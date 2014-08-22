@@ -19,7 +19,7 @@ IonicModule
       backButtonIcon: 'ion-ios7-arrow-back'
     },
     '$ionicNavViewConfig': {
-      transition: 'slide-left-right-ios7'
+      transition: 'ios-transition'
     },
     '$ionicTabsConfig': {
       type: '',

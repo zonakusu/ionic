@@ -1,5 +1,5 @@
 IonicModule.constant('$ionicNavViewConfig', {
-  transition: 'slide-left-right-ios7'
+  transition: 'ios-transition'
 });
 
 /**
@@ -121,12 +121,16 @@ function( $ionicViewService,   $state,   $compile,   $controller,   $animate,   
       return function(scope, element, attr, navViewCtrl) {
         var gesture;
 
-        var dragBack = ionic.debounce(function() {
+        var dragBack = ionic.debounce(function(e) {
           var backView = $ionicViewService.getBackView();
+          if(!$ionicViewService.isBackDragging()) {
+            $ionicViewService.setBackDragging(true);
+          }
+          $ionicViewService.setBackDragPercent(e.gesture.center.pageX);
           backView && backView.go();
         }, 200, true);
-        var dragListener = function() {
-          dragBack();
+        var dragListener = function(e) {
+          dragBack(e);
         };
         var gesture = $ionicGesture.on('edgepanright', dragListener, element);
 
@@ -188,13 +192,23 @@ function( $ionicViewService,   $state,   $compile,   $controller,   $animate,   
           var newElement = jqLite('<div></div>').html(locals.$template).contents();
           var viewRegisterData = renderer().register(newElement);
 
-          // Remove existing content
-          renderer(doAnimate).leave();
+          if($ionicViewService.isBackDragging()) {
+            // Remove existing content
+            renderer(doAnimate).leaveStep();
 
-          viewLocals = locals;
-          view.state = locals.$$state;
+            viewLocals = locals;
+            view.state = locals.$$state;
 
-          renderer(doAnimate).enter(newElement);
+            renderer(doAnimate).enterStep(newElement);
+          } else {
+            // Remove existing content
+            renderer(doAnimate).leave();
+
+            viewLocals = locals;
+            view.state = locals.$$state;
+
+            renderer(doAnimate).enter(newElement);
+          }
 
           var link = $compile(newElement);
           viewScope = scope.$new();

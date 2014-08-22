@@ -136,6 +136,17 @@ function($rootScope, $state, $location, $window, $injector, $animate, $ionicNavV
   }
 
   return {
+    setBackDragging: function(isBackDragging) {
+      this.backDragging = isBackDragging;
+    },
+
+    setBackDragPercent: function(percent) {
+      this.backDragPercent = percent;
+    },
+
+    isBackDragging: function() {
+      return this.backDragging;
+    },
 
     register: function(containerScope, element) {
 
@@ -450,19 +461,22 @@ function($rootScope, $state, $location, $window, $injector, $animate, $ionicNavV
         return className;
       }
 
-      function setAnimationClass() {
+      function setAnimationClass(element) {
         // add the animation CSS class we're gonna use to transition between views
         if (animationClass) {
           navViewElement[0].classList.add(animationClass);
+          element.addClass(animationClass);
         }
 
         if(registerData.navDirection === 'back') {
           // animate like we're moving backward
           navViewElement[0].classList.add('reverse');
+          element.addClass('reverse');
         } else {
           // defaults to animate forward
           // make sure the reverse class isn't already added
           navViewElement[0].classList.remove('reverse');
+          element.addClass('reverse');
         }
       }
 
@@ -470,11 +484,51 @@ function($rootScope, $state, $location, $window, $injector, $animate, $ionicNavV
 
         return {
 
+          enterStep: function(element, percentage) {
+            if(doAnimation && shouldAnimate) {
+              // enter with an animation
+              setAnimationClass(element);
+
+              element.addClass('ng-enter');
+              document.body.classList.add('disable-pointer-events');
+
+              $animate.enter(element, navViewElement, null, function() {
+                document.body.classList.remove('disable-pointer-events');
+                if (animationClass) {
+                  navViewElement[0].classList.remove(animationClass);
+                }
+              });
+              return;
+            } else if(!doAnimation) {
+              document.body.classList.remove('disable-pointer-events');
+            }
+
+            // no animation
+            navViewElement.append(element);
+          },
+
+          leaveStep: function(percentage) {
+            var element = navViewElement.contents();
+
+            if(doAnimation && shouldAnimate) {
+              // leave with an animation
+              setAnimationClass(element);
+
+              $animate.leave(element, function() {
+                element.remove();
+              });
+              return;
+            }
+
+            // no animation
+            element.remove();
+          },
+
           enter: function(element) {
 
             if(doAnimation && shouldAnimate) {
               // enter with an animation
-              setAnimationClass();
+              setAnimationClass(element);
 
               element.addClass('ng-enter');
               document.body.classList.add('disable-pointer-events');
@@ -499,7 +553,7 @@ function($rootScope, $state, $location, $window, $injector, $animate, $ionicNavV
 
             if(doAnimation && shouldAnimate) {
               // leave with an animation
-              setAnimationClass();
+              setAnimationClass(element);
 
               $animate.leave(element, function() {
                 element.remove();
