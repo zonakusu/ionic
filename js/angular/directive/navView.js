@@ -105,7 +105,8 @@ IonicModule
   '$controller',
   '$animate',
   '$ionicGesture',
-function( $ionicViewService,   $state,   $compile,   $controller,   $animate,   $ionicGesture) {
+  '$timeout',
+function( $ionicViewService,   $state,   $compile,   $controller,   $animate,   $ionicGesture, $timeout) {
   // IONIC's fork of Angular UI Router, v0.2.7
   // the navView handles registering views in the history, which animation to use, and which
   var viewIsUpdating = false;
@@ -118,13 +119,16 @@ function( $ionicViewService,   $state,   $compile,   $controller,   $animate,   
     controller: function(){},
     compile: function (element, attr, transclude) {
       return function(scope, element, attr, navViewCtrl) {
+        var gesture;
 
-        $ionicGesture.on('dragright', function(e) {
-
+        var dragBack = ionic.debounce(function() {
           var backView = $ionicViewService.getBackView();
           backView && backView.go();
-
-        }, element);
+        }, 200, true);
+        var dragListener = function() {
+          dragBack();
+        };
+        var gesture = $ionicGesture.on('dragright', dragListener, element);
 
         var viewScope, viewLocals,
           name = attr[directive.name] || attr.name || '',
