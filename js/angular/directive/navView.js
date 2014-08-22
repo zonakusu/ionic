@@ -128,7 +128,7 @@ function( $ionicViewService,   $state,   $compile,   $controller,   $animate,   
         var dragListener = function() {
           dragBack();
         };
-        var gesture = $ionicGesture.on('dragright', dragListener, element);
+        var gesture = $ionicGesture.on('edgepanright', dragListener, element);
 
         var viewScope, viewLocals,
           name = attr[directive.name] || attr.name || '',

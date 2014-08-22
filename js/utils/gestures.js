@@ -1130,6 +1130,136 @@
     }
   };
 
+  /**
+   * Pan
+   * Move with x fingers (default 1) from edge of screen. Blocking the scrolling when
+   * moving left and right is a good practice. When all the drag events are blocking
+   * you disable scrolling on that area.
+   * events  drag, drapleft, dragright, dragup, dragdown
+   */
+  ionic.Gestures.gestures.EdgePan = {
+    name: 'edgepan',
+    index: 49,
+    defaults: {
+      drag_min_distance : 10,
+      // Set correct_for_drag_min_distance to true to make the starting point of the drag
+      // be calculated from where the drag was triggered, not from where the touch started.
+      // Useful to avoid a jerk-starting drag, which can make fine-adjustments
+      // through dragging difficult, and be visually unappealing.
+      correct_for_drag_min_distance : true,
+      // set 0 for unlimited, but this can conflict with transform
+      drag_max_touches  : 1,
+      // prevent default browser behavior when dragging occurs
+      // be careful with it, it makes the element a blocking element
+      // when you are using the drag gesture, it is a good practice to set this true
+      drag_block_horizontal   : true,
+      drag_block_vertical     : true,
+      // drag_lock_to_axis keeps the drag gesture on the axis that it started on,
+      // It disallows vertical directions if the initial direction was horizontal, and vice versa.
+      drag_lock_to_axis       : false,
+      // drag lock only kicks in when distance > drag_lock_min_distance
+      // This way, locking occurs only when the distance has become large enough to reliably determine the direction
+      drag_lock_min_distance : 25,
+
+      // Threshold of distance from edge to count as an edge pan
+      edge_threshold: 10
+    },
+    triggered: false,
+    handler: function dragGesture(ev, inst) {
+      // current gesture isnt drag, but dragged is true
+      // this means an other gesture is busy. now call dragend
+      if(ionic.Gestures.detection.current.name != this.name && this.triggered) {
+        inst.trigger(this.name +'end', ev);
+        this.triggered = false;
+        return;
+      }
+
+      // max touches
+      if(inst.options.drag_max_touches > 0 &&
+          ev.touches.length > inst.options.drag_max_touches) {
+            return;
+          }
+
+      switch(ev.eventType) {
+        case ionic.Gestures.EVENT_START:
+          this.triggered = false;
+          break;
+
+        case ionic.Gestures.EVENT_MOVE:
+          if(ev.deltaX > 0 && ionic.Gestures.detection.current.startEvent.center.pageX > inst.element.offsetLeft + inst.options.edge_threshold) {
+            return;
+          } else if(ev.deltaX < 0 && ionic.Gestures.detection.current.startEvent.center.pageX < (inst.element.offsetLeft + inst.element.offsetWidth) - inst.options.edge_threshold) {
+            return;
+          }
+
+          // when the distance we moved is too small we skip this gesture
+          // or we can be already in dragging
+          if(ev.distance < inst.options.drag_min_distance &&
+              ionic.Gestures.detection.current.name != this.name) {
+                return;
+              }
+
+          // we are dragging!
+          if(ionic.Gestures.detection.current.name != this.name) {
+            ionic.Gestures.detection.current.name = this.name;
+            if (inst.options.correct_for_drag_min_distance) {
+              // When a drag is triggered, set the event center to drag_min_distance pixels from the original event center.
+              // Without this correction, the dragged distance would jumpstart at drag_min_distance pixels instead of at 0.
+              // It might be useful to save the original start point somewhere
+              var factor = Math.abs(inst.options.drag_min_distance/ev.distance);
+              ionic.Gestures.detection.current.startEvent.center.pageX += ev.deltaX * factor;
+              ionic.Gestures.detection.current.startEvent.center.pageY += ev.deltaY * factor;
+
+              // recalculate event data using new start point
+              ev = ionic.Gestures.detection.extendEventData(ev);
+            }
+          }
+
+          // lock drag to axis?
+          if(ionic.Gestures.detection.current.lastEvent.drag_locked_to_axis || (inst.options.drag_lock_to_axis && inst.options.drag_lock_min_distance<=ev.distance)) {
+            ev.drag_locked_to_axis = true;
+          }
+          var last_direction = ionic.Gestures.detection.current.lastEvent.direction;
+          if(ev.drag_locked_to_axis && last_direction !== ev.direction) {
+            // keep direction on the axis that the drag gesture started on
+            if(ionic.Gestures.utils.isVertical(last_direction)) {
+              ev.direction = (ev.deltaY < 0) ? ionic.Gestures.DIRECTION_UP : ionic.Gestures.DIRECTION_DOWN;
+            }
+            else {
+              ev.direction = (ev.deltaX < 0) ? ionic.Gestures.DIRECTION_LEFT : ionic.Gestures.DIRECTION_RIGHT;
+            }
+          }
+
+          // first time, trigger dragstart event
+          if(!this.triggered) {
+            inst.trigger(this.name +'start', ev);
+            this.triggered = true;
+          }
+
+          // trigger normal event
+          inst.trigger(this.name, ev);
+
+          // direction event, like dragdown
+          inst.trigger(this.name + ev.direction, ev);
+
+          // block the browser events
+          if( (inst.options.drag_block_vertical && ionic.Gestures.utils.isVertical(ev.direction)) ||
+              (inst.options.drag_block_horizontal && !ionic.Gestures.utils.isVertical(ev.direction))) {
+                ev.preventDefault();
+              }
+          break;
+
+        case ionic.Gestures.EVENT_END:
+          // trigger dragend
+          if(this.triggered) {
+            inst.trigger(this.name +'end', ev);
+          }
+
+          this.triggered = false;
+          break;
+      }
+    }
+  };
 
   /**
    * Drag
