@@ -476,7 +476,7 @@ function($rootScope, $state, $location, $window, $injector, $animate, $ionicNavV
           // defaults to animate forward
           // make sure the reverse class isn't already added
           navViewElement[0].classList.remove('reverse');
-          element.addClass('reverse');
+          element.removeClass('reverse');
         }
       }
 
