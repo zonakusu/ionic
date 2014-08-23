@@ -10,12 +10,12 @@
 IonicModule.animation('.ios-transition', function() {
   var inAnimator = collide.animation({
     easing: 'cubic-bezier(0.4, 0.6, 0.2, 1)',
-    duration: 15400
+    duration: 400
   });
 
   var outAnimator = collide.animation({
     easing: 'cubic-bezier(0.4, 0.6, 0.2, 1)',
-    duration: 15400
+    duration: 400
   });
 
   return {
