@@ -10,12 +10,12 @@
 IonicModule.animation('.ios-transition', function() {
   var inAnimator = collide.animation({
     easing: 'cubic-bezier(0.4, 0.6, 0.2, 1)',
-    duration: 400
+    duration: 5400
   });
 
   var outAnimator = collide.animation({
     easing: 'cubic-bezier(0.4, 0.6, 0.2, 1)',
-    duration: 400
+    duration: 5400
   });
 
   return {
@@ -26,15 +26,19 @@ IonicModule.animation('.ios-transition', function() {
       .on('start', function(v) {
         if(isReverse) {
           element[0].zIndex = 0;
+          element[0].style.webkitTransform = element[0].style.transform = 'translate3d(-20%, 0, 0)';
         } else {
+          element[0].style.webkitTransform = element[0].style.transform = 'translate3d(100%, 0, 0)';
           element[0].zIndex = 1;
         }
       })
       .on('step', function(v) {
         if(isReverse) {
+          console.log('ENTER REVERSE', v);
           // Slide in from -20% to 0
           element[0].style.webkitTransform = element[0].style.transform = 'translate3d(' + Math.max(0, (-20 + (v*100))) + '%, 0, 0)';
         } else {
+          console.log('ENTER', v);
           // Slide in from 100% to 0
           element[0].style.webkitTransform = element[0].style.transform = 'translate3d(' + (100 - (v*100)) + '%, 0, 0)';
         }
@@ -72,11 +76,13 @@ IonicModule.animation('.ios-transition', function() {
       })
       .on('step', function(v) {
         if(isReverse) {
+          console.log('LEAVE REVERSE', v);
           // Slide from 0 to 100% (off screen)
           element[0].style.webkitTransform = element[0].style.transform = 'translate3d(' + v*100 + '%, 0, 0)';
         } else {
+          console.log('LEAVE', v);
           // Slide from 0 to -20%
-          element[0].style.webkitTransform = element[0].style.transform = 'translate3d(' + Math.max(-20, -v*100) + '%, 0, 0)';
+          element[0].style.webkitTransform = element[0].style.transform = 'translate3d(' + -v*20 + '%, 0, 0)';
         }
       })
       .on('complete', function() {
