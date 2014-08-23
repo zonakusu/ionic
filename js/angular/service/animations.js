@@ -10,12 +10,12 @@
 IonicModule.animation('.ios-transition', function() {
   var inAnimator = collide.animation({
     easing: 'cubic-bezier(0.4, 0.6, 0.2, 1)',
-    duration: 5400
+    duration: 340
   });
 
   var outAnimator = collide.animation({
     easing: 'cubic-bezier(0.4, 0.6, 0.2, 1)',
-    duration: 5400
+    duration: 340
   });
 
   return {
@@ -25,18 +25,18 @@ IonicModule.animation('.ios-transition', function() {
       inAnimator
       .on('start', function(v) {
         if(isReverse) {
-          element[0].zIndex = 0;
+          element[0].zIndex = 1;
           element[0].style.webkitTransform = element[0].style.transform = 'translate3d(-20%, 0, 0)';
         } else {
           element[0].style.webkitTransform = element[0].style.transform = 'translate3d(100%, 0, 0)';
-          element[0].zIndex = 1;
+          element[0].zIndex = 2;
         }
       })
       .on('step', function(v) {
         if(isReverse) {
           console.log('ENTER REVERSE', v);
           // Slide in from -20% to 0
-          element[0].style.webkitTransform = element[0].style.transform = 'translate3d(' + Math.max(0, (-20 + (v*100))) + '%, 0, 0)';
+          element[0].style.webkitTransform = element[0].style.transform = 'translate3d(' + (-20 + v*20) + '%, 0, 0)';
         } else {
           console.log('ENTER', v);
           // Slide in from 100% to 0
@@ -69,9 +69,9 @@ IonicModule.animation('.ios-transition', function() {
       outAnimator
       .on('start', function(v) {
         if(isReverse) {
-          element[0].zIndex = 1;
+          element[0].style.zIndex = 2;
         } else {
-          element[0].zIndex = 0;
+          element[0].style.zIndex = 1;
         }
       })
       .on('step', function(v) {
