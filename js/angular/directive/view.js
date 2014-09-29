@@ -49,16 +49,13 @@ IonicModule
           return;
         }
 
-        if (angular.isDefined($attr.title)) {
-
-          var initialTitle = $attr.title;
-          navBarCtrl.changeTitle(initialTitle, $scope.$navDirection);
-
-          // watch for changes in the title, don't set initial value as changeTitle does that
-          $attr.$observe('title', function(val, oldVal) {
-            navBarCtrl.setTitle(val);
+        $scope.$on('$ionicView.beforeEnter', function(ev, viewRegisterData) {
+          navBarCtrl.navBarEnter({
+            title: $attr.title,
+            direction: viewRegisterData.direction,
+            showBack: viewRegisterData.showBack
           });
-        }
+        });
 
         var hideBackAttr = angular.isDefined($attr.hideBackButton) ?
           $attr.hideBackButton :

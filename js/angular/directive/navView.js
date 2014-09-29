@@ -1,7 +1,3 @@
-IonicModule.constant('$ionicNavViewConfig', {
-  transition: 'slide-left-right-ios7'
-});
-
 /**
  * @ngdoc directive
  * @name ionNavView
@@ -101,13 +97,9 @@ IonicModule
 .directive('ionNavView', [
   '$ionicViewService',
   '$state',
-  '$compile',
-  '$controller',
-  '$animate',
-function( $ionicViewService,   $state,   $compile,   $controller,   $animate) {
-  // IONIC's fork of Angular UI Router, v0.2.7
-  // the navView handles registering views in the history, which animation to use, and which
-  var viewIsUpdating = false;
+function( $ionicViewService, $state) {
+  // IONIC's fork of Angular UI Router, v0.2.10
+  // the navView handles registering views in the history and how to transition between them
 
   var directive = {
     restrict: 'E',
@@ -115,93 +107,65 @@ function( $ionicViewService,   $state,   $compile,   $controller,   $animate) {
     priority: 2000,
     transclude: true,
     controller: function(){},
-    compile: function (element, attr, transclude) {
-      return function(scope, element, attr, navViewCtrl) {
-        var viewScope, viewLocals,
-          name = attr[directive.name] || attr.name || '',
-          onloadExp = attr.onload || '',
-          initialView = transclude(scope);
+    compile: function (tElement, attr, transclude) {
 
-        // Put back the compiled initial view
-        element.append(initialView);
+      // a nav view element is a container for numerous views
+      tElement.addClass('view-container');
+
+      return function(navViewScope, navViewElement, navViewAttrs, navViewCtrl) {
+        var latestLocals;
+        var navViewName = navViewAttrs[directive.name] || navViewAttrs.name || '';
+
+        // Put in the compiled initial view
+        transclude(navViewScope, function(clone){
+          navViewElement.append( clone );
+        });
 
         // Find the details of the parent view directive (if any) and use it
         // to derive our own qualified view name, then hang our own details
         // off the DOM so child directives can find it.
-        var parent = element.parent().inheritedData('$uiView');
-        if (name.indexOf('@') < 0) name  = name + '@' + ((parent && parent.state) ? parent.state.name : '');
-        var view = { name: name, state: null };
-        element.data('$uiView', view);
+        var parent = navViewElement.parent().inheritedData('$uiView');
+        var parentViewName = ((parent && parent.state) ? parent.state.name : '');
+        if (navViewName.indexOf('@') < 0) navViewName  = navViewName + '@' + parentViewName;
 
-        var eventHook = function() {
-          if (viewIsUpdating) return;
-          viewIsUpdating = true;
+        var viewData = { name: navViewName, state: null };
+        navViewElement.data('$uiView', viewData);
 
-          try { updateView(true); } catch (e) {
-            viewIsUpdating = false;
-            throw e;
-          }
-          viewIsUpdating = false;
-        };
+        // listen for $stateChangeSuccess
+        navViewScope.$on('$stateChangeSuccess', function() {
+          updateView(false);
+        });
+        navViewScope.$on('$viewContentLoading', function() {
+          updateView(false);
+        });
 
-        scope.$on('$stateChangeSuccess', eventHook);
-        // scope.$on('$viewContentLoading', eventHook);
-        updateView(false);
+        // initial load, ready go
+        updateView(true);
 
-        function updateView(doAnimate) {
-          //===false because $animate.enabled() is a noop without angular-animate included
-          if ($animate.enabled() === false) {
-            doAnimate = false;
-          }
 
-          var locals = $state.$current && $state.$current.locals[name];
-          if (locals === viewLocals) return; // nothing to do
-          var renderer = $ionicViewService.getRenderer(element, attr, scope);
+        function updateView(firstTime) {
+          // get the current local according to the $state
+          var currentLocals = $state.$current && $state.$current.locals[navViewName];
 
-          // Destroy previous view scope
-          if (viewScope) {
-            viewScope.$destroy();
-            viewScope = null;
-          }
+          // do not update THIS nav-view if its is not the container for the given state
+          // if the currentLocals are the same as THIS latestLocals, then nothing to do
+          if (!currentLocals || (!firstTime && currentLocals === latestLocals)) return;
 
-          if (!locals) {
-            viewLocals = null;
-            view.state = null;
+          // register the view and figure out where it lives in the various
+          // histories and nav stacks along with how views should enter/leave
+          var transition = $ionicViewService.getTransition(navViewScope, navViewElement, navViewAttrs, currentLocals);
 
-            // Restore the initial view
-            return element.append(initialView);
-          }
+          // let's not continue if its not a valid transition
+          if( !transition.isValid() ) return;
 
-          var newElement = jqLite('<div></div>').html(locals.$template).contents();
-          var viewRegisterData = renderer().register(newElement);
+          // update the latestLocals
+          latestLocals = currentLocals;
+          viewData.state = currentLocals.$$state;
 
-          // Remove existing content
-          renderer(doAnimate).leave();
-
-          viewLocals = locals;
-          view.state = locals.$$state;
-
-          renderer(doAnimate).enter(newElement);
-
-          var link = $compile(newElement);
-          viewScope = scope.$new();
-
-          viewScope.$navDirection = viewRegisterData.navDirection;
-
-          if (locals.$$controller) {
-            locals.$scope = viewScope;
-            var controller = $controller(locals.$$controller, locals);
-            element.children().data('$ngControllerController', controller);
-          }
-          link(viewScope);
-
-          var viewHistoryData = $ionicViewService._getViewById(viewRegisterData.viewId) || {};
-          viewScope.$broadcast('$viewContentLoaded', viewHistoryData);
-
-          if (onloadExp) viewScope.$eval(onloadExp);
-
-          newElement = null;
+          // init the transition of views for this nav-view directive
+          transition.init();
         }
+
       };
     }
   };

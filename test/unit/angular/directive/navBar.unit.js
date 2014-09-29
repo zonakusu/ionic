@@ -1,4 +1,4 @@
-describe('ionNavBar', function() {
+xdescribe('ionNavBar', function() {
   describe('$ionicNavBar controller', function() {
 
     var backView = { go: jasmine.createSpy('backViewGo') };

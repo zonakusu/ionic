@@ -18,10 +18,6 @@ IonicModule
       alignTitle: 'center',
       backButtonIcon: 'ion-ios7-arrow-back'
     },
-    '$ionicNavViewConfig': {
-      //transition: 'slide-left-right-ios'
-      transition: 'slide-ios'
-    },
     '$ionicTabsConfig': {
       type: '',
       position: ''
@@ -32,9 +28,6 @@ IonicModule
       transition: 'nav-title-slide-full',
       alignTitle: 'center',
       backButtonIcon: 'ion-ios7-arrow-back'
-    },
-    '$ionicNavViewConfig': {
-      transition: 'slide-full'
     },
     '$ionicTabsConfig': {
       type: 'tabs-striped',
