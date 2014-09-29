@@ -1,4 +1,4 @@
-describe('ionView directive', function() {
+xdescribe('ionView directive', function() {
   beforeEach(module('ionic'));
 
   function setup(attrs, scopeProps, content) {

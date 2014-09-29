@@ -18,9 +18,6 @@ function($scope, $ionicViewService, $element) {
   self.add = function(tab) {
     $ionicViewService.registerHistory(tab);
     self.tabs.push(tab);
-    if(self.tabs.length === 1) {
-      self.select(tab);
-    }
   };
 
   self.remove = function(tab) {
@@ -55,6 +52,7 @@ function($scope, $ionicViewService, $element) {
     var tabIndex;
     if (angular.isNumber(tab)) {
       tabIndex = tab;
+      if(tabIndex >= self.tabs.length) return;
       tab = self.tabs[tabIndex];
     } else {
       tabIndex = self.tabs.indexOf(tab);

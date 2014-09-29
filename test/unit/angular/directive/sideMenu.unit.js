@@ -66,6 +66,7 @@ describe('Ionic Angular Side Menu', function() {
   }));
 
   it('should set exposed menu', inject(function($compile, $rootScope) {
+    ionic.animationFrameThrottle = function(cb) { return cb; };
     var el = $compile('<ion-side-menus><ion-side-menu></><ion-side-menu-content></ion-side-menu-content></ion-side-menus>')($rootScope.$new());
     $rootScope.$apply();
     var sideMenuController = el.controller('ionSideMenus');
