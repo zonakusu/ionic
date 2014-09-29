@@ -22,7 +22,7 @@ IonicModule.constant('$ionicNavBarConfig', {
  * {@link ionic.directive:ionNavButtons}.
  *
  * Add an [animation class](/docs/components#animations) to the element via the
- * `animation` attribute to enable animated changing of titles 
+ * `animation` attribute to enable animated changing of titles
  * (recommended: 'nav-title-slide-ios7').
  *
  * Note that the ion-nav-bar element will only work correctly if your content has an
@@ -88,27 +88,19 @@ IonicModule
   '$ionicNavBarConfig',
 function($ionicViewService, $rootScope, $animate, $compile, $ionicNavBarConfig) {
 
+  var navBarContainer = '<div class="nav-bar-container hide"><div class="buttons left-buttons"></div><div class="title"></div><div class="buttons right-buttons"></div></div>';
+
   return {
     restrict: 'E',
     controller: '$ionicNavBar',
     scope: true,
     compile: function(tElement, tAttrs) {
       //We cannot transclude here because it breaks element.data() inheritance on compile
-      tElement
-        .addClass('bar bar-header nav-bar')
-        .append(
-          '<div class="buttons left-buttons"> ' +
-          '</div>' +
-          '<h1 ng-bind-html="title" class="title"></h1>' +
-          '<div class="buttons right-buttons"> ' +
-          '</div>'
-        );
+      tElement.addClass('bar bar-header nav-bar');
 
-      if (isDefined(tAttrs.animation)) {
-        tElement.addClass(tAttrs.animation);
-      } else {
-        tElement.addClass($ionicNavBarConfig.transition);
-      }
+      // add three empty nav bar containers that will be available for nav bar transitions
+      tElement.append( jqLite(navBarContainer+navBarContainer+navBarContainer) );
+
 
       return { pre: prelink };
       function prelink($scope, $element, $attr, navBarCtrl) {
@@ -117,24 +109,24 @@ function($ionicViewService, $rootScope, $animate, $compile, $ionicNavBarConfig) 
           alignTitle: $attr.alignTitle || $ionicNavBarConfig.alignTitle || 'center'
         });
 
-        //defaults
-        $scope.backButtonShown = false;
-        $scope.shouldAnimate = true;
-        $scope.isReverse = false;
-        $scope.isInvisible = true;
+        // //defaults
+        // $scope.backButtonShown = false;
+        // $scope.shouldAnimate = true;
+        // $scope.isReverse = false;
+        // $scope.isInvisible = true;
 
-        $scope.$on('$destroy', function() {
-          $scope.$parent.$hasHeader = false;
-        });
+        // $scope.$on('$destroy', function() {
+        //   $scope.$parent.$hasHeader = false;
+        // });
 
-        $scope.$watch(function() {
-          return ($scope.isReverse ? ' reverse' : '') +
-            ($scope.isInvisible ? ' invisible' : '') +
-            (!$scope.shouldAnimate ? ' no-animation' : '');
-        }, function(className, oldClassName) {
-          $element.removeClass(oldClassName);
-          $element.addClass(className);
-        });
+        // $scope.$watch(function() {
+        //   return ($scope.isReverse ? ' reverse' : '') +
+        //     ($scope.isInvisible ? ' invisible' : '') +
+        //     (!$scope.shouldAnimate ? ' no-animation' : '');
+        // }, function(className, oldClassName) {
+        //   $element.removeClass(oldClassName);
+        //   $element.addClass(className);
+        // });
 
       }
     }

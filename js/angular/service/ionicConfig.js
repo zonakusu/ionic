@@ -24,6 +24,40 @@ IonicModule
 
   /**
    * @ngdoc method
+   * @name $ionicConfigProvider#maxCachedViews
+   * @description Maximum number of view elements to cache in the DOM. When the max number is
+   * exceeded, the `viewRemovePolicy` determines which view to remove. Views which stay in the
+   * DOM essentially caches the view's scope, current state and scroll position. When the
+   * maximum cached is `0`, then after each view transition, the view's element will
+   * be removed from the DOM, and the next time the same view is shown it will have to
+   * re-compile, attach to the DOM, and link the element again.
+   * @param {number} maxNumber Maximum number of views to retain. Default `10`.
+   * @returns {number} How many views Ionic will hold onto until the a view is removed.
+   */
+  config.maxCachedViews = 10;
+
+
+  /**
+   * @ngdoc method
+   * @name $ionicConfigProvider#viewTransition
+   * @description Animation style when transitioning between views. Default `platform`.
+   *
+   * @param {string} transition Which style of transitioning to use.
+   *
+   * * `platform`: Dynamically choose the correct transition style depending on
+   *               the platform the app is running from. If the platform is
+   *               not `ios` or `android` then it will default to `ios`.
+   * * `ios`: iOS style transitions.
+   * * `android`: Android style transitions.
+   * * `none`: Do not preform animated transitions.
+   *
+   * @returns {string} View transition.
+   */
+  config.viewTransition = 'platform';
+
+
+  /**
+   * @ngdoc method
    * @name $ionicConfigProvider#prefetchTemplates
    * @description Set whether Ionic should prefetch all templateUrls defined in
    * $stateProvider.state. If set to false, the user will have to wait

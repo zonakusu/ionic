@@ -10,40 +10,82 @@ IonicModule
 function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionicNavBarDelegate) {
   //Let the parent know about our controller too so that children of
   //sibling content elements can know about us
+  var CSS_NAV_BAR_ACTIVE = 'nav-bar-active';
+  var CSS_NAV_BAR_ENTERING = 'nav-bar-entering';
+  var CSS_NAV_BAR_LEAVING = 'nav-bar-leaving';
+  var CSS_HIDE = 'hide';
+  var DATA_IS_ACTIVE = '$isActive';
+  var DATA_IS_USED = '$isUsed';
+  var DATA_TITLE = '$title';
+
+
   $element.parent().data('$ionNavBarController', this);
 
   var deregisterInstance = $ionicNavBarDelegate._registerInstance(this, $attrs.delegateHandle);
 
   $scope.$on('$destroy', deregisterInstance);
 
-  $scope.$on('$viewHistory.historyChange', function(e, data) {
-    backIsShown = !!data.showBack;
-  });
+  this.navBarEnter = function(viewData) {
+    var navBarElements = getNavBarElements();
+    var enteringEle;
+    var leavingEle;
+    var x, l = navBarElements.length;
 
-  var self = this;
-
-  this.leftButtonsElement = jqLite(
-    $element[0].querySelector('.buttons.left-buttons')
-  );
-  this.rightButtonsElement = jqLite(
-    $element[0].querySelector('.buttons.right-buttons')
-  );
-
-  this.back = function() {
-    var backView = $ionicViewService.getBackView();
-    backView && backView.go();
-    return false;
-  };
-
-  this.align = function(direction) {
-    this._headerBarView.align(direction);
-  };
-
-  this.showBackButton = function(show) {
-    if (arguments.length) {
-      $scope.backButtonShown = !!show;
+    // find the active element that should leave
+    for(x=0; x<l; x++) {
+      if( navBarElements.eq(x).data(DATA_IS_ACTIVE) ) {
+        leavingEle = navBarElements.eq(x);
+        leavingEle.data(DATA_IS_USED, true);
+        leavingEle.data(DATA_IS_ACTIVE, false);
+      }
     }
-    return !!($scope.hasBackButton && $scope.backButtonShown);
+
+    // find an available element that's not being used
+    for(x=0; x<l; x++) {
+      if( !navBarElements.eq(x).data(DATA_IS_USED) ) {
+        enteringEle = navBarElements.eq(x);
+        enteringEle.data(DATA_IS_USED, true);
+        break;
+      }
+    }
+
+    if(enteringEle) {
+      this.renderActive(enteringEle, viewData);
+    }
+
+    this.transition(enteringEle, leavingEle, viewData);
+  };
+
+  this.renderActive = function(ele, viewData) {
+    setElementTitle(viewData.title, ele);
+
+    var backButtonEle = getBackButtonElement();
+    if(backButtonEle) {
+      if(viewData.showBack) {
+        backButtonEle.removeClass('hide');
+      } else {
+        backButtonEle.addClass('hide');
+      }
+    }
+
+  };
+
+  this.transition = function(enteringEle, leavingEle, viewData) {
+    if(enteringEle) {
+      enteringEle.data(DATA_IS_ACTIVE, true);
+      enteringEle.removeClass(CSS_HIDE);
+    }
+
+    var navBarElements = getNavBarElements();
+    var ele;
+    for(var x=0, l=navBarElements.length; x<l; x++) {
+      ele = navBarElements.eq(x);
+      ele.data(DATA_IS_USED, false);
+      if( !ele.data(DATA_IS_ACTIVE) ) {
+        ele.addClass(CSS_HIDE);
+      }
+    }
+
   };
 
   this.showBar = function(show) {
@@ -54,33 +96,45 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
     return !$scope.isInvisible;
   };
 
-  this.setTitle = function(title) {
-    if ($scope.title === title) {
-      return;
-    }
-    $scope.oldTitle = $scope.title;
-    $scope.title = title || '';
-  };
+  function getNavBarElements() {
+    return jqLite( $element[0].querySelectorAll('.nav-bar-container') );
+  }
 
-  this.changeTitle = function(title, direction) {
-    if ($scope.title === title) {
-      // if we're not animating the title, but the back button becomes invisible
-      if(typeof backIsShown != 'undefined' && !backIsShown && $scope.backButtonShown){
-        jqLite($element[0].querySelector('.back-button')).addClass('ng-hide');
+  function getBackButtonElement() {
+    var ele = $element[0].querySelector('.back-button');
+    if(ele) {
+      return jqLite(ele);
+    }
+  }
+
+  function getActiveElement() {
+    var navBarElements = getNavBarElements();
+    for(var x=0, l=navBarElements.length; x<l; x++) {
+      if(navBarElements(x).data(DATA_IS_ACTIVE)) {
+        return navBarElements(x);
       }
-      return false;
     }
-    this.setTitle(title);
-    $scope.isReverse = direction == 'back';
-    $scope.shouldAnimate = !!direction;
+  }
 
-    if (!$scope.shouldAnimate) {
-      //We're done!
-      this._headerBarView.align();
-    } else {
-      this._animateTitles();
+  function setElementTitle(title, ele) {
+    $scope.oldTitle = $scope.title;
+    $scope.title = title = title || '';
+
+    if(ele) {
+      var titleEle = ele[0].querySelector('.title');
+      if(titleEle) {
+        titleEle = jqLite(titleEle);
+        if(titleEle.data(DATA_TITLE) !== title) {
+          // only make an update if there is a title change
+          titleEle.html(title);
+          titleEle.data(DATA_TITLE, title);
+        }
+      }
     }
-    return true;
+  }
+
+  this.setTitle = function(title) {
+    setElementTitle(title, getActiveElement());
   };
 
   this.getTitle = function() {
@@ -91,49 +145,32 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
     return $scope.oldTitle || '';
   };
 
-  /**
-   * Exposed for testing
-   */
-  this._animateTitles = function() {
-    var oldTitleEl, newTitleEl, currentTitles;
-
-    //If we have any title right now
-    //(or more than one, they could be transitioning on switch),
-    //replace the first one with an oldTitle element
-    currentTitles = $element[0].querySelectorAll('.title');
-    if (currentTitles.length) {
-      oldTitleEl = $compile('<h1 class="title" ng-bind-html="oldTitle"></h1>')($scope);
-      jqLite(currentTitles[currentTitles.length-1]).replaceWith(oldTitleEl);
+  this.showBackButton = function(show) {
+    if (arguments.length) {
+      $scope.backButtonShown = !!show;
     }
-    //Compile new title
-    newTitleEl = $compile('<h1 class="title invisible" ng-bind-html="title"></h1>')($scope);
-
-    //Animate in on next frame
-    ionic.requestAnimationFrame(function() {
-
-      oldTitleEl && $animate.leave(jqLite(oldTitleEl));
-
-      var insert = oldTitleEl && jqLite(oldTitleEl) || null;
-      $animate.enter(newTitleEl, $element, insert, function() {
-        self._headerBarView.align();
-      });
-
-      //Cleanup any old titles leftover (besides the one we already did replaceWith on)
-      forEach(currentTitles, function(el) {
-        if (el && el.parentNode) {
-          //Use .remove() to cleanup things like .data()
-          jqLite(el).remove();
-        }
-      });
-
-      //$apply so bindings fire
-      $scope.$digest();
-
-      //Stop flicker of new title on ios7
-      ionic.requestAnimationFrame(function() {
-        newTitleEl[0].classList.remove('invisible');
-      });
-    });
+    return !!($scope.hasBackButton && $scope.backButtonShown);
   };
+
+  this.back = function() {
+    var backView = $ionicViewService.getBackView();
+    backView && backView.go();
+    return false;
+  };
+
+
+  // var self = this;
+
+  // this.leftButtonsElement = jqLite(
+  //   $element[0].querySelector('.buttons.left-buttons')
+  // );
+  // this.rightButtonsElement = jqLite(
+  //   $element[0].querySelector('.buttons.right-buttons')
+  // );
+
+  // this.align = function(direction) {
+  //   this._headerBarView.align(direction);
+  // };
+
 }]);
 

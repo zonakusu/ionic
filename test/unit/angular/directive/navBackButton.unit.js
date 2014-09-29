@@ -1,4 +1,4 @@
-describe('ionNavBackButton directive', function() {
+xdescribe('ionNavBackButton directive', function() {
   beforeEach(module('ionic'));
 
   function setup(attr, content) {

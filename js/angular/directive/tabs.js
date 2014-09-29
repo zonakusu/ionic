@@ -68,7 +68,7 @@ function($ionicViewService, $ionicTabsDelegate, $ionicTabsConfig) {
       element.addClass($ionicTabsConfig.position);
       element.addClass($ionicTabsConfig.type);
 
-      return { pre: prelink };
+      return { pre: prelink, post: postLink };
       function prelink($scope, $element, $attr, tabsCtrl) {
         var deregisterInstance = $ionicTabsDelegate._registerInstance(
           tabsCtrl, $attr.delegateHandle
@@ -98,6 +98,14 @@ function($ionicViewService, $ionicTabsDelegate, $ionicTabsConfig) {
           delete $scope.$hasTabs;
           delete $scope.$hasTabsTop;
         });
+      }
+
+      function postLink($scope, $element, $attr, tabsCtrl) {
+        if(!tabsCtrl.selectedTab()) {
+          // all the tabs have been added
+          // but one hasn't been selected yet
+          tabsCtrl.select(0);
+        }
       }
     }
   };

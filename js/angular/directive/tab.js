@@ -40,10 +40,12 @@ IonicModule.constant('$ionicTabConfig', {
 IonicModule
 .directive('ionTab', [
   '$rootScope',
-  '$animate',
+  '$ionicConfig',
   '$ionicBind',
   '$compile',
-function($rootScope, $animate, $ionicBind, $compile) {
+  '$state',
+  '$ionicViewService',
+function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewService) {
 
   //Returns ' key="value"' if value exists
   function attrStr(k,v) {
@@ -52,7 +54,6 @@ function($rootScope, $animate, $ionicBind, $compile) {
   return {
     restrict: 'E',
     require: ['^ionTabs', 'ionTab'],
-    replace: true,
     controller: '$ionicTab',
     scope: true,
     compile: function(element, attr) {
@@ -74,7 +75,7 @@ function($rootScope, $animate, $ionicBind, $compile) {
 
       //Remove the contents of the element so we can compile them later, if tab is selected
       //We don't use regular transclusion because it breaks element inheritance
-      var tabContent = jqLite('<div class="pane">')
+      var tabContent = jqLite('<div class="pane hide">')
         .append( element.contents().remove() );
 
       return function link($scope, $element, $attr, ctrls) {
@@ -82,18 +83,17 @@ function($rootScope, $animate, $ionicBind, $compile) {
         var childElement;
         var tabsCtrl = ctrls[0];
         var tabCtrl = ctrls[1];
+        var isTabContentAttached = false;
 
-        var navView = tabContent[0].querySelector('ion-nav-view') ||
-          tabContent[0].querySelector('data-ion-nav-view');
+        var navView = tabContent[0].querySelector('ion-nav-view');
         var navViewName = navView && navView.getAttribute('name');
 
         $ionicBind($scope, $attr, {
-          animate: '=',
           onSelect: '&',
           onDeselect: '&',
           title: '@',
           uiSref: '@',
-          href: '@',
+          href: '@'
         });
 
         tabsCtrl.add($scope);
@@ -128,18 +128,46 @@ function($rootScope, $animate, $ionicBind, $compile) {
         tabNavElement.data('$ionTabController', tabCtrl);
         tabsCtrl.$tabsElement.append($compile(tabNavElement)($scope));
 
-        $scope.$watch('$tabSelected', function(value) {
-          childScope && childScope.$destroy();
-          childScope = null;
-          childElement && $animate.leave(childElement);
-          childElement = null;
-          if (value) {
-            childScope = $scope.$new();
-            childElement = tabContent.clone();
-            $animate.enter(childElement, tabsCtrl.$element);
-            $compile(childElement)(childScope);
+
+        function tabSelected(isSelected) {
+          if (isSelected) {
+            // this tab is being selected
+
+            // check if the tab is already in the DOM
+            if(!isTabContentAttached) {
+              // tab should be selected and is NOT in the DOM
+              // create a new scope and append it
+              childScope = $scope.$new();
+              childElement = tabContent.clone();
+              tabsCtrl.$element.append( childElement );
+              $compile(childElement)(childScope);
+              isTabContentAttached = true;
+
+            }
+
+            // remove the hide class so the tabs content shows up
+            childElement.removeClass('hide');
+
+          } else if(isTabContentAttached && childElement) {
+            // this tab should NOT be selected, and it is already in the DOM
+
+            if( $ionicConfig.maxCachedViews > 0 ) {
+              // keep the tabs in the DOM, only css hide it
+              childElement.addClass('hide');
+
+            } else {
+              // do not keep tabs in the DOM
+              childScope && childScope.$destroy();
+              childScope = null;
+              childElement && childElement.remove();
+              childElement = null;
+              isTabContentAttached = false;
+            }
+
           }
-        });
+        }
+
+        $scope.$watch('$tabSelected', tabSelected);
 
       };
     }
