@@ -179,7 +179,6 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
   this._rightButtons;
 
   this.registerButtons = function(buttons, side) {
-    console.log('registerButtons', side, buttons)
     if(side === 'right') {
       this._rightButtons = buttons;
     } else {
