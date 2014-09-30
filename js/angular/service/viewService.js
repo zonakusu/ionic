@@ -606,16 +606,44 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
       function onEnteringComplete(ev) {
         validComplete(ev, function(){
           enteringDeferred.resolve();
-          enteringEle.off(EVENT_ANIMATIONEND, onEnteringComplete);
         });
       }
 
       function onLeavingComplete(ev) {
         validComplete(ev, function(){
           leavingDeferred.resolve();
-          leavingEle && leavingEle.off(EVENT_ANIMATIONEND, onLeavingComplete);
         });
       }
+
+      enteringDeferred.promise.finally(function(){
+        if(enteringEle) {
+          enteringEle.off(EVENT_ANIMATIONEND, onEnteringComplete);
+
+          var enteringScope = jqLite(enteringEle).scope();
+          if(enteringScope) {
+            var enteringData = {
+              action: registerData.action,
+              direction: direction,
+              showBack: registerData.showBack
+            };
+            enteringScope.$broadcast('$ionicView.afterEnter', enteringData);
+            enteringScope.$broadcast('$viewContentLoaded', enteringData);
+          }
+        }
+      });
+
+      leavingDeferred.promise.finally(function(){
+        if(leavingEle) {
+          leavingEle.off(EVENT_ANIMATIONEND, onLeavingComplete);
+
+          var leavingScope = jqLite(leavingEle).scope();
+          if(leavingScope) {
+            leavingScope.$broadcast('$ionicView.afterLeave', {
+              direction: registerData.direction
+            });
+          }
+        }
+      });
 
       function cleanup() {
         if(registerData) {
@@ -909,23 +937,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
           // the view may have an onload attribute, if so do something
           //if (navViewAttrs.onload) view.scope.$eval(navViewAttrs.onload);
-
-          // broadcast the history data of the active view
-          jqLite(enteringEle).scope().$broadcast('$viewContentLoaded', {
-            action: registerData.action,
-            direction: direction
-          });
-
-          jqLite(enteringEle).scope().$broadcast('$ionicView.afterEnter', {
-            direction: registerData.direction,
-            showBack: registerData.showBack
-          });
-
-          if(leavingEle) {
-            jqLite(leavingEle).scope().$broadcast('$ionicView.afterLeave', {
-              direction: registerData.direction
-            });
-          }
 
           // remove any DOM nodes according to the removal policy
           trans.runRemovalPolicy();
