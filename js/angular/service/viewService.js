@@ -340,22 +340,22 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
       } else {
 
         var alreadyExists = false;
-        if(viewLocals && viewLocals.$$state) {
-          // check if this new view is one that already exists in another history
-          var vwName, vw;
-          for(vwName in viewHistory.views) {
-            vw = viewHistory.views[ vwName ];
+        // if(viewLocals && viewLocals.$$state) {
+        //   // check if this new view is one that already exists in another history
+        //   var vwName, vw;
+        //   for(vwName in viewHistory.views) {
+        //     vw = viewHistory.views[ vwName ];
 
-            if( hist.historyId !== vw.historyId &&
-                vw.stateName === viewLocals.$$state.toString() ) {
-              rsp.viewId = vw.viewId;
-              rsp.historyId = vw.historyId;
-              rsp.action = 'existingHistory';
-              alreadyExists = true;
-              break;
-            }
-          }
-        }
+        //     if( hist.historyId !== vw.historyId &&
+        //         vw.stateName === viewLocals.$$state.toString() ) {
+        //       rsp.viewId = vw.viewId;
+        //       rsp.historyId = vw.historyId;
+        //       rsp.action = 'existingHistory';
+        //       alreadyExists = true;
+        //       break;
+        //     }
+        //   }
+        // }
 
         if(!alreadyExists) {
           // does not exist yet
@@ -441,6 +441,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
       rsp.showBack = !!(viewHistory.backView && viewHistory.backView.historyId === viewHistory.currentView.historyId);
 
       hist.cursor = viewHistory.currentView.index;
+
+      console.log('VIEW', rsp);
 
       return rsp;
     },
