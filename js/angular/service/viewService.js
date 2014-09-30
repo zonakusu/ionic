@@ -286,6 +286,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
          currentView.historyId === hist.historyId) {
         // do nothing if its the same stateId in the same history
         rsp.action = ACTION_NO_CHANGE;
+        console.log('VIEW', rsp);
         return rsp;
       }
 
@@ -340,28 +341,29 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
       } else {
 
         var alreadyExists = false;
-        // if(viewLocals && viewLocals.$$state) {
-        //   // check if this new view is one that already exists in another history
-        //   var vwName, vw;
-        //   for(vwName in viewHistory.views) {
-        //     vw = viewHistory.views[ vwName ];
+        if(viewLocals && viewLocals.$$state) {
+          // check if this new view is one that already exists in another history
+          var vwName, vw;
+          for(vwName in viewHistory.views) {
+            vw = viewHistory.views[ vwName ];
 
-        //     if( hist.historyId !== vw.historyId &&
-        //         vw.stateName === viewLocals.$$state.toString() ) {
-        //       rsp.viewId = vw.viewId;
-        //       rsp.historyId = vw.historyId;
-        //       rsp.action = 'existingHistory';
-        //       alreadyExists = true;
-        //       break;
-        //     }
-        //   }
-        // }
+            if( hist.historyId !== vw.historyId &&
+                vw.stateName === viewLocals.$$state.toString() ) {
+              rsp.viewId = vw.viewId;
+              rsp.historyId = vw.historyId;
+              rsp.action = 'existingHistory';
+              alreadyExists = true;
+              break;
+            }
+          }
+        }
 
         if(!alreadyExists) {
           // does not exist yet
           rsp.ele = createViewElement(viewLocals);
           if(!rsp.ele) {
             rsp.action = 'invalidLocals';
+            console.log('VIEW', rsp);
             return rsp;
           }
 
@@ -371,6 +373,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
             // For example, the <ion-tabs> directive contains a <ion-tab> and the <ion-tab> is the
             // view, but the <ion-tabs> directive itself should not be registered as a view.
             rsp.action = ACTION_DISABLED_BY_TAG_NAME;
+            rsp.tag = rsp.ele[0].tagName;
+            console.log('VIEW', rsp);
             return rsp;
           }
 
@@ -419,6 +423,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
             stateId: currentStateId,
             stateName: this.getCurrentStateName(),
             stateParams: this.getCurrentStateParams(),
+            tagName: rsp.ele[0].tagName,
             url: $location.url()
           });
 
@@ -441,6 +446,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
       rsp.showBack = !!(viewHistory.backView && viewHistory.backView.historyId === viewHistory.currentView.historyId);
 
       hist.cursor = viewHistory.currentView.index;
+
+      rsp.tagName = viewHistory.views[rsp.viewId].tagName;
 
       console.log('VIEW', rsp);
 
