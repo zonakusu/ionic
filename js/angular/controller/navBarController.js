@@ -56,8 +56,8 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
     this.transition(enteringEle, leavingEle, viewData);
   };
 
-  this.renderActive = function(ele, viewData) {
-    setElementTitle(viewData.title, ele);
+  this.renderActive = function(navBarEle, viewData) {
+    setTitleElement(viewData.title, navBarEle);
 
     var backButtonEle = getBackButtonElement();
     if(backButtonEle) {
@@ -66,6 +66,14 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
       } else {
         backButtonEle.addClass('hide');
       }
+    }
+
+    if(this._leftButtons) {
+      setButtonsElement(this._leftButtons, 'left', navBarEle);
+    }
+
+    if(this._rightButtons) {
+      setButtonsElement(this._rightButtons, 'right', navBarEle);
     }
 
   };
@@ -116,12 +124,12 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
     }
   }
 
-  function setElementTitle(title, ele) {
+  function setTitleElement(title, navBarEle) {
     $scope.oldTitle = $scope.title;
     $scope.title = title = title || '';
 
-    if(ele) {
-      var titleEle = ele[0].querySelector('.title');
+    if(navBarEle) {
+      var titleEle = navBarEle[0].querySelector('.title');
       if(titleEle) {
         titleEle = jqLite(titleEle);
         if(titleEle.data(DATA_TITLE) !== title) {
@@ -133,8 +141,17 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
     }
   }
 
+  function setButtonsElement(buttons, side, navBarEle) {
+    if(navBarEle) {
+      var navBarButtonEle = navBarEle[0].querySelector('.' + side + '-buttons');
+      if(navBarButtonEle) {
+        jqLite(navBarButtonEle).append( buttons );
+      }
+    }
+  }
+
   this.setTitle = function(title) {
-    setElementTitle(title, getActiveElement());
+    setTitleElement(title, getActiveElement());
   };
 
   this.getTitle = function() {
@@ -158,6 +175,17 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
     return false;
   };
 
+  this._leftButtons;
+  this._rightButtons;
+
+  this.registerButtons = function(buttons, side) {
+    console.log('registerButtons', side, buttons)
+    if(side === 'right') {
+      this._rightButtons = buttons;
+    } else {
+      this._leftButtons = buttons;
+    }
+  };
 
   // var self = this;
 
