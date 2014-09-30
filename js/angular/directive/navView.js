@@ -111,6 +111,7 @@ function( $ionicViewService, $state) {
 
       // a nav view element is a container for numerous views
       tElement.addClass('view-container');
+      tElement.removeAttr('title');
 
       return function(navViewScope, navViewElement, navViewAttrs, navViewCtrl) {
         var latestLocals;
@@ -164,6 +165,7 @@ function( $ionicViewService, $state) {
 
           // init the transition of views for this nav-view directive
           transition.init();
+          console.log('updateView', navViewName)
         }
 
       };
