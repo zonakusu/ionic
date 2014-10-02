@@ -38,12 +38,12 @@ function($timeout, $ionicGesture, $window) {
     require: '^ionSideMenus',
     scope: true,
     compile: function(element, attr) {
+      element.addClass('menu-content pane');
+
       return { pre: prelink };
       function prelink($scope, $element, $attr, sideMenuCtrl) {
         var startCoord = null;
         var primaryScrollAxis = null;
-
-        $element.addClass('menu-content pane');
 
         if (isDefined(attr.dragContent)) {
           $scope.$watch(attr.dragContent, function(value) {

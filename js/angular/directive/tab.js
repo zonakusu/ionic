@@ -75,7 +75,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
 
       //Remove the contents of the element so we can compile them later, if tab is selected
       //We don't use regular transclusion because it breaks element inheritance
-      var tabContent = jqLite('<div class="pane hide">')
+      var tabContent = jqLite('<div class="tab-content pane view-cache">')
         .append( element.contents().remove() );
 
       return function link($scope, $element, $attr, ctrls) {
@@ -146,14 +146,14 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
             }
 
             // remove the hide class so the tabs content shows up
-            childElement.removeClass('hide');
+            childElement.removeClass('view-cache');
 
           } else if(isTabContentAttached && childElement) {
             // this tab should NOT be selected, and it is already in the DOM
 
             if( $ionicConfig.maxCachedViews > 0 ) {
               // keep the tabs in the DOM, only css hide it
-              childElement.addClass('hide');
+              childElement.addClass('view-cache');
 
             } else {
               // do not keep tabs in the DOM
@@ -168,6 +168,10 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
         }
 
         $scope.$watch('$tabSelected', tabSelected);
+
+        $scope.$on('$ionicView.navViewActive', function() {
+          childElement && childElement.removeClass('view-cache');
+        });
 
       };
     }
