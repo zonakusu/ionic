@@ -101,22 +101,14 @@ function($rootScope, $state, $location, $document, $ionicPlatform, $ionicViewSer
   '$timeout',
   '$ionicClickBlock',
   '$ionicConfig',
-function($rootScope, $state, $compile, $controller, $location, $window, $q, $timeout, $ionicClickBlock, $ionicConfig) {
+  '$animate',
+function($rootScope, $state, $compile, $controller, $location, $window, $q, $timeout, $ionicClickBlock, $ionicConfig, $animate) {
 
   // data keys for jqLite elements
-  var DATA_VIEW_IS_ACTIVE = '$ionViewIsActive';
-  var DATA_ELE_IDENTIFIER = '$ionEleId';
-  var DATA_VIEW_ACCESSED = '$ionAccessed';
-  var DATA_CACHE_VIEW = '$ionCacheView';
-
-  // css class names used
-  var CSS_HIDE = 'hide';
-  var CSS_VIEW_ENTERING = 'view-entering';
-  var CSS_VIEW_LEAVING = 'view-leaving';
-  var CSS_TRANSITIONING = 'transitioning';
-  var CSS_NAV_FORWARD = 'nav-forward';
-  var CSS_NAV_BACK = 'nav-back';
-  var CSS_VIEW_ACTIVE = 'view-active';
+  var DATA_VIEW_IS_ACTIVE = '$ionicViewActive';
+  var DATA_ELE_IDENTIFIER = '$ionicEleId';
+  var DATA_VIEW_ACCESSED = '$ionicAccessed';
+  var DATA_NO_CACHE = '$ionicNoCache';
 
   // history actions while navigating views
   var ACTION_INITIAL_VIEW = 'initialView';
@@ -126,19 +118,14 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
   var ACTION_NO_CHANGE = 'noChange';
   var ACTION_DISABLED_BY_TAG_NAME = 'disabledByTagName';
 
-  // physical direction of navigation
+  // direction of navigation
   var DIRECTION_BACK = 'back';
   var DIRECTION_FORWARD = 'forward';
+  var DIRECTION_ENTER = 'enter';
+  var DIRECTION_EXIT = 'exit';
+  var DIRECTION_SWITCH = 'switch';
 
-  // event types to listen for when a transition has ended
-  var EVENT_ANIMATIONEND = 'webkitAnimationEnd animationend';
-
-  // transitionTotal is used to know which is the most recent
-  var transitionTotal = 0;
-
-  // keep a list of all the transition styles that were used
-  // so its easy to remove them
-  var usedTransitionStyles = [];
+  var transitionCounter = 0;
 
   var View = function(){};
   View.prototype.initialize = function(data) {
@@ -543,29 +530,22 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
     },
 
     getTransition: function(navViewScope, navViewElement, navViewAttrs, viewLocals, registerData, enteringView) {
-      // each transition is given an ID, later used to make
-      // sure complete() is only ran on the most recent transition
-      transitionTotal = transitionTotal > 999 ? 0 : transitionTotal + 1;
-      var transitionId = transitionTotal;
+
+      var transitionId = ++transitionCounter;
 
       // injected registerData used for testing
       registerData = registerData || this.register(navViewScope, viewLocals);
 
-      var direction = registerData.direction;
-      var doAnimation, transitionStyle;
-
       // injected enteringView used for testing
       enteringView = enteringView || getViewById(registerData.viewId) || {};
-
-      var enteringDeferred = $q.defer();
-      var leavingDeferred = $q.defer();
 
       // get a reference to an entering/leaving element if they exist
       // loop through to see if the view is already in the navViewElement
       var enteringEle, leavingEle;
-      var x, viewElements = navViewElement.children();
+      var viewElements = navViewElement.children();
       var enteringEleIdentifier = getViewElementIdentifier(viewLocals, enteringView);
-      for(x=0, l=viewElements.length; x<l; x++) {
+
+      for(var x=0, l=viewElements.length; x<l; x++) {
         if(enteringEleIdentifier && viewElements.eq(x).data(DATA_ELE_IDENTIFIER) == enteringEleIdentifier) {
           // we found an existing element in the DOM that should be entering the view
           enteringEle = viewElements.eq(x);
@@ -581,7 +561,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
       if(!enteringEle && registerData.ele) {
         // already created a new element within the register
-        // instead of doing it twice, just use the one we go from register
+        // instead of doing it twice, just use the one we got from register
         enteringEle = registerData.ele;
       }
 
@@ -590,67 +570,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
         // create it using existing template/scope/locals
         enteringEle = createViewElement(viewLocals);
       }
-
-      function validComplete(ev, complete) {
-        // only listen for <ion-view> transition ends
-        if(ev && ev.target.tagName !== 'ION-VIEW') return;
-
-        // only the most recent transitionend event should do something
-        if(!doAnimation || transitionId === transitionTotal) {
-          // the most recent transitionend just happend
-          ev && ev.stopPropagation();
-          complete();
-
-        } else {
-          // this isn't the most recent transitionend
-          // clean it up, but don't fire the callback
-          enteringDeferred.reject();
-          leavingDeferred.reject();
-          cleanup();
-        }
-      }
-
-      function onEnteringComplete(ev) {
-        validComplete(ev, function(){
-          enteringDeferred.resolve();
-        });
-      }
-
-      function onLeavingComplete(ev) {
-        validComplete(ev, function(){
-          leavingDeferred.resolve();
-        });
-      }
-
-      enteringDeferred.promise.finally(function(){
-        if(enteringEle) {
-          enteringEle.off(EVENT_ANIMATIONEND, onEnteringComplete);
-
-          var enteringScope = jqLite(enteringEle).scope();
-          if(enteringScope) {
-            var enteringData = {
-              action: registerData.action,
-              direction: direction,
-              showBack: registerData.showBack
-            };
-            enteringScope.$broadcast('$ionicView.afterEnter', enteringData);
-            enteringScope.$broadcast('$viewContentLoaded', enteringData);
-          }
-        }
-      });
-
-      leavingDeferred.promise.finally(function(){
-        if(leavingEle) {
-          leavingEle.off(EVENT_ANIMATIONEND, onLeavingComplete);
-
-          var leavingScope = jqLite(leavingEle).scope();
-          if(leavingScope) {
-            leavingScope.$broadcast('$ionicView.afterLeave', {
-              direction: registerData.direction
-            });
-          }
-        }
-      });
 
       function cleanup() {
         if(registerData) {
@@ -670,156 +589,58 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
         registerData: registerData,
 
         init: function() {
-          trans.setStyle();
-
-          trans.stage()
-            .then(function(){
-              return trans.compileAndLink();
-            })
-            .then(function(){
-              return trans.start();
-            })
-            .then(function(){
-              trans.complete();
-            });
-        },
-
-        setStyle: function() {
-          // Priorities of which transition style to use
-          // 1) From the entering view elements's "transition-style" attribute
-          // 2) $stateProvider.state views transitionStyle
-          // 3) $ionicConfig.viewTransition global setting
-          // 4) if none of the above, default to 'platform'
-
-          // first get the global view transition type
-          var viewTransition = $ionicConfig.viewTransition || 'platform';
-
-          // next see if this specific view has a transition type
-          if(viewLocals && viewLocals.views) {
-            for(var n in viewLocals.views) {
-              if(viewLocals.views[n].transition) {
-                viewTransition = viewLocals.views[n].transition;
-              }
-            }
-          }
-
-          // next see if the enteringEle itself has an attribute
-          var elementTransitionStyle = enteringEle && enteringEle.attr('transition-style');
-          if(elementTransitionStyle) {
-            viewTransition = elementTransitionStyle;
-          }
-
-          // set if this transition should animate or not
-          // the direction needs to be going either forward or back
-          // AND there can't be a transition type of 'none'
-          doAnimation = (direction == DIRECTION_BACK || direction == DIRECTION_FORWARD) && (viewTransition !== 'none');
-
-          // figure out which transition style to use
-          if(viewTransition == 'platform') {
-            // if this is a platform transition, then we need to figure out which platform this is first
-            transitionStyle = ionic.Platform.platform() + '-slide';
-
-          } else {
-            // use the given transition config
-            transitionStyle = viewTransition;
-          }
-          transitionStyle += '-transition';
-          transitionStyle = 'slide-transition';
-
-          // if we've never see this style before add it so it's easy to remove them all later
-          var isNewTransitionStyle = true;
-          for(var x=0; x<usedTransitionStyles.length; x++) {
-            if(usedTransitionStyles[x]==transitionStyle) {
-              isNewTransitionStyle = false;
-              break;
-            }
-          }
-          if(isNewTransitionStyle) {
-            usedTransitionStyles.push(transitionStyle);
-          }
-
-          // returns data for testing
-          return {
-            animation: doAnimation,
-            style: transitionStyle
-          };
-        },
-
-        stage: function() {
-          // stage where the will be BEFORE the transition starts
-          var deferred = $q.defer();
 
           $ionicClickBlock.show();
 
-          if(doAnimation) {
-            // an animated transition should happen
+          trans.render(function(){
 
-            // add which transition style will be used
-            classToggle(navViewElement, transitionStyle);
+            $animate.transition('ios-slide', registerData.direction, navViewElement, enteringEle).then(function(transData){
 
-            // remove any transition styles that shouldn't
-            // be there, but have been used in the past
-            for(var x=0; x<usedTransitionStyles.length; x++) {
-              if(usedTransitionStyles[x] !== transitionStyle) {
-                classToggle(navViewElement, 0, usedTransitionStyles[x]);
+              if(transitionId === transitionCounter) {
+                // only run complete on the most recent transition
+                trans.complete(transData);
+
+                // remove any DOM nodes according to the removal policy
+                trans.runRemovalPolicy();
+
+                // allow clicks to hapen again after the transition
+                $ionicClickBlock.hide();
+
+                console.log('done!', transData);
               }
-            }
 
-            // set which navigation direction is happening
-            if(direction == DIRECTION_BACK) {
-              // add nav-back and remove nav-forward
-              classToggle(navViewElement, CSS_NAV_BACK, CSS_NAV_FORWARD);
-
-            } else {
-              // add nav-forward and remove nav-back
-              classToggle(navViewElement, CSS_NAV_FORWARD, CSS_NAV_BACK);
-            }
-
-            // set that the entering element, is um, entering
-            // and remove the leaving css class if its there
-            classToggle(enteringEle, CSS_VIEW_ENTERING, CSS_VIEW_LEAVING);
-
-            // set the leaving class on the leaving element
-            classToggle(leavingEle, CSS_VIEW_LEAVING, CSS_VIEW_ENTERING);
-
-            $timeout(function(){
-              // attempt to make sure it all gets reflected in the DOM
-              deferred.resolve();
+              // always clean up any references that could cause memory issues
+              cleanup();
             });
 
-          } else {
-            // no animation
-            deferred.resolve();
-          }
+          });
 
-          return deferred.promise;
         },
 
-        compileAndLink: function() {
-          var deferred = $q.defer();
+        render: function(callback) {
+          // update that this view was just accessed
+          enteringEle.data(DATA_VIEW_ACCESSED, Date.now());
 
           if(!alreadyInDom) {
             // the entering element is not already in the DOM
             // hasn't been compiled and isn't linked up yet
 
-            if(doAnimation) {
-              // have the entering ele display:none when it hits the DOM
-              // in hopes to reduce reflows while it links
-              classToggle(enteringEle, CSS_HIDE);
-            }
-
-            // add the DATA_CACHE_VIEW data
+            // add the DATA_NO_CACHE data
             // if the current state has cache:false
             // or the element has cache-view="false" attribute
             if( (viewLocals && viewLocals.$$state.self.cache === false) ||
                 (enteringEle.attr('cache-view') == 'false') ) {
-              enteringEle.data(DATA_CACHE_VIEW, false);
+              enteringEle.data(DATA_NO_CACHE, true);
             }
 
             // compile the entering element and get the link function
             var link = $compile(enteringEle);
 
+            // existing elements in the DOM are looked up by their state name and state id
+            enteringEle.data(DATA_ELE_IDENTIFIER, getViewElementIdentifier(viewLocals, enteringView) );
+
             // append the entering element to the DOM
+            enteringEle.addClass('view-entering')
             navViewElement.append(enteringEle);
 
             // create a new scope for the entering element
@@ -834,86 +655,18 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
             // run link with the view's scope
             link(scope);
-          }
 
-          // update that this view was just accessed
-          enteringEle.data(DATA_VIEW_ACCESSED, Date.now());
-
-          if( !enteringEle.data(DATA_ELE_IDENTIFIER) ) {
-            // existing elements in the DOM are looked up by their state name and state id
-            enteringEle.data(DATA_ELE_IDENTIFIER, getViewElementIdentifier(viewLocals, enteringView) );
-          }
-
-          if(doAnimation) {
-            // add the event listeners for the transitionend event
-            // so we know when both transitions have completed
-            enteringEle.on(EVENT_ANIMATIONEND, onEnteringComplete);
-
-            if(leavingEle) {
-              // add the transitionend event listener to
-              // the leaving element if it exists
-              leavingEle.on(EVENT_ANIMATIONEND, onLeavingComplete);
-
-            } else {
-              // there was no leaving element, auto resolve the transition has ended
-              onLeavingComplete();
-            }
-
-            // give it a $timeout in hopes to not continue until after digest
             $timeout(function(){
-              deferred.resolve();
-            }, 10);
+              callback();
+            }, 12);
 
           } else {
-            deferred.resolve();
+            callback();
           }
 
-          return deferred.promise;
         },
 
-        start: function() {
-          // transitions all the views together
-          // remove the "hide" class from the entering element
-          classToggle(enteringEle, 0, CSS_HIDE);
-
-          if(doAnimation) {
-            // start transitioning the two views
-
-            // give it a $timeout to make sure the DOM has been updated
-            // after the "hide" class has been removed from the entering element
-            $timeout(function(){
-              classToggle(navViewElement, CSS_TRANSITIONING);
-            }, 20);
-
-          } else {
-            // add "hide" class to the leaving element
-            classToggle(leavingEle, CSS_HIDE);
-
-            // there was no asnyc transition, just auto resolve them
-            onEnteringComplete();
-            onLeavingComplete();
-          }
-
-          jqLite(enteringEle).scope().$broadcast('$ionicView.beforeEnter', {
-            direction: registerData.direction,
-            showBack: registerData.showBack
-          });
-
-          if(leavingEle) {
-            jqLite(leavingEle).scope().$broadcast('$ionicView.beforeLeave', {
-              direction: registerData.direction
-            });
-          }
-
-          return $q.all([ enteringDeferred.promise, leavingDeferred.promise ]);
-        },
-
-        complete: function() {
-          // remove the transitions css
-          navViewElement.removeClass(CSS_TRANSITIONING)
-                        .removeClass(transitionStyle)
-                        .removeClass(CSS_NAV_FORWARD)
-                        .removeClass(CSS_NAV_BACK);
+        complete: function(transData) {
 
           // remove the all transition css classes
           var viewElements = navViewElement.children();
@@ -923,47 +676,38 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
           // update/ensure each view element has the correct classes
           for(var x=0, l=viewElements.length; x<l; x++) {
             viewElement = viewElements.eq(x);
+            viewElement.data(DATA_VIEW_IS_ACTIVE, (viewElement.data(DATA_ELE_IDENTIFIER) === activeStateId) );
+          }
 
-            // all child views should have these classes removed
-            viewElement.removeClass(CSS_VIEW_LEAVING)
-                       .removeClass(CSS_VIEW_ENTERING);
+          if(enteringEle) {
+            var enteringScope = jqLite(enteringEle).scope();
+            if(enteringScope) {
+              enteringScope.$broadcast('$ionicView.afterEnter', transData);
+              enteringScope.$broadcast('$viewContentLoaded', transData);
+            }
+          }
 
-            if(activeStateId && viewElement.data(DATA_ELE_IDENTIFIER) == activeStateId) {
-              // ONLY the active view
-              viewElement.removeClass(CSS_HIDE)
-                         .addClass(CSS_VIEW_ACTIVE)
-                         .data(DATA_VIEW_IS_ACTIVE, true);
-
-            } else {
-              // all EXCEPT the active view
-              viewElement.addClass(CSS_HIDE)
-                         .removeClass(CSS_VIEW_ACTIVE)
-                         .data(DATA_VIEW_IS_ACTIVE, false);
+          if(leavingEle) {
+            var leavingScope = jqLite(leavingEle).scope();
+            if(leavingScope) {
+              leavingScope.$broadcast('$ionicView.afterLeave', transData);
             }
           }
 
           // the view may have an onload attribute, if so do something
           //if (navViewAttrs.onload) view.scope.$eval(navViewAttrs.onload);
 
-          // remove any DOM nodes according to the removal policy
-          trans.runRemovalPolicy();
-
-          // clean up any references that could cause memory issues
-          cleanup();
-
-          // allow clicks to hapen again after the transition
-          $ionicClickBlock.hide();
         },
 
         runRemovalPolicy: function() {
           var removableEle;
 
-          if( direction == DIRECTION_BACK && leavingEle ) {
+          if( registerData.direction == DIRECTION_BACK && leavingEle ) {
             // if they just navigated back we can destroy the forward view
             removableEle = leavingEle;
 
-          } else if( leavingEle && leavingEle.data(DATA_CACHE_VIEW) === false ) {
-            // remove if the leaving element has DATA_CACHE_VIEW===false
+          } else if( leavingEle && leavingEle.data(DATA_NO_CACHE) ) {
+            // remove if the leaving element has DATA_NO_CACHE===false
             removableEle = leavingEle;
 
           } else {
@@ -999,7 +743,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
         },
 
         isValid: function() {
-          return enteringEle && (direction != ACTION_NO_CHANGE);
+          return enteringEle && (registerData.direction != ACTION_NO_CHANGE);
         }
 
       };
