@@ -18,14 +18,25 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
   var DATA_IS_USED = '$isUsed';
   var DATA_TITLE = '$title';
 
+  this._leftButtons;
+  this._rightButtons;
+
 
   $element.parent().data('$ionNavBarController', this);
 
   var deregisterInstance = $ionicNavBarDelegate._registerInstance(this, $attrs.delegateHandle);
 
-  $scope.$on('$destroy', deregisterInstance);
+  $scope.$on('$destroy', function(){
+    this._rightButtons = null;
+    this._leftButtons = null;
+    deregisterInstance();
+  });
 
   this.navBarEnter = function(viewData) {
+    this.enable();
+
+    console.log($ionicNavBarDelegate, this)
+
     var navBarElements = getNavBarElements();
     var enteringEle;
     var leavingEle;
@@ -96,6 +107,16 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
 
   };
 
+  this._enableBar = function(enable) {
+    $scope.isInvisible = !enable;
+  };
+
+  this.enable = function() {
+    for(var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
+      $ionicNavBarDelegate._instances[x]._enableBar( $ionicNavBarDelegate._instances[x] === this );
+    }
+  };
+
   this.showBar = function(show) {
     if (arguments.length) {
       $scope.isInvisible = !show;
@@ -117,10 +138,15 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
 
   function getActiveElement() {
     var navBarElements = getNavBarElements();
-    for(var x=0, l=navBarElements.length; x<l; x++) {
-      if(navBarElements(x).data(DATA_IS_ACTIVE)) {
-        return navBarElements(x);
+    var x, l=navBarElements.length;
+    for(x=0; x<l; x++) {
+      if(navBarElements.eq(x).data(DATA_IS_ACTIVE)) {
+        return navBarElements.eq(x);
       }
+    }
+    if(l) {
+      navBarElements.eq(x).data(DATA_IS_ACTIVE, true);
+      return navBarElements.eq(0);
     }
   }
 
@@ -175,9 +201,6 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
     return false;
   };
 
-  this._leftButtons;
-  this._rightButtons;
-
   this.registerButtons = function(buttons, side) {
     if(side === 'right') {
       this._rightButtons = buttons;
@@ -185,19 +208,6 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
       this._leftButtons = buttons;
     }
   };
-
-  // var self = this;
-
-  // this.leftButtonsElement = jqLite(
-  //   $element[0].querySelector('.buttons.left-buttons')
-  // );
-  // this.rightButtonsElement = jqLite(
-  //   $element[0].querySelector('.buttons.right-buttons')
-  // );
-
-  // this.align = function(direction) {
-  //   this._headerBarView.align(direction);
-  // };
 
 }]);
 

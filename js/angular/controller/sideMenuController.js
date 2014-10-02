@@ -382,6 +382,7 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
   $scope.$on('$destroy', function() {
     deregisterInstance();
     deregisterBackButtonAction();
+    self.$scope = null;
   });
 
   self.initialize({

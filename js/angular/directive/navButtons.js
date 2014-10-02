@@ -41,9 +41,9 @@ IonicModule
     compile: function($element, $attrs) {
       var content = $element.contents().remove();
 
-    // The original element is just a completely empty <ion-nav-buttons> element.
-    // make it invisible just to be sure it doesn't change any layout
-    $element.css('display', 'none');
+      // The original element is just a completely empty <ion-nav-buttons> element.
+      // make it invisible just to be sure it doesn't change any layout
+      $element.addClass('hide');
 
       return function($scope, $element, $attrs, navBarCtrl) {
 

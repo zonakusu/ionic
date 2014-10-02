@@ -23,13 +23,8 @@ function($provide) {
       }
     }
 
-    $animate.transition = function(animationClass, navDirection, parentElement, enteringElement) {
+    $animate.transition = function(animationClass, navDirection, parentElement, enteringElement, leavingElement) {
       var deferred = $q.defer();
-
-      var leavingElement = parentElement[0].querySelector('.' + CSS_VIEW_ACTIVE);
-      if(leavingElement) {
-        leavingElement = jqLite(leavingElement);
-      }
 
       $animate.stage(animationClass, navDirection, parentElement, enteringElement, leavingElement);
 

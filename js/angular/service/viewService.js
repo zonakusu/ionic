@@ -272,9 +272,9 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
          currentView.stateId === currentStateId &&
          currentView.historyId === hist.historyId) {
         // do nothing if its the same stateId in the same history
-        rsp.action = ACTION_NO_CHANGE;
-        console.log('VIEW', rsp);
-        return rsp;
+        // rsp.action = ACTION_NO_CHANGE;
+        // console.log('VIEW', rsp);
+        // return rsp;
       }
 
       if(viewHistory.forcedNav) {
@@ -328,22 +328,22 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
       } else {
 
         var alreadyExists = false;
-        if(viewLocals && viewLocals.$$state) {
-          // check if this new view is one that already exists in another history
-          var vwName, vw;
-          for(vwName in viewHistory.views) {
-            vw = viewHistory.views[ vwName ];
+        // if(viewLocals && viewLocals.$$state) {
+        //   // check if this new view is one that already exists in another history
+        //   var vwName, vw;
+        //   for(vwName in viewHistory.views) {
+        //     vw = viewHistory.views[ vwName ];
 
-            if( hist.historyId !== vw.historyId &&
-                vw.stateName === viewLocals.$$state.toString() ) {
-              rsp.viewId = vw.viewId;
-              rsp.historyId = vw.historyId;
-              rsp.action = 'existingHistory';
-              alreadyExists = true;
-              break;
-            }
-          }
-        }
+        //     if( hist.historyId !== vw.historyId &&
+        //         vw.stateName === viewLocals.$$state.toString() ) {
+        //       rsp.viewId = vw.viewId;
+        //       rsp.historyId = vw.historyId;
+        //       rsp.action = 'existingHistory';
+        //       alreadyExists = true;
+        //       break;
+        //     }
+        //   }
+        // }
 
         if(!alreadyExists) {
           // does not exist yet
@@ -550,7 +550,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
           // we found an existing element in the DOM that should be entering the view
           enteringEle = viewElements.eq(x);
 
-        } else if(viewElements.eq(x).data(DATA_VIEW_IS_ACTIVE)) {
+        } else if(viewElements.eq(x).hasClass('view-active')) {
           // this element is currently the active one, so it will be the leaving element
           leavingEle = viewElements.eq(x);
         }
@@ -576,9 +576,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
           registerData.ele = null;
           registerData = null;
         }
-
         enteringView = null;
-
         enteringEle = null;
         leavingEle = null;
       }
@@ -594,11 +592,13 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
           trans.render(function(){
 
-            $animate.transition('ios-slide', registerData.direction, navViewElement, enteringEle).then(function(transData){
+            trans.before();
+
+            $animate.transition('ios-slide', registerData.direction, navViewElement, enteringEle, leavingEle).then(function(transData){
 
               if(transitionId === transitionCounter) {
                 // only run complete on the most recent transition
-                trans.complete(transData);
+                trans.after(transData);
 
                 // remove any DOM nodes according to the removal policy
                 trans.runRemovalPolicy();
@@ -606,7 +606,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
                 // allow clicks to hapen again after the transition
                 $ionicClickBlock.hide();
 
-                console.log('done!', transData);
+                navViewScope.$emit('$ionicView.navViewActive', transData);
               }
 
               // always clean up any references that could cause memory issues
@@ -666,7 +666,27 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
         },
 
-        complete: function(transData) {
+        before: function() {
+          var transData = {
+            direction: registerData.direction
+          };
+          if(enteringEle) {
+            var enteringScope = jqLite(enteringEle).scope();
+            if(enteringScope) {
+              enteringScope.$broadcast('$ionicView.beforeEnter', transData);
+            }
+          }
+
+          if(leavingEle) {
+            var leavingScope = jqLite(leavingEle).scope();
+            console.log('viewService beforeLeave', leavingScope)
+            if(leavingScope) {
+              leavingScope.$broadcast('$ionicView.beforeLeave', transData);
+            }
+          }
+        },
+
+        after: function(transData) {
 
           // remove the all transition css classes
           var viewElements = navViewElement.children();
