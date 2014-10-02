@@ -12,10 +12,6 @@
   from { -webkit-transform: translate3d(98%, 0, 0); }
   to   { -webkit-transform: translate3d(0, 0, 0); }
 }
-@-moz-keyframes slideInFromRight {
-  from { -moz-transform: translate3d(98%, 0, 0); }
-  to   { -moz-transform: translate3d(0, 0, 0); }
-}
 @keyframes slideInFromRight {
   from { transform: translate3d(98%, 0, 0); }
   to   { transform: translate3d(0, 0, 0); }
@@ -28,10 +24,6 @@
 @-webkit-keyframes slideOutToRight {
   from { -webkit-transform: translate3d(0, 0, 0); }
   to   { -webkit-transform: translate3d(100%, 0, 0); }
-}
-@-moz-keyframes slideOutToRight {
-  from { -moz-transform: translate3d(0, 0, 0); }
-  to   { -moz-transform: translate3d(100%, 0, 0); }
 }
 @keyframes slideOutToRight {
   from { transform: translate3d(0, 0, 0); }
@@ -46,13 +38,9 @@
   from { -webkit-transform: translate3d(-100%, 0, 0); }
   to   { -webkit-transform: translate3d(0, 0, 0); }
 }
-@-moz-keyframes slideInFromLeft {
-  from { -moz-transform: translateX(-100%); }
-  to   { -moz-transform: translateX(0); }
-}
 @keyframes slideInFromLeft {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
+  from { transform: translate3d(-100%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
 }
 
 
@@ -63,13 +51,9 @@
   from { -webkit-transform: translate3d(-33%, 0, 0); }
   to   { -webkit-transform: translate3d(0, 0, 0); }
 }
-@-moz-keyframes slideInFromLeft33 {
-  from { -moz-transform: translateX(-33%); }
-  to   { -moz-transform: translateX(0); }
-}
 @keyframes slideInFromLeft33 {
-  from { transform: translateX(-33%); }
-  to   { transform: translateX(0); }
+  from { transform: translate3d(-33%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
 }
 
 
@@ -79,10 +63,6 @@
 @-webkit-keyframes slideOutToLeft {
   from { -webkit-transform: translate3d(0, 0, 0); }
   to   { -webkit-transform: translate3d(-100%, 0, 0); }
-}
-@-moz-keyframes slideOutToLeft {
-  from { -moz-transform: translate3d(0, 0, 0); }
-  to   { -moz-transform: translate3d(-100%); }
 }
 @keyframes slideOutToLeft {
   from { transform: translate3d(0, 0, 0); }
@@ -97,10 +77,6 @@
   from { -webkit-transform: translate3d(0, 0, 0); }
   to   { -webkit-transform: translate3d(-33%, 0, 0); }
 }
-@-moz-keyframes slideOutToLeft33 {
-  from { -moz-transform: translate3d(0, 0, 0); }
-  to   { -moz-transform: translate3d(-33%); }
-}
 @keyframes slideOutToLeft33 {
   from { transform: translate3d(0, 0, 0); }
   to   { transform: translate3d(-33%, 0, 0); }
@@ -113,10 +89,6 @@
 @-webkit-keyframes slideInFromBottom {
   from { -webkit-transform: translate3d(0, 100%, 0); }
   to   { -webkit-transform: translate3d(0, 0, 0); }
-}
-@-moz-keyframes slideInFromBottom {
-  from { -moz-transform: translate3d(0, 100%, 0); }
-  to   { -moz-transform: translate3d(0, 0, 0); }
 }
 @keyframes slideInFromBottom {
   from { transform: translate3d(0, 100%, 0); }
@@ -131,10 +103,6 @@
   from { -webkit-transform: translate3d(0, 0, 0); }
   to   { -webkit-transform: translate3d(0, 100%, 0); }
 }
-@-moz-keyframes slideOutToBottom {
-  from { -moz-transform: translate3d(0, 0, 0); }
-  to   { -moz-transform: translate3d(0, 100%, 0); }
-}
 @keyframes slideOutToBottom {
   from { transform: translate3d(0, 0, 0); }
   to   { transform: translate3d(0, 100%, 0); }
@@ -147,10 +115,6 @@
 @-webkit-keyframes slideInFromTop {
   from { -webkit-transform: translate3d(0, -100%, 0); }
   to   { -webkit-transform: translate3d(0, 0, 0); }
-}
-@-moz-keyframes slideInFromTop {
-  from { -moz-transform: translate3d(0, -100%, 0); }
-  to   { -moz-transform: translate3d(0, 0, 0); }
 }
 @keyframes slideInFromTop {
   from { transform: translate3d(0, -100%, 0); }
@@ -165,10 +129,6 @@
   from { -webkit-transform: translate3d(0, 0, 0); }
   to   { -webkit-transform: translate3d(0, -100%, 0); }
 }
-@-moz-keyframes slideOutToBottom {
-  from { -moz-transform: translate3d(0, 0, 0); }
-  to   { -moz-transform: translate3d(0, -100%, 0); }
-}
 @keyframes slideOutToBottom {
   from { transform: translate3d(0, 0, 0); }
   to   { transform: translate3d(0, -100%, 0); }
@@ -179,10 +139,6 @@
 // -------------------------------
 
 @-webkit-keyframes fadeOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-@-moz-keyframes fadeOut {
   from { opacity: 1; }
   to   { opacity: 0; }
 }
@@ -199,10 +155,6 @@
   from { opacity: 1; }
   to   { opacity: .8; }
 }
-@-moz-keyframes fadeOutToPartial {
-  from { opacity: 1; }
-  to   { opacity: .8; }
-}
 @keyframes fadeOutToPartial {
   from { opacity: 1; }
   to   { opacity: .8; }
@@ -213,10 +165,6 @@
 // -------------------------------
 
 @-webkit-keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@-moz-keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
@@ -233,10 +181,6 @@
   from { opacity: .8; }
   to   { opacity: 1; }
 }
-@-moz-keyframes fadeInFromPartial {
-  from { opacity: .8; }
-  to   { opacity: 1; }
-}
 @keyframes fadeInFromPartial {
   from { opacity: .8; }
   to   { opacity: 1; }
@@ -247,10 +191,6 @@
 // -------------------------------
 
 @-webkit-keyframes fadeInHalf {
-  from { background-color: rgba(0,0,0,0); }
-  to   { background-color: rgba(0,0,0,0.5); }
-}
-@-moz-keyframes fadeInHalf {
   from { background-color: rgba(0,0,0,0); }
   to   { background-color: rgba(0,0,0,0.5); }
 }
@@ -267,10 +207,6 @@
   from { background-color: rgba(0,0,0,0.5); }
   to   { background-color: rgba(0,0,0,0); }
 }
-@-moz-keyframes fadeOutHalf {
-  from { background-color: rgba(0,0,0,0.5); }
-  to   { background-color: rgba(0,0,0,0); }
-}
 @keyframes fadeOutHalf {
   from { background-color: rgba(0,0,0,0.5); }
   to   { background-color: rgba(0,0,0,0); }
@@ -280,14 +216,15 @@
 // Add Box Shadow
 // -------------------------------
 
+$view-box-shadow: 0px 2px 15px black;
+
 @-webkit-keyframes addBoxShadow {
   from { @include box-shadow( none ); }
-  to   { @include box-shadow( 0 0 12px rgba(0, 0, 0, 0.5) ); }
+  to   { @include box-shadow( $view-box-shadow ); }
 }
-
 @keyframes addBoxShadow {
   from { @include box-shadow( none ); }
-  to   { @include box-shadow( 0 0 12px rgba(0, 0, 0, 0.5) ); }
+  to   { @include box-shadow( $view-box-shadow ); }
 }
 
 
@@ -295,12 +232,11 @@
 // -------------------------------
 
 @-webkit-keyframes removeBoxShadow {
-  from { @include box-shadow( 0 0 12px rgba(0, 0, 0, 0.5) ); }
+  from { @include box-shadow( $view-box-shadow ); }
   to   { @include box-shadow( none ); }
 }
-
 @keyframes removeBoxShadow {
-  from { @include box-shadow( 0 0 12px rgba(0, 0, 0, 0.5) ); }
+  from { @include box-shadow( $view-box-shadow ); }
   to   { @include box-shadow( none ); }
 }
 

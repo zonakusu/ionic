@@ -3,78 +3,101 @@
 $view-transition-duration:              400ms;
 
 
-
-// Slide transition
+// iOS View Transitions
 // -------------------------------
 
-.slide-transition {
-  // set a black background so leaving views can change
-  // their opacity and the leaving view can fade to gray
+.ios-slide {
   background-color: #000;
 }
 
-.slide-transition.nav-forward {
+.ios-slide.nav-forward {
 
-  .view-entering {
-    // stage the entering element before the transition begins
-    // view entering, comes in from the right, when navigating forward
+  .ng-animate {
+    // stage where the entering view will start from
     @include translate3d(98%, 0, 0);
+  }
+
+  .view-add {
+    @include animation-name( slideInFromRight, addBoxShadow );
+    @include animation-duration( $view-transition-duration );
     z-index: $z-index-view-above;
   }
 
-  .view-leaving {
-    // stage the leaving element before the transition begins
+  .view-remove {
+    @include animation-name( slideOutToLeft33, fadeOutToPartial );
+    @include animation-duration( $view-transition-duration );
     z-index: $z-index-view-below;
-  }
-
-  &.transitioning .view-entering {
-    // begin transitioning the entering element in from the right
-    @include animation-name( slideInFromRight );
-  }
-
-  &.transitioning .view-leaving {
-    // begin transitioning the leaving element out to the left
-    @include animation-name( slideOutToLeft33, fadeOutToPartial, addBoxShadow );
   }
 
 }
 
-.slide-transition.nav-back {
+.ios-slide.nav-back {
 
-  .view-entering {
-    // stage the entering element before the transition begins
-    // view entering, comes in from the right, when navigating forward
+  .ng-animate {
+    // stage where the entering view will start from
     @include translate3d(-33%, 0, 0);
+  }
+
+  .view-add {
+    @include animation-name( slideInFromLeft33, fadeInFromPartial );
+    @include animation-duration( $view-transition-duration );
     z-index: $z-index-view-below;
   }
 
-  .view-leaving {
-    // stage the leaving element before the transition begins
+  .view-remove {
+    @include animation-name( slideOutToRight, removeBoxShadow );
+    @include animation-duration( $view-transition-duration );
     z-index: $z-index-view-above;
-  }
-
-  &.transitioning .view-entering {
-    // begin transitioning the entering element in from the left
-    @include animation-name( slideInFromLeft33, fadeInFromPartial, removeBoxShadow );
-  }
-
-  &.transitioning .view-leaving {
-    // begin transitioning the leaving element out to the right
-    @include animation-name( slideOutToRight );
   }
 
 }
 
 
 
-// View Transition Globals
+// Intermediate Seetings Throughout Transition
+// -------------------------------
+// These prevent flickers as elements are added and remove
+// and hold their correct opacity between setting final states
+
+.view-entering, // entering: before animate
+.view-active.view-leaving // leaving: after animate
+{
+  opacity: 0;
+}
+
+.view-entering.view, // entering: during and after animate
+.view-active.view-leaving.ng-animate // leaving: before and during animate
+{
+  opacity: 1;
+}
+
+
+
+// View Transition Defaults (no animation)
 // -------------------------------
 
-.view-entering,
-.view-leaving {
-  @include animation-duration( $view-transition-duration );
+.view-add {
+  @include animation-name( fadeIn );
+}
+
+.view-remove {
+  @include animation-name( fadeOut );
+}
+
+.view-add,
+.view-remove {
+  opacity: 1;
+  @include animation-duration( 0 );
   @include animation-fill-mode( forwards );
 }
+
+
+
+
+
+
+
+
 
 
 

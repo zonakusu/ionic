@@ -969,9 +969,11 @@ ionic.views.Scroll = ionic.views.View.inherit({
       if(width > self.__contentWidth) {
         width = 0;
       }
+      if(width !== self.__indicatorX.size) {
+        self.__indicatorX.indicator.style.width = width + 'px';
+      }
       self.__indicatorX.size = width;
       self.__indicatorX.minScale = this.options.minScrollbarSizeX / width;
-      self.__indicatorX.indicator.style.width = width + 'px';
       self.__indicatorX.maxPos = self.__clientWidth - width;
       self.__indicatorX.sizeRatio = self.__maxScrollLeft ? self.__indicatorX.maxPos / self.__maxScrollLeft : 1;
     }
@@ -982,10 +984,12 @@ ionic.views.Scroll = ionic.views.View.inherit({
       if(height > self.__contentHeight) {
         height = 0;
       }
+      if(height !== self.__indicatorY.size) {
+        self.__indicatorY.indicator.style.height = height + 'px';
+      }
       self.__indicatorY.size = height;
       self.__indicatorY.minScale = this.options.minScrollbarSizeY / height;
       self.__indicatorY.maxPos = self.__clientHeight - height;
-      self.__indicatorY.indicator.style.height = height + 'px';
       self.__indicatorY.sizeRatio = self.__maxScrollTop ? self.__indicatorY.maxPos / self.__maxScrollTop : 1;
     }
   },
@@ -1059,7 +1063,10 @@ ionic.views.Scroll = ionic.views.View.inherit({
         y = 0;
 
         // Make sure scale is transformed from the center/top origin point
-        self.__indicatorY.indicator.style[self.__transformOriginProperty] = 'center top';
+        if(self.__indicatorY.originProp !== 'center top') {
+          self.__indicatorY.indicator.style[self.__transformOriginProperty] = 'center top';
+          self.__indicatorY.originProp = 'center top';
+        }
 
       } else if(heightDiff > 0) {
 
@@ -1069,7 +1076,10 @@ ionic.views.Scroll = ionic.views.View.inherit({
         y = self.__indicatorY.maxPos - ystop;
 
         // Make sure scale is transformed from the center/bottom origin point
-        self.__indicatorY.indicator.style[self.__transformOriginProperty] = 'center bottom';
+        if(self.__indicatorY.originProp !== 'center bottom') {
+          self.__indicatorY.indicator.style[self.__transformOriginProperty] = 'center bottom';
+          self.__indicatorY.originProp = 'center bottom';
+        }
 
       } else {
 
@@ -1079,7 +1089,11 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
       }
 
-      self.__indicatorY.indicator.style[self.__transformProperty] = 'translate3d(0,' + y + 'px, 0) scaleY(' + heightScale + ')';
+      var translate3d = 'translate3d(0,' + y + 'px, 0) scaleY(' + heightScale + ')';
+      if(self.__indicatorY.transformProp !== translate3d) {
+        self.__indicatorY.indicator.style[self.__transformProperty] = translate3d;
+        self.__indicatorY.transformProp = translate3d;
+      }
     }
   },
 
@@ -1170,7 +1184,11 @@ ionic.views.Scroll = ionic.views.View.inherit({
     if (helperElem.style[perspectiveProperty] !== undef) {
 
       return function(left, top, zoom, wasResize) {
-        content.style[transformProperty] = 'translate3d(' + (-left) + 'px,' + (-top) + 'px,0) scale(' + zoom + ')';
+        var translate3d = 'translate3d(' + (-left) + 'px,' + (-top) + 'px,0) scale(' + zoom + ')';
+        if(translate3d !== self.contentTransform) {
+          content.style[transformProperty] = translate3d;
+          self.contentTransform = translate3d;
+        }
         self.__repositionScrollbars();
         if(!wasResize) {
           self.triggerScrollEvent();
