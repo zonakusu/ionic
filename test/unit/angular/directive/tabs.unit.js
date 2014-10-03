@@ -509,7 +509,7 @@ describe('tabs', function() {
 
       var tabContent = tabsEl.find('.pane');
       expect(tabContent.length).toBe(1);
-      expect(tabContent.hasClass('hide')).toBe(true);
+      expect(tabContent.hasClass('view-cache')).toBe(true);
 
       tab.$apply('$tabSelected = true');
 
@@ -524,7 +524,7 @@ describe('tabs', function() {
       tab.$broadcast.reset();
 
       tab.$apply('$tabSelected = false');
-      expect(tabContent.hasClass('hide')).toBe(true);
+      expect(tabContent.hasClass('view-cache')).toBe(true);
     });
 
   });

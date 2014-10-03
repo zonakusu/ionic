@@ -30,8 +30,8 @@
  * {@link ionic.directive:ionNavBar} by default.
  */
 IonicModule
-.directive('ionView', ['$ionicViewService', '$rootScope', '$animate',
-           function( $ionicViewService,   $rootScope,   $animate) {
+.directive('ionView', ['$ionicViewService', '$rootScope',
+           function( $ionicViewService,   $rootScope) {
   return {
     restrict: 'EA',
     priority: 1000,
@@ -55,7 +55,6 @@ IonicModule
             direction: viewRegisterData.direction,
             showBack: viewRegisterData.showBack
           });
-          //$element && $element.removeClass('view-cache');
         });
 
         $scope.$on('$ionicView.navViewActive', function() {

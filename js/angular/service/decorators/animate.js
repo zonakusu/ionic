@@ -4,7 +4,7 @@
 IonicModule.config([
   '$provide',
 function($provide) {
-  function $AnimateDecorator($animate, $q, $timeout) {
+  function $AnimateDecorator($animate, $timeout) {
 
     var CSS_DIRECTIONS = 'nav-forward nav-back nav-enter nav-exit nav-switch'.split(' ');
     var CSS_VIEW_ACTIVE = 'view-active';
@@ -15,6 +15,7 @@ function($provide) {
     var NG_ANIMATE_PARENT_KEY = '$$ngAnimateKey';
 
     var usedAnimationClasses = [];
+    var useAnimation = true;
 
     function extractElementNode(element) {
       for(var i = 0; i < element.length; i++) {
@@ -23,20 +24,18 @@ function($provide) {
       }
     }
 
-    $animate.transition = function(animationClass, navDirection, parentElement, enteringElement, leavingElement) {
-      var deferred = $q.defer();
+    $animate.transition = function(animationClass, navDirection, parentElement, enteringElement, leavingElement, callback) {
 
       $animate.stage(animationClass, navDirection, parentElement, enteringElement, leavingElement);
 
-      $animate.start(animationClass, navDirection, parentElement, enteringElement, leavingElement).then(function(){
+      $animate.start(animationClass, navDirection, parentElement, enteringElement, leavingElement, function(){
 
         $animate.end(animationClass, navDirection, parentElement, enteringElement, leavingElement);
 
-         deferred.resolve();
+         callback && callback();
 
       });
 
-      return deferred.promise;
     };
 
     $animate.stage = function(animationClass, navDirection, parentElement, enteringElement, leavingElement) {
@@ -84,23 +83,33 @@ function($provide) {
     };
 
 
-    $animate.start = function(animationClass, navDirection, parentElement, enteringElement, leavingElement) {
-      var enteringDeferred = $q.defer();
-      var leavingDeferred = $q.defer();
+    $animate.start = function(animationClass, navDirection, parentElement, enteringElement, leavingElement, callback) {
+      var enteringDone, leavingDone;
 
-      $animate.addClass(enteringElement, CSS_ANIMATION_SUPER, function(){
-        enteringDeferred.resolve();
-      });
-
-      if(leavingElement) {
-        $animate.removeClass(leavingElement, CSS_ANIMATION_SUPER, function(){
-          leavingDeferred.resolve();
-        })
-      } else {
-        leavingDeferred.resolve();
+      function next() {
+        enteringDone && leavingDone && callback && callback();
       }
 
-      return $q.all([ enteringDeferred.promise, leavingDeferred.promise ]);
+      if(enteringElement && useAnimation) {
+        $animate.addClass(enteringElement, CSS_ANIMATION_SUPER, function(){
+          enteringDone = true;
+          next();
+        });
+      } else {
+        enteringDone = true;
+        next();
+      }
+
+      if(leavingElement && useAnimation) {
+        $animate.removeClass(leavingElement, CSS_ANIMATION_SUPER, function(){
+          leavingDone = true;
+          next();
+        })
+      } else {
+        leavingDone = true;
+        next();
+      }
+
     };
 
 
@@ -128,9 +137,16 @@ function($provide) {
 
     };
 
+    $animate.useAnimation = function(val) {
+      if(arguments.length) {
+        useAnimation = val;
+      }
+      return useAnimation;
+    };
+
 
     return $animate;
   }
 
-  $provide.decorator('$animate', ['$delegate', '$q', '$timeout', $AnimateDecorator]);
+  $provide.decorator('$animate', ['$delegate', '$timeout', $AnimateDecorator]);
 }]);
