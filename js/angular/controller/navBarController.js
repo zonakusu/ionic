@@ -35,8 +35,6 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
   this.navBarEnter = function(viewData) {
     this.enable();
 
-    console.log($ionicNavBarDelegate, this)
-
     var navBarElements = getNavBarElements();
     var enteringEle;
     var leavingEle;

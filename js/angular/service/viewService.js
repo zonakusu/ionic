@@ -530,7 +530,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
     },
 
     getTransition: function(navViewScope, navViewElement, navViewAttrs, viewLocals, registerData, enteringView) {
-
       var transitionId = ++transitionCounter;
 
       // injected registerData used for testing
@@ -546,6 +545,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
       var enteringEleIdentifier = getViewElementIdentifier(viewLocals, enteringView);
 
       for(var x=0, l=viewElements.length; x<l; x++) {
+
         if(enteringEleIdentifier && viewElements.eq(x).data(DATA_ELE_IDENTIFIER) == enteringEleIdentifier) {
           // we found an existing element in the DOM that should be entering the view
           enteringEle = viewElements.eq(x);
@@ -594,7 +594,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
             trans.before();
 
-            $animate.transition('ios-slide', registerData.direction, navViewElement, enteringEle, leavingEle).then(function(transData){
+            $animate.transition('ios-slide', registerData.direction, navViewElement, enteringEle, leavingEle, function(transData){
 
               if(transitionId === transitionCounter) {
                 // only run complete on the most recent transition
@@ -656,14 +656,15 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
             // run link with the view's scope
             link(scope);
 
-            $timeout(function(){
-              callback();
-            }, 12);
-
-          } else {
-            callback();
+            if( $animate.useAnimation() ) {
+              $timeout(function(){
+                callback();
+              }, 12);
+              return;
+            }
           }
 
+          callback();
         },
 
         before: function() {
@@ -679,7 +680,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
           if(leavingEle) {
             var leavingScope = jqLite(leavingEle).scope();
-            console.log('viewService beforeLeave', leavingScope)
             if(leavingScope) {
               leavingScope.$broadcast('$ionicView.beforeLeave', transData);
             }

@@ -2,7 +2,7 @@
 describe('Ionic nav-view', function() {
   beforeEach(module('ionic'));
 
-  var compile, viewService, rootScope, scope, elem;
+  var compile, viewService, $rootScope, elem, $animate;
 
   var aState = {
     template: 'aState template'
@@ -70,7 +70,7 @@ describe('Ionic nav-view', function() {
   iState = {
     template: '<ion-nav-view>'+
         '<ul><li ng-repeat="item in items">{{item}}</li></ul>'+
-      '</ion-nav>'
+      '</ion-nav-view>'
   },
   jState = {
     template: 'jState'
@@ -127,15 +127,16 @@ describe('Ionic nav-view', function() {
       .state('ionView3', ionView3State);
   }));
 
-  beforeEach(inject(function(_$compile_, $rootScope, $ionicViewService, $ionicConfig) {
+  beforeEach(inject(function(_$compile_, _$animate_, $ionicViewService, $ionicConfig, $rootScope) {
     viewService = $ionicViewService;
-    rootScope = $rootScope;
     $compile = _$compile_;
+    $animate = _$animate_;
     scope = $rootScope.$new();
     elem = angular.element('<div>');
 
     $ionicConfig.viewTransition = 'none';
     $ionicConfig.maxCachedViews = 30;
+    $animate.useAnimation(false);
   }));
 
   it('should publish a controller', function() {
@@ -265,11 +266,11 @@ describe('Ionic nav-view', function() {
   //   var orgElement = elem.find('div').find('ion-nav-view').find('ion-nav-view').find('span');
 
   //   expect(orgElement.text()).toBe(content);
-  //   expect(orgElement.hasClass('hide')).toBe(true);
+  //   expect(orgElement.hasClass('view-cache')).toBe(true);
 
   //   var newElement = elem.find('div').find('ion-nav-view').find('ion-nav-view').find('div');
   //   expect(newElement.text()).toBe(hNavViewState.views.inner.template);
-  //   expect(newElement.hasClass('hide')).toBe(false);
+  //   expect(newElement.hasClass('view-cache')).toBe(false);
 
   //   // going to the parent state which makes the inner view empty
   //   $state.go(gNavViewState);
@@ -278,8 +279,8 @@ describe('Ionic nav-view', function() {
   //   expect(elem.find('ion-nav-view').text()).toBe(content);
   // }));
 
-  it('initial view should be transcluded once to prevent breaking other directives', inject(function ($state, $q) {
-    scope.items = ["I", "am", "a", "list", "of", "items"];
+  it('initial view should be transcluded once to prevent breaking other directives', inject(function ($rootScope, $state, $q, $timeout) {
+    scope.items = ["list", "of", "items"];
 
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
@@ -366,11 +367,11 @@ describe('Ionic nav-view', function() {
     expect(divs.length).toBe(2);
 
     expect(divs.eq(0).hasClass('view-active')).toBe(false);
-    expect(divs.eq(0).hasClass('hide')).toBe(true);
+    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
     expect(divs.eq(0).text()).toBe('page1');
 
     expect(divs.eq(1).hasClass('view-active')).toBe(true);
-    expect(divs.eq(1).hasClass('hide')).toBe(false);
+    expect(divs.eq(1).hasClass('view-cache')).toBe(false);
     expect(divs.eq(1).text()).toBe('page2');
 
     $state.go(page3State);
@@ -380,15 +381,15 @@ describe('Ionic nav-view', function() {
     expect(divs.length).toBe(3);
 
     expect(divs.eq(0).hasClass('view-active')).toBe(false);
-    expect(divs.eq(0).hasClass('hide')).toBe(true);
+    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
     expect(divs.eq(0).text()).toBe('page1');
 
     expect(divs.eq(1).hasClass('view-active')).toBe(false);
-    expect(divs.eq(1).hasClass('hide')).toBe(true);
+    expect(divs.eq(1).hasClass('view-cache')).toBe(true);
     expect(divs.eq(1).text()).toBe('page2');
 
     expect(divs.eq(2).hasClass('view-active')).toBe(true);
-    expect(divs.eq(2).hasClass('hide')).toBe(false);
+    expect(divs.eq(2).hasClass('view-cache')).toBe(false);
     expect(divs.eq(2).text()).toBe('page3');
 
     $state.go(page4State);
@@ -398,19 +399,19 @@ describe('Ionic nav-view', function() {
     expect(divs.length).toBe(4);
 
     expect(divs.eq(0).hasClass('view-active')).toBe(false);
-    expect(divs.eq(0).hasClass('hide')).toBe(true);
+    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
     expect(divs.eq(0).text()).toBe('page1');
 
     expect(divs.eq(1).hasClass('view-active')).toBe(false);
-    expect(divs.eq(1).hasClass('hide')).toBe(true);
+    expect(divs.eq(1).hasClass('view-cache')).toBe(true);
     expect(divs.eq(1).text()).toBe('page2');
 
     expect(divs.eq(2).hasClass('view-active')).toBe(false);
-    expect(divs.eq(2).hasClass('hide')).toBe(true);
+    expect(divs.eq(2).hasClass('view-cache')).toBe(true);
     expect(divs.eq(2).text()).toBe('page3');
 
     expect(divs.eq(3).hasClass('view-active')).toBe(true);
-    expect(divs.eq(3).hasClass('hide')).toBe(false);
+    expect(divs.eq(3).hasClass('view-cache')).toBe(false);
     expect(divs.eq(3).text()).toBe('page4');
   }));
 
@@ -428,9 +429,9 @@ describe('Ionic nav-view', function() {
 
     var divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(4);
-    expect(divs.eq(0).hasClass('hide')).toBe(true);
-    expect(divs.eq(1).hasClass('hide')).toBe(true);
-    expect(divs.eq(2).hasClass('hide')).toBe(true);
+    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
+    expect(divs.eq(1).hasClass('view-cache')).toBe(true);
+    expect(divs.eq(2).hasClass('view-cache')).toBe(true);
     expect(divs.eq(3).hasClass('view-active')).toBe(true);
 
     $state.go(page3State);
@@ -438,8 +439,8 @@ describe('Ionic nav-view', function() {
 
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(3);
-    expect(divs.eq(0).hasClass('hide')).toBe(true);
-    expect(divs.eq(1).hasClass('hide')).toBe(true);
+    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
+    expect(divs.eq(1).hasClass('view-cache')).toBe(true);
     expect(divs.eq(2).hasClass('view-active')).toBe(true);
 
     $state.go(page2State);
@@ -447,7 +448,7 @@ describe('Ionic nav-view', function() {
 
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(2);
-    expect(divs.eq(0).hasClass('hide')).toBe(true);
+    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
     expect(divs.eq(1).hasClass('view-active')).toBe(true);
 
     $state.go(page1State);
