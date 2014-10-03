@@ -55,7 +55,6 @@ IonicModule
             direction: viewRegisterData.direction,
             showBack: viewRegisterData.showBack
           });
-          //$element && $element.removeClass('view-cache');
         });
 
         $scope.$on('$ionicView.navViewActive', function() {
