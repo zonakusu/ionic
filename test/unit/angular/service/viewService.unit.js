@@ -54,21 +54,6 @@ describe('Ionic View Service', function() {
     expect(registerData.historyId).toEqual('root');
   }));
 
-  it('should do nothing if the same state happens', inject(function($state) {
-    var uiViewScope = {};
-    $state.go('home');
-    rootScope.$apply();
-    viewService.register(uiViewScope, viewLocals);
-
-    homeViewScope = {};
-    $state.go('home');
-    rootScope.$apply();
-    registerData = viewService.register(homeViewScope, viewLocals);
-
-    expect(registerData.action).toEqual('noChange');
-    expect(registerData.historyId).toEqual('root');
-  }));
-
   it('should create a new view', inject(function($location, $state) {
     $location.url('/home');
     var view1Scope = {};
