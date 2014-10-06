@@ -48,7 +48,6 @@ function($scope, scrollViewOptions, $timeout, $window, $$scrollValueCache, $loca
         scrollView.options.bouncing = false;
         // Faster scroll decel
         scrollView.options.deceleration = 0.95;
-      } else {
       }
     });
   }
@@ -57,8 +56,8 @@ function($scope, scrollViewOptions, $timeout, $window, $$scrollValueCache, $loca
   ionic.on('resize', resize, $window);
 
   // set by rootScope listener if needed
-  var backListenDone = angular.noop;
-  var viewContentLoaded = angular.noop;
+  this.backListenDone = angular.noop;
+  this.viewContentLoaded = angular.noop;
 
   var scrollFunc = function(e) {
     var detail = (e.originalEvent || e).detail || {};
@@ -73,25 +72,27 @@ function($scope, scrollViewOptions, $timeout, $window, $$scrollValueCache, $loca
 
   $scope.$on('$destroy', function() {
     deregisterInstance();
+    self.backListenDone();
+    self.viewContentLoaded();
     scrollView.__cleanup();
     ionic.off('resize', resize, $window);
     $window.removeEventListener('resize', resize);
-    viewContentLoaded();
-    backListenDone();
     if (self._rememberScrollId) {
       $$scrollValueCache[self._rememberScrollId] = scrollView.getValues();
     }
     scrollViewOptions = null;
+    self._scrollViewOptions.el = null;
     self._scrollViewOptions = null;
-    self.element = null;
     $element.off('scroll', scrollFunc);
     $element = null;
     self.$element = null;
+    element = null;
+    self.element = null;
     self.scrollView = null;
     scrollView = null;
   });
 
-  viewContentLoaded = $scope.$on('$viewContentLoaded', function(e, historyData) {
+  this.viewContentLoaded = $scope.$on('$viewContentLoaded', function(e, historyData) {
     //only the top-most scroll area under a view should remember that view's
     //scroll position
     if (e.defaultPrevented) { return; }
@@ -103,7 +104,7 @@ function($scope, scrollViewOptions, $timeout, $window, $$scrollValueCache, $loca
         self.rememberScrollPosition(viewId);
         self.scrollToRememberedPosition();
 
-        backListenDone = $rootScope.$on('$viewHistory.viewBack', function(e, fromViewId, toViewId) {
+        self.backListenDone = $rootScope.$on('$viewHistory.viewBack', function(e, fromViewId, toViewId) {
           //When going back from this view, forget its saved scroll position
           if (viewId === fromViewId) {
             self.forgetScrollPosition();
