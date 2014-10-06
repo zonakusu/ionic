@@ -41,8 +41,9 @@ function($provide) {
 
     $animate.stage = function(animationClass, navDirection, parentElement, enteringElement, leavingElement) {
 
-      var isExistingAnimationClass;
-      for(var x=0; x<usedAnimationClasses.length; x++) {
+      var x, isExistingAnimationClass;
+
+      for(x=0; x<usedAnimationClasses.length; x++) {
         if(usedAnimationClasses[x] === animationClass && navDirection) {
           isExistingAnimationClass = true;
         } else {
@@ -53,12 +54,13 @@ function($provide) {
         usedAnimationClasses.push(animationClass);
       }
 
-      for(var x=0; x<CSS_DIRECTIONS.length; x++) {
+      for(x=0; x<CSS_DIRECTIONS.length; x++) {
         if(CSS_DIRECTIONS[x] !== navDirection) {
-          parentElement.removeClass(CSS_DIRECTIONS[x])
+          parentElement.removeClass( CSS_DIRECTIONS[x] );
         }
       }
-      if(navDirection) {
+
+      if( doAnimation(navDirection) ) {
         parentElement.addClass(animationClass)
                      .addClass('nav-' + navDirection);
 
@@ -76,9 +78,12 @@ function($provide) {
                      .removeClass(CSS_VIEW_CACHE);
 
       if(leavingElement) {
-        leavingElement.addClass('ng-animate')
-                      .addClass(CSS_VIEW_LEAVING)
-                      .removeClass(CSS_VIEW_CACHE);
+          leavingElement.addClass(CSS_VIEW_LEAVING)
+                        .removeClass(CSS_VIEW_CACHE);
+
+        if( doAnimation(navDirection) ) {
+          leavingElement.addClass('ng-animate');
+        }
       }
 
     };
