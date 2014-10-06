@@ -12,23 +12,6 @@ IonicModule
   '$ionicViewService',
 function($rootScope, $state, $location, $document, $ionicPlatform, $ionicViewService) {
 
-  // init the variables that keep track of the view history
-  $rootScope.$viewHistory = {
-    histories: { root: { historyId: 'root', parentHistoryId: null, stack: [], cursor: -1 } },
-    views: {},
-    backView: null,
-    forwardView: null,
-    currentView: null,
-    disabledRegistrableTagNames: []
-  };
-
-  // set that these directives should not animate when transitioning
-  // to it. Instead, the children <tab> directives would animate
-  if ($ionicViewService.disableRegisterByTagName) {
-    $ionicViewService.disableRegisterByTagName('ion-tabs');
-    $ionicViewService.disableRegisterByTagName('ion-side-menus');
-  }
-
   // always reset the keyboard state when change stage
   $rootScope.$on('$stateChangeStart', function(){
     ionic.keyboard.hide();
@@ -37,7 +20,9 @@ function($rootScope, $state, $location, $document, $ionicPlatform, $ionicViewSer
   $rootScope.$on('viewState.changeHistory', function(e, data) {
     if(!data) return;
 
-    var hist = (data.historyId ? $rootScope.$viewHistory.histories[ data.historyId ] : null );
+    var viewHistory = $ionicViewService.viewHistory();
+
+    var hist = (data.historyId ? viewHistory.histories[ data.historyId ] : null );
     if(hist && hist.cursor > -1 && hist.cursor < hist.stack.length) {
       // the history they're going to already exists
       // go to it's last view in its stack
@@ -73,9 +58,9 @@ function($rootScope, $state, $location, $document, $ionicPlatform, $ionicViewSer
   // Triggered when devices with a hardware back button (Android) is clicked by the user
   // This is a Cordova/Phonegap platform specifc method
   function onHardwareBackButton(e) {
-    if($rootScope.$viewHistory.backView) {
+    if(viewHistory.backView) {
       // there is a back view, go to it
-      $rootScope.$viewHistory.backView.go();
+      viewHistory.backView.go();
     } else {
       // there is no back view, so close the app instead
       ionic.Platform.exitApp();
@@ -97,12 +82,11 @@ function($rootScope, $state, $location, $document, $ionicPlatform, $ionicViewSer
   '$controller',
   '$location',
   '$window',
-  '$q',
   '$timeout',
   '$ionicClickBlock',
   '$ionicConfig',
   '$animate',
-function($rootScope, $state, $compile, $controller, $location, $window, $q, $timeout, $ionicClickBlock, $ionicConfig, $animate) {
+function($rootScope, $state, $compile, $controller, $location, $window, $timeout, $ionicClickBlock, $ionicConfig, $animate) {
 
   // data keys for jqLite elements
   var DATA_VIEW_IS_ACTIVE = '$ionicViewActive';
@@ -115,8 +99,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
   var ACTION_NEW_VIEW = 'newView';
   var ACTION_MOVE_BACK = 'moveBack';
   var ACTION_MOVE_FORWARD = 'moveForward';
-  var ACTION_NO_CHANGE = 'noChange';
-  var ACTION_DISABLED_BY_TAG_NAME = 'disabledByTagName';
+  var ACTION_HISTORY_TAG_NAME = 'historyView';
 
   // direction of navigation
   var DIRECTION_BACK = 'back';
@@ -126,6 +109,16 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
   var DIRECTION_SWITCH = 'switch';
 
   var transitionCounter = 0;
+  var stateChangeCounter = 0;
+  var lastStateId;
+
+  var viewHistory = {
+    histories: { root: { historyId: 'root', parentHistoryId: null, stack: [], cursor: -1 } },
+    views: {},
+    backView: null,
+    forwardView: null,
+    currentView: null
+  };
 
   var View = function(){};
   View.prototype.initialize = function(data) {
@@ -143,9 +136,9 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
     if(this.url && this.url !== $location.url()) {
 
-      if($rootScope.$viewHistory.backView === this) {
+      if(viewHistory.backView === this) {
         return $window.history.go(-1);
-      } else if($rootScope.$viewHistory.forwardView === this) {
+      } else if(viewHistory.forwardView === this) {
         return $window.history.go(1);
       }
 
@@ -164,7 +157,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
 
   function getViewById(viewId) {
-    return (viewId ? $rootScope.$viewHistory.views[ viewId ] : null );
+    return (viewId ? viewHistory.views[ viewId ] : null );
   }
 
   function getBackView(view) {
@@ -176,16 +169,16 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
   }
 
   function getHistoryById(historyId) {
-    return (historyId ? $rootScope.$viewHistory.histories[ historyId ] : null );
+    return (historyId ? viewHistory.histories[ historyId ] : null );
   }
 
   function getHistory(scope) {
     var histObj = getParentHistoryObj(scope);
 
-    if( !$rootScope.$viewHistory.histories[ histObj.historyId ] ) {
+    if( !viewHistory.histories[ histObj.historyId ] ) {
       // this history object exists in parent scope, but doesn't
       // exist in the history data yet
-      $rootScope.$viewHistory.histories[ histObj.historyId ] = {
+      viewHistory.histories[ histObj.historyId ] = {
         historyId: histObj.historyId,
         parentHistoryId: getParentHistoryObj(histObj.scope.$parent).historyId,
         stack: [],
@@ -210,8 +203,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
   }
 
   function setNavViews(viewId, rsp) {
-    var viewHistory = $rootScope.$viewHistory;
-
     viewHistory.currentView = getViewById(viewId);
     viewHistory.backView = getBackView(viewHistory.currentView);
     viewHistory.forwardView = getForwardView(viewHistory.currentView);
@@ -251,194 +242,234 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
   return {
 
+    viewHistory: function(val) {
+      if(arguments.length) {
+        viewHistory = val;
+      }
+      return viewHistory;
+    },
+
     register: function(parentScope, viewLocals) {
 
-      var viewHistory = $rootScope.$viewHistory,
-          currentStateId = this.getCurrentStateId(),
+      var currentStateId = this.getCurrentStateId(),
           hist = getHistory(parentScope),
           currentView = viewHistory.currentView,
           backView = viewHistory.backView,
           forwardView = viewHistory.forwardView,
           nextViewOptions = this.nextViewOptions(),
-          rsp = {
-            viewId: null,
-            action: null,
-            direction: null,
-            historyId: hist.historyId,
-            showBack: false
-          };
+          viewId = null,
+          action = null,
+          direction = 'none',
+          historyId = hist.historyId,
+          showBack = false,
+          ele,
+          tmp;
 
-      if(currentView &&
-         currentView.stateId === currentStateId &&
-         currentView.historyId === hist.historyId) {
-        // do nothing if its the same stateId in the same history
-        // rsp.action = ACTION_NO_CHANGE;
-        // console.log('VIEW', rsp);
-        // return rsp;
+      if( viewLocals && viewLocals.$$state && viewLocals.$$state.self && viewLocals.$$state.self.abstract ) {
+        // abstract states should not register themselves in the history stack
+        return {
+          action: 'abstractView'
+        };
+      }
+
+      if(lastStateId !== currentStateId) {
+        lastStateId = currentStateId;
+        stateChangeCounter++;
       }
 
       if(viewHistory.forcedNav) {
         // we've previously set exactly what to do
         ionic.Utils.extend(rsp, viewHistory.forcedNav);
-        $rootScope.$viewHistory.forcedNav = null;
+        viewHistory.forcedNav = null;
 
       } else if(backView && backView.stateId === currentStateId) {
         // they went back one, set the old current view as a forward view
-        rsp.viewId = backView.viewId;
-        rsp.historyId = backView.historyId;
-        rsp.action = ACTION_MOVE_BACK;
+        viewId = backView.viewId;
+        historyId = backView.historyId;
+        action = ACTION_MOVE_BACK;
         if(backView.historyId === currentView.historyId) {
           // went back in the same history
-          rsp.direction = DIRECTION_BACK;
+          direction = DIRECTION_BACK;
+
+        } else if(currentView) {
+          direction = DIRECTION_EXIT;
+
+          tmp = getHistoryById(backView.historyId);
+          if(tmp && tmp.parentHistoryId === currentView.historyId) {
+            direction = DIRECTION_ENTER;
+
+          } else {
+            tmp = getHistoryById(currentView.historyId);
+            if(tmp && tmp.parentHistoryId === hist.parentHistoryId) {
+              direction = DIRECTION_SWITCH;
+            }
+          }
         }
 
       } else if(forwardView && forwardView.stateId === currentStateId) {
         // they went to the forward one, set the forward view to no longer a forward view
-        rsp.viewId = forwardView.viewId;
-        rsp.historyId = forwardView.historyId;
-        rsp.action = ACTION_MOVE_FORWARD;
+        viewId = forwardView.viewId;
+        historyId = forwardView.historyId;
+        action = ACTION_MOVE_FORWARD;
         if(forwardView.historyId === currentView.historyId) {
-          rsp.direction = DIRECTION_FORWARD;
+          direction = DIRECTION_FORWARD;
+
+        } else if(currentView) {
+          direction = DIRECTION_EXIT;
+
+          if(currentView.historyId === hist.parentHistoryId) {
+            direction = DIRECTION_ENTER;
+
+          } else {
+            tmp = getHistoryById(currentView.historyId);
+            if(tmp && tmp.parentHistoryId === hist.parentHistoryId) {
+              direction = DIRECTION_SWITCH;
+            }
+          }
         }
 
-        var parentHistory = getParentHistoryObj(parentScope);
-        if(forwardView.historyId && parentHistory.scope) {
+        tmp = getParentHistoryObj(parentScope);
+        if(forwardView.historyId && tmp.scope) {
           // if a history has already been created by the forward view then make sure it stays the same
-          parentHistory.scope.$historyId = forwardView.historyId;
-          rsp.historyId = forwardView.historyId;
+          tmp.scope.$historyId = forwardView.historyId;
+          historyId = forwardView.historyId;
         }
 
-      } else if(currentView && currentView.historyId !== hist.historyId &&
+      } else if(currentView && currentView.historyId !== historyId &&
                 hist.cursor > -1 && hist.stack.length > 0 && hist.cursor < hist.stack.length &&
                 hist.stack[hist.cursor].stateId === currentStateId) {
         // they just changed to a different history and the history already has views in it
         var switchToView = hist.stack[hist.cursor];
-        rsp.viewId = switchToView.viewId;
-        rsp.historyId = switchToView.historyId;
-        rsp.action = ACTION_MOVE_BACK;
+        viewId = switchToView.viewId;
+        historyId = switchToView.historyId;
+        action = ACTION_MOVE_BACK;
+        direction = DIRECTION_SWITCH;
+
+        tmp = getHistoryById(currentView.historyId);
+        if(tmp && tmp.parentHistoryId === historyId) {
+          direction = DIRECTION_EXIT;
+
+        } else if(backView) {
+          tmp = getHistoryById(backView.historyId);
+          if(tmp && tmp.parentHistoryId === currentView.historyId) {
+            direction = DIRECTION_ENTER;
+          }
+        }
 
         // if switching to a different history, and the history of the view we're switching
         // to has an existing back view from a different history than itself, then
         // it's back view would be better represented using the current view as its back view
-        var switchToViewBackView = getViewById(switchToView.backViewId);
-        if(switchToViewBackView && switchToView.historyId !== switchToViewBackView.historyId) {
+        tmp = getViewById(switchToView.backViewId);
+        if(tmp && switchToView.historyId !== tmp.historyId) {
           hist.stack[hist.cursor].backViewId = currentView.viewId;
         }
 
       } else {
+        // does not exist yet
+        ele = createViewElement(viewLocals);
+        if(!ele) {
+          return {
+            action: 'invalidLocals'
+          };
+        }
 
-        var alreadyExists = false;
-        // if(viewLocals && viewLocals.$$state) {
-        //   // check if this new view is one that already exists in another history
-        //   var vwName, vw;
-        //   for(vwName in viewHistory.views) {
-        //     vw = viewHistory.views[ vwName ];
+        // set a new unique viewId
+        viewId = ionic.Utils.nextUid();
 
-        //     if( hist.historyId !== vw.historyId &&
-        //         vw.stateName === viewLocals.$$state.toString() ) {
-        //       rsp.viewId = vw.viewId;
-        //       rsp.historyId = vw.historyId;
-        //       rsp.action = 'existingHistory';
-        //       alreadyExists = true;
-        //       break;
-        //     }
-        //   }
-        // }
+        if(currentView) {
+          // set the forward view if there is a current view (ie: if its not the first view)
+          currentView.forwardViewId = viewId;
 
-        if(!alreadyExists) {
-          // does not exist yet
-          rsp.ele = createViewElement(viewLocals);
-          if(!rsp.ele) {
-            rsp.action = 'invalidLocals';
-            console.log('VIEW', rsp);
-            return rsp;
-          }
+          action = ACTION_NEW_VIEW;
 
-          // first check to see if this element can even be registered as a view
-          if(!this.isTagNameRegistrable(rsp.ele)) {
-            // Certain tags are only containers for views, but are not views themselves.
-            // For example, the <ion-tabs> directive contains a <ion-tab> and the <ion-tab> is the
-            // view, but the <ion-tabs> directive itself should not be registered as a view.
-            rsp.action = ACTION_DISABLED_BY_TAG_NAME;
-            rsp.tag = rsp.ele[0].tagName;
-            console.log('VIEW', rsp);
-            return rsp;
-          }
-
-          // set a new unique viewId
-          rsp.viewId = ionic.Utils.nextUid();
-
-          if(currentView) {
-            // set the forward view if there is a current view (ie: if its not the first view)
-            currentView.forwardViewId = rsp.viewId;
-
-            // its only moving forward if its in the same history
-            if(hist.historyId === currentView.historyId) {
-              rsp.direction = DIRECTION_FORWARD;
+          // check if there is a new forward view within the same history
+          if(forwardView && currentView.stateId !== forwardView.stateId &&
+             currentView.historyId === forwardView.historyId) {
+            // they navigated to a new view but the stack already has a forward view
+            // since its a new view remove any forwards that existed
+            tmp = getHistoryById(forwardView.historyId);
+            if(tmp) {
+              // the forward has a history
+              for(var x=tmp.stack.length - 1; x >= forwardView.index; x--) {
+                // starting from the end destroy all forwards in this history from this point
+                tmp.stack[x].destroy();
+                tmp.stack.splice(x);
+              }
+              historyId = forwardView.historyId;
             }
-            rsp.action = ACTION_NEW_VIEW;
+          }
 
-            // check if there is a new forward view within the same history
-            if(forwardView && currentView.stateId !== forwardView.stateId &&
-               currentView.historyId === forwardView.historyId) {
-              // they navigated to a new view but the stack already has a forward view
-              // since its a new view remove any forwards that existed
-              var forwardsHistory = getHistoryById(forwardView.historyId);
-              if(forwardsHistory) {
-                // the forward has a history
-                for(var x=forwardsHistory.stack.length - 1; x >= forwardView.index; x--) {
-                  // starting from the end destroy all forwards in this history from this point
-                  forwardsHistory.stack[x].destroy();
-                  forwardsHistory.stack.splice(x);
-                }
-                rsp.historyId = forwardView.historyId;
+          // its only moving forward if its in the same history
+          if(hist.historyId === currentView.historyId) {
+            direction = DIRECTION_FORWARD;
+
+          } else if(currentView.historyId !== hist.historyId) {
+            direction = DIRECTION_ENTER;
+
+            tmp = getHistoryById(currentView.historyId);
+            if(tmp && tmp.parentHistoryId === hist.parentHistoryId) {
+              direction = DIRECTION_SWITCH;
+
+            } else {
+              tmp = getHistoryById(tmp.parentHistoryId);
+              if(tmp && tmp.historyId === hist.historyId) {
+                direction = DIRECTION_EXIT;
               }
             }
-
-          } else {
-            // there's no current view, so this must be the initial view
-            rsp.action = ACTION_INITIAL_VIEW;
           }
 
-          // add the new view
-          viewHistory.views[rsp.viewId] = this.createView({
-            viewId: rsp.viewId,
-            index: hist.stack.length,
-            historyId: hist.historyId,
-            backViewId: (currentView && currentView.viewId ? currentView.viewId : null),
-            forwardViewId: null,
-            stateId: currentStateId,
-            stateName: this.getCurrentStateName(),
-            stateParams: this.getCurrentStateParams(),
-            tagName: rsp.ele[0].tagName,
-            url: $location.url()
-          });
-
-          if (rsp.action == ACTION_MOVE_BACK) {
-            $rootScope.$emit('$viewHistory.viewBack', currentView.viewId, rsp.viewId);
-          }
-
-          // add the new view to this history's stack
-          hist.stack.push(viewHistory.views[rsp.viewId]);
+        } else {
+          // there's no current view, so this must be the initial view
+          action = ACTION_INITIAL_VIEW;
         }
+
+        if(stateChangeCounter < 2) {
+          // views that were spun up on the first load should not animate
+          direction = 'none';
+        }
+
+        // add the new view
+        viewHistory.views[viewId] = this.createView({
+          viewId: viewId,
+          index: hist.stack.length,
+          historyId: hist.historyId,
+          backViewId: (currentView && currentView.viewId ? currentView.viewId : null),
+          forwardViewId: null,
+          stateId: currentStateId,
+          stateName: this.getCurrentStateName(),
+          stateParams: this.getCurrentStateParams(),
+          url: $location.url()
+        });
+
+        // add the new view to this history's stack
+        hist.stack.push(viewHistory.views[viewId]);
       }
 
       if(nextViewOptions) {
-        if(nextViewOptions.disableAnimate) rsp.direction = null;
-        if(nextViewOptions.disableBack) viewHistory.views[rsp.viewId].backViewId = null;
+        if(nextViewOptions.disableAnimate) direction = null;
+        if(nextViewOptions.disableBack) viewHistory.views[viewId].backViewId = null;
         this.nextViewOptions(null);
       }
 
-      setNavViews(rsp.viewId);
-      rsp.showBack = !!(viewHistory.backView && viewHistory.backView.historyId === viewHistory.currentView.historyId);
+      if (action == ACTION_MOVE_BACK) {
+        $rootScope.$emit('$viewHistory.viewBack', currentView.viewId, viewId);
+      }
+
+      setNavViews(viewId);
+      showBack = !!(viewHistory.backView && viewHistory.backView.historyId === viewHistory.currentView.historyId);
 
       hist.cursor = viewHistory.currentView.index;
 
-      rsp.tagName = viewHistory.views[rsp.viewId].tagName;
+      console.log('VIEW:', viewId, '  history:', historyId, '  action:', action, '  direction:', direction);
 
-      console.log('VIEW', rsp);
-
-      return rsp;
+      return {
+        viewId: viewId,
+        action: action,
+        direction: direction,
+        historyId: historyId,
+        showBack: showBack,
+        ele: ele
+      };
     },
 
     registerHistory: function(scope) {
@@ -452,15 +483,15 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
     },
 
     getCurrentView: function() {
-      return $rootScope.$viewHistory.currentView;
+      return viewHistory.currentView;
     },
 
     getBackView: function() {
-      return $rootScope.$viewHistory.backView;
+      return viewHistory.backView;
     },
 
     getForwardView: function() {
-      return $rootScope.$viewHistory.forwardView;
+      return viewHistory.forwardView;
     },
 
     getCurrentStateName: function() {
@@ -508,10 +539,10 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
       if(historyId) {
         var hist = getHistoryById(historyId);
         if(hist && hist.stack.length) {
-          if($rootScope.$viewHistory.currentView && $rootScope.$viewHistory.currentView.viewId === hist.stack[0].viewId) {
+          if(viewHistory.currentView && viewHistory.currentView.viewId === hist.stack[0].viewId) {
             return;
           }
-          $rootScope.$viewHistory.forcedNav = {
+          viewHistory.forcedNav = {
             viewId: hist.stack[0].viewId,
             action: ACTION_MOVE_BACK,
             direction: 'back'
@@ -589,7 +620,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
         init: function() {
 
           $ionicClickBlock.show();
-
+          //console.log('transition:', registerData.direction)
           trans.render(function(){
 
             trans.before();
@@ -598,10 +629,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
 
               if(transitionId === transitionCounter) {
                 // only run complete on the most recent transition
+                // remove any DOM nodes
                 trans.after(transData);
-
-                // remove any DOM nodes according to the removal policy
-                trans.runRemovalPolicy();
 
                 // allow clicks to hapen again after the transition
                 $ionicClickBlock.hide();
@@ -640,7 +669,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
             enteringEle.data(DATA_ELE_IDENTIFIER, getViewElementIdentifier(viewLocals, enteringView) );
 
             // append the entering element to the DOM
-            enteringEle.addClass('view-entering')
+            enteringEle.addClass('view-entering');
             navViewElement.append(enteringEle);
 
             // create a new scope for the entering element
@@ -687,14 +716,13 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
         },
 
         after: function(transData) {
-
-          // remove the all transition css classes
           var viewElements = navViewElement.children();
-          var viewElement;
+          var viewElementsLength = viewElements.length;
+          var x, viewElement, removableEle;
           var activeStateId = enteringEle.data(DATA_ELE_IDENTIFIER);
 
           // update/ensure each view element has the correct classes
-          for(var x=0, l=viewElements.length; x<l; x++) {
+          for(x=0; x<viewElementsLength; x++) {
             viewElement = viewElements.eq(x);
             viewElement.data(DATA_VIEW_IS_ACTIVE, (viewElement.data(DATA_ELE_IDENTIFIER) === activeStateId) );
           }
@@ -714,42 +742,30 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
             }
           }
 
-          // the view may have an onload attribute, if so do something
-          //if (navViewAttrs.onload) view.scope.$eval(navViewAttrs.onload);
-
-        },
-
-        runRemovalPolicy: function() {
-          var removableEle;
-
-          if( registerData.direction == DIRECTION_BACK && leavingEle ) {
+          // check if any views should be removed
+          if( registerData.direction == DIRECTION_BACK && !$ionicConfig.cacheForwardViews && leavingEle ) {
             // if they just navigated back we can destroy the forward view
+            // do not remove forward views if cacheForwardViews config is true
             removableEle = leavingEle;
 
           } else if( leavingEle && leavingEle.data(DATA_NO_CACHE) ) {
             // remove if the leaving element has DATA_NO_CACHE===false
             removableEle = leavingEle;
 
-          } else {
+          } else if( (viewElementsLength - 1) > $ionicConfig.maxCachedViews ) {
             // check to see if we have more cached views than we should
-            var viewElements = navViewElement.children();
-            var viewElementsLength = viewElements.length;
+            // the total number of child elements has exceeded how many to keep in the DOM
+            var oldestAccess = Date.now();
 
-            if( (viewElementsLength - 1) > $ionicConfig.maxCachedViews ) {
-              // the total number of child elements has exceeded how many to keep in the DOM
-              var viewElement;
-              var oldestAccess = Date.now();
+            for(x=0; x<viewElementsLength; x++) {
+              viewElement = viewElements.eq(x);
 
-              for(var x=0; x<viewElementsLength; x++) {
-                viewElement = viewElements.eq(x);
+              if( viewElement.data(DATA_VIEW_IS_ACTIVE) ) continue;
 
-                if( viewElement.data(DATA_VIEW_IS_ACTIVE) ) continue;
-
-                if( viewElement.data(DATA_VIEW_ACCESSED) < oldestAccess ) {
-                  // remove the element that was the oldest to be accessed
-                  oldestAccess = viewElement.data(DATA_VIEW_ACCESSED);
-                  removableEle = viewElements.eq(x);
-                }
+              if( viewElement.data(DATA_VIEW_ACCESSED) < oldestAccess ) {
+                // remove the element that was the oldest to be accessed
+                oldestAccess = viewElement.data(DATA_VIEW_ACCESSED);
+                removableEle = viewElements.eq(x);
               }
             }
           }
@@ -763,7 +779,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
         },
 
         isValid: function() {
-          return enteringEle && (registerData.direction != ACTION_NO_CHANGE);
+          return enteringEle;
         }
 
       };
@@ -771,33 +787,22 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
       return trans;
     },
 
-    disableRegisterByTagName: function(tagName) {
-      // not every element should animate betwee transitions
-      // For example, the <ion-tabs> directive should not animate when it enters,
-      // but instead the <ion-tabs> directve would just show, and its children
-      // <ion-tab> directives would do the animating, but <ion-tabs> itself is not a view
-      $rootScope.$viewHistory.disabledRegistrableTagNames.push(tagName.toUpperCase());
-    },
-
-    isTagNameRegistrable: function(element) {
+    isHistoryTagName: function(element) {
       // check if this element has a tagName (at its root, not recursively)
       // that shouldn't be animated, like <ion-tabs> or <ion-side-menu>
-      var x, y, disabledTags = $rootScope.$viewHistory.disabledRegistrableTagNames;
-      for(x=0; x<element.length; x++) {
-        if(element[x].nodeType !== 1) continue;
-        for(y=0; y<disabledTags.length; y++) {
-          if(element[x].tagName === disabledTags[y]) {
-            return false;
-          }
+      var x, historyTagNames = ['ION-TABS', 'ION-SIDE-MENUS'];
+      for(x=0; x<historyTagNames.length; x++) {
+        if(element[0].tagName === historyTagNames[x]) {
+          return true;
         }
       }
-      return true;
+      return false;
     },
 
     clearHistory: function() {
       var
-      histories = $rootScope.$viewHistory.histories,
-      currentView = $rootScope.$viewHistory.currentView;
+      histories = viewHistory.histories,
+      currentView = viewHistory.currentView;
 
       if(histories) {
         for(var historyId in histories) {
@@ -818,9 +823,9 @@ function($rootScope, $state, $compile, $controller, $location, $window, $q, $tim
         }
       }
 
-      for(var viewId in $rootScope.$viewHistory.views) {
+      for(var viewId in viewHistory.views) {
         if(viewId !== currentView.viewId) {
-          delete $rootScope.$viewHistory.views[viewId];
+          delete viewHistory.views[viewId];
         }
       }
 
