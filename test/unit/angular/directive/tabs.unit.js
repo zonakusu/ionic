@@ -1,17 +1,5 @@
 describe('tabs', function() {
 
-  describe('miscellaneous', function() {
-    beforeEach(module('ionic', function($provide) {
-      $provide.value('$ionicViewService', {
-        disableRegisterByTagName: jasmine.createSpy('disableRegisterByTagName')
-      });
-    }));
-    it('should register tabs', inject(function($ionicViewService, $compile, $rootScope) {
-      $compile('<ion-tabs>')($rootScope.$new());
-      expect($ionicViewService.disableRegisterByTagName).toHaveBeenCalledWith('ion-tabs');
-    }));
-  });
-
   describe('$ionicTabs controller', function() {
     beforeEach(module('ionic'));
     var ctrl, scope;
