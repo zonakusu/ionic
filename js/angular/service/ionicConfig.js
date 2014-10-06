@@ -39,6 +39,20 @@ IonicModule
 
   /**
    * @ngdoc method
+   * @name $ionicConfigProvider#cacheForwardViews
+   * @description When navigating between views, by default, views that were recently visited
+   * are cached, and the same data and DOM elements are referenced when navigating back. However,
+   * when navigating back in the history, the "forward" view is removed so its not cached. If
+   * you navigate forward to the same view again it'll create a new DOM element, re-compiled and
+   * linked. Basically any forward views are reset each time. Set this config to `true` to have
+   * forward views are cached and not reset on each load.
+   * @param {boolean} value `false`.
+   * @returns {boolean}
+   */
+  config.cacheForwardViews = false;
+
+  /**
+   * @ngdoc method
    * @name $ionicConfigProvider#viewTransition
    * @description Animation style when transitioning between views. Default `platform`.
    *

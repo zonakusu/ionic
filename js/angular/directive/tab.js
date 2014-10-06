@@ -74,9 +74,15 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
         '></ion-tab-nav>';
 
       //Remove the contents of the element so we can compile them later, if tab is selected
-      //We don't use regular transclusion because it breaks element inheritance
-      var tabContent = jqLite('<div class="tab-content pane view-cache">')
-        .append( element.contents().remove() );
+      var tabContent = document.createElement('div');
+      tabContent.innerHTML = element.html();
+      element.empty();
+
+      var navViewName;
+      var tabChildEle = tabContent.children;
+      if(tabChildEle.length && tabChildEle[0].tagName === 'ION-NAV-VIEW') {
+        navViewName = tabChildEle[0].getAttribute('name');
+      }
 
       return function link($scope, $element, $attr, ctrls) {
         var childScope;
@@ -84,9 +90,6 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
         var tabsCtrl = ctrls[0];
         var tabCtrl = ctrls[1];
         var isTabContentAttached = false;
-
-        var navView = tabContent[0].querySelector('ion-nav-view');
-        var navViewName = navView && navView.getAttribute('name');
 
         $ionicBind($scope, $attr, {
           onSelect: '&',
@@ -138,7 +141,8 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
               // tab should be selected and is NOT in the DOM
               // create a new scope and append it
               childScope = $scope.$new();
-              childElement = tabContent.clone();
+              childElement = jqLite('<div class="tab-content pane view-cache">');
+              childElement.html(tabContent.innerHTML);
               tabsCtrl.$element.append( childElement );
               $compile(childElement)(childScope);
               isTabContentAttached = true;
