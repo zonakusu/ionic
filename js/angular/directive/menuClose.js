@@ -5,7 +5,9 @@
  * @restrict AC
  *
  * @description
- * Closes a side menu which is currently opened.
+ * Closes a side menu which is currently opened. By default, navigation
+ * transitions will not animate between views when the menu is open and
+ * this directive is used to close the menu.
  *
  * @usage
  * Below is an example of a link within a side menu. Tapping this link would
@@ -22,6 +24,9 @@ IonicModule
     require: '^ionSideMenus',
     link: function($scope, $element, $attr, sideMenuCtrl) {
       $element.bind('click', function(){
+        // lower priority than navAnimation which allows navAnimation
+        // to override this directives nextAnimation() call
+        $ionicViewService.nextAnimation('none');
         sideMenuCtrl.close();
       });
     }

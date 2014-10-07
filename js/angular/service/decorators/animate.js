@@ -4,7 +4,7 @@
 IonicModule.config([
   '$provide',
 function($provide) {
-  function $AnimateDecorator($animate, $timeout) {
+  function $AnimateDecorator($animate) {
 
     var CSS_DIRECTIONS = 'nav-forward nav-back nav-enter nav-exit nav-switch'.split(' ');
     var CSS_VIEW_ACTIVE = 'view-active';
@@ -19,9 +19,8 @@ function($provide) {
 
 
     $animate.transition = function(animationClass, navDirection, enteringElement, leavingElement, callback) {
-
       var parentElement = enteringElement.parent();
-      var doAnimation = !!(navDirection && navDirection !== 'none' && useAnimation);
+      var doAnimation = !!(useAnimation && navDirection && navDirection !== 'none' && animationClass !== 'none');
 
       $animate.stage(doAnimation, animationClass, navDirection, parentElement, enteringElement, leavingElement);
 
@@ -77,7 +76,6 @@ function($provide) {
 
       if(leavingElement) {
           leavingElement.addClass(CSS_VIEW_LEAVING)
-                        .addClass('view')
                         .removeClass(CSS_VIEW_CACHE)
                         .addClass(CSS_ANIMATION_SUPER);
 
@@ -134,8 +132,7 @@ function($provide) {
         leavingElement.addClass(CSS_VIEW_CACHE)
                       .removeClass(CSS_VIEW_ACTIVE)
                       .removeClass(CSS_VIEW_ENTERING)
-                      .removeClass(CSS_VIEW_LEAVING)
-                      .removeClass('view');
+                      .removeClass(CSS_VIEW_LEAVING);
       }
 
       parentElement.removeClass(animationClass);
@@ -143,7 +140,6 @@ function($provide) {
       for(var x=0; x<CSS_DIRECTIONS.length; x++) {
         parentElement.removeClass(CSS_DIRECTIONS[x]);
       }
-
     };
 
 
@@ -166,5 +162,5 @@ function($provide) {
     return $animate;
   }
 
-  $provide.decorator('$animate', ['$delegate', '$timeout', $AnimateDecorator]);
+  $provide.decorator('$animate', ['$delegate', $AnimateDecorator]);
 }]);

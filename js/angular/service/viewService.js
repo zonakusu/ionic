@@ -111,6 +111,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
   var transitionCounter = 0;
   var stateChangeCounter = 0;
   var lastStateId;
+  var nextAnimation;
 
   var viewHistory = {
     histories: { root: { historyId: 'root', parentHistoryId: null, stack: [], cursor: -1 } },
@@ -234,6 +235,10 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
   }
 
   return {
+
+    nextAnimation: function(val) {
+      nextAnimation = val;
+    },
 
     viewHistory: function(val) {
       if(arguments.length) {
@@ -559,6 +564,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
       var direction = registerData.direction;
 
       if(direction === DIRECTION_ENTER || direction === DIRECTION_EXIT) {
+        // this direction should happen on the parent nav-view, not this one
+        // emit it up to the parent, and this direction should be none
         navViewScope.$emit('$ionicView.direction', direction);
         if(direction === DIRECTION_ENTER) {
           direction = DIRECTION_NONE;
@@ -653,7 +660,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
         getAnimationDirection: function(childDirection) {
           // Priority
-          // 1) Button attribute which initiated the transision
+          // 1) nav-animation attribute directive
           // 2) Entering element's attribute
           // 3) Entering view's $state config property
           // 4) View registration data
@@ -672,7 +679,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           }
 
           return {
-            animation: enteringEle.attr('view-animation') || viewState.viewAnimation || getConfigViewAnimation(),
+            animation: nextAnimation || enteringEle.attr('view-animation') || viewState.viewAnimation || getConfigViewAnimation(),
             direction: enteringEle.attr('view-direction') || viewState.viewDirection || childDirection || direction || DIRECTION_NONE
           };
         },
@@ -794,12 +801,9 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
             jqLite(removableEle).scope().$destroy();
             removableEle.remove();
           }
-        },
 
-        isValid: function() {
-          return enteringEle;
+          nextAnimation = null;
         }
-
       };
 
       return trans;
