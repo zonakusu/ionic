@@ -632,8 +632,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
         animate: function(childDirection) {
           var d = trans.getAnimationDirection(childDirection);
 
-          console.log('animate', d.direction)
-
           $animate.transition( d.animation, d.direction, enteringEle, leavingEle, function(transData){
 
             if(transitionId === transitionCounter) {
