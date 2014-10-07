@@ -349,7 +349,7 @@
     this._currentDrag = {
       placeholder: null,
       content: null
-    }
+    };
     this._currentDrag = null;
     doneCallback && doneCallback();
   };

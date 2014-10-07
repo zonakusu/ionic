@@ -176,7 +176,7 @@ function( $ionicViewService, $state) {
           childDirection = childRegisterData;
         }
 
-        navViewScope.$on('$ionicView.direction', childViewRegister)
+        navViewScope.$on('$ionicView.direction', childViewRegister);
 
       };
     }
