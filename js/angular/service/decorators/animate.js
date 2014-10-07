@@ -11,17 +11,11 @@ function($provide) {
     var CSS_VIEW_CACHE = 'view-cache';
     var CSS_VIEW_ENTERING = 'view-entering';
     var CSS_VIEW_LEAVING = 'view-leaving';
-    var CSS_ANIMATION_SUPER = 'view';
+    var CSS_ANIMATION_SUPER = 'view-pane';
     var NG_ANIMATE_PARENT_KEY = '$$ngAnimateKey';
 
     var usedAnimationClasses = [];
 
-    function extractElementNode(element) {
-      for(var i = 0; i < element.length; i++) {
-        var elm = element[i];
-        if(elm.nodeType == 1) return elm;
-      }
-    }
 
     $animate.transition = function(animationClass, navDirection, parentElement, enteringElement, leavingElement) {
       var deferred = $q.defer();
@@ -39,19 +33,17 @@ function($provide) {
       return deferred.promise;
     };
 
-    $animate.stage = function(animationClass, navDirection, parentElement, enteringElement, leavingElement) {
+
+    $animate.stage = function(doAnimation, animationClass, navDirection, parentElement, enteringElement, leavingElement) {
 
       var x, isExistingAnimationClass;
 
       for(x=0; x<usedAnimationClasses.length; x++) {
-        if(usedAnimationClasses[x] === animationClass && navDirection) {
+        if(usedAnimationClasses[x] === animationClass && doAnimation) {
           isExistingAnimationClass = true;
         } else {
-          parentElement.removeClass(usedAnimationClasses[x]);
+          parentElement.removeClass( usedAnimationClasses[x] );
         }
-      }
-      if(!isExistingAnimationClass) {
-        usedAnimationClasses.push(animationClass);
       }
 
       for(x=0; x<CSS_DIRECTIONS.length; x++) {
@@ -60,7 +52,11 @@ function($provide) {
         }
       }
 
-      if( doAnimation(navDirection) ) {
+      if( doAnimation ) {
+        if(!isExistingAnimationClass) {
+          usedAnimationClasses.push(animationClass);
+        }
+
         parentElement.addClass(animationClass)
                      .addClass('nav-' + navDirection);
 
@@ -68,7 +64,7 @@ function($provide) {
         // and not the default parent counter within $animate
         var classParentID = extractElementNode(parentElement).getAttribute('class');
         var parentID = parentElement.data(NG_ANIMATE_PARENT_KEY);
-        if(parentID !== classParentID) {
+        if(parentElement !== classParentID) {
           parentElement.data(NG_ANIMATE_PARENT_KEY, classParentID);
         }
       }
@@ -79,9 +75,11 @@ function($provide) {
 
       if(leavingElement) {
           leavingElement.addClass(CSS_VIEW_LEAVING)
-                        .removeClass(CSS_VIEW_CACHE);
+                        .addClass('view')
+                        .removeClass(CSS_VIEW_CACHE)
+                        .addClass(CSS_ANIMATION_SUPER);
 
-        if( doAnimation(navDirection) ) {
+        if( doAnimation ) {
           leavingElement.addClass('ng-animate');
         }
       }

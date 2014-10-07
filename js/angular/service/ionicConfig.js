@@ -53,22 +53,23 @@ IonicModule
 
   /**
    * @ngdoc method
-   * @name $ionicConfigProvider#viewTransition
+   * @name $ionicConfigProvider#viewAnimation
    * @description Animation style when transitioning between views. Default `platform`.
    *
-   * @param {string} transition Which style of transitioning to use.
+   * @param {string} animation Which style of view transitioning to use.
    *
-   * * `platform`: Dynamically choose the correct transition style depending on
+   * * `platform`: Dynamically choose the correct animation style depending on
    *               the platform the app is running from. If the platform is
-   *               not `ios` or `android` then it will default to `ios`.
-   * * `ios`: iOS style transitions.
-   * * `android`: Android style transitions.
+   *               not `ios` or `android` then it will default to `ios-transition`.
+   * * `ios-transition`: iOS style transition.
+   * * `android-transition`: Android style transition.
    * * `none`: Do not preform animated transitions.
    *
-   * @returns {string} View transition.
+   * @returns {string} View animation.
    */
-  config.viewTransition = 'platform';
-
+  config.viewAnimation = 'platform';
+  config.iosViewAnimation = 'ios-transition';
+  config.androidViewAnimation = 'android-transition';
 
   /**
    * @ngdoc method

@@ -89,7 +89,6 @@ function($rootScope, $state, $location, $document, $ionicPlatform, $ionicViewSer
 function($rootScope, $state, $compile, $controller, $location, $window, $timeout, $ionicClickBlock, $ionicConfig, $animate) {
 
   // data keys for jqLite elements
-  var DATA_VIEW_IS_ACTIVE = '$ionicViewActive';
   var DATA_ELE_IDENTIFIER = '$ionicEleId';
   var DATA_VIEW_ACCESSED = '$ionicAccessed';
   var DATA_NO_CACHE = '$ionicNoCache';
@@ -107,6 +106,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
   var DIRECTION_ENTER = 'enter';
   var DIRECTION_EXIT = 'exit';
   var DIRECTION_SWITCH = 'switch';
+  var DIRECTION_NONE = 'none';
 
   var transitionCounter = 0;
   var stateChangeCounter = 0;
@@ -233,13 +233,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
     return ionic.Utils.nextUid();
   }
 
-  function classToggle(ele, addClassName, removeClassName) {
-    if(ele) {
-      addClassName && ele.addClass(addClassName);
-      removeClassName && ele.removeClass(removeClassName);
-    }
-  }
-
   return {
 
     viewHistory: function(val) {
@@ -259,7 +252,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           nextViewOptions = this.nextViewOptions(),
           viewId = null,
           action = null,
-          direction = 'none',
+          direction = DIRECTION_NONE,
           historyId = hist.historyId,
           showBack = false,
           ele,
@@ -268,7 +261,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
       if( viewLocals && viewLocals.$$state && viewLocals.$$state.self && viewLocals.$$state.self.abstract ) {
         // abstract states should not register themselves in the history stack
         return {
-          action: 'abstractView'
+          action: 'abstractView',
+          direction: DIRECTION_NONE
         };
       }
 
@@ -349,8 +343,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
         if(tmp && tmp.parentHistoryId === historyId) {
           direction = DIRECTION_EXIT;
 
-        } else if(backView) {
-          tmp = getHistoryById(backView.historyId);
+        } else {
+          tmp = getHistoryById(historyId);
           if(tmp && tmp.parentHistoryId === currentView.historyId) {
             direction = DIRECTION_ENTER;
           }
@@ -425,7 +419,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
         if(stateChangeCounter < 2) {
           // views that were spun up on the first load should not animate
-          direction = 'none';
+          direction = DIRECTION_NONE;
         }
 
         // add the new view
@@ -451,16 +445,12 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
         this.nextViewOptions(null);
       }
 
-      if (action == ACTION_MOVE_BACK) {
-        $rootScope.$emit('$viewHistory.viewBack', currentView.viewId, viewId);
-      }
-
       setNavViews(viewId);
       showBack = !!(viewHistory.backView && viewHistory.backView.historyId === viewHistory.currentView.historyId);
 
       hist.cursor = viewHistory.currentView.index;
 
-      console.log('VIEW:', viewId, '  history:', historyId, '  action:', action, '  direction:', direction);
+      console.log('VIEW:', viewId, (viewHistory.views[viewId] && viewHistory.views[viewId].url), '  history:', historyId, '  action:', action, '  direction:', direction);
 
       return {
         viewId: viewId,
@@ -545,7 +535,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           viewHistory.forcedNav = {
             viewId: hist.stack[0].viewId,
             action: ACTION_MOVE_BACK,
-            direction: 'back'
+            direction: DIRECTION_BACK
           };
           hist.stack[0].go();
         }
@@ -565,6 +555,15 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
       // injected registerData used for testing
       registerData = registerData || this.register(navViewScope, viewLocals);
+
+      var direction = registerData.direction;
+
+      if(direction === DIRECTION_ENTER || direction === DIRECTION_EXIT) {
+        navViewScope.$emit('$ionicView.direction', direction);
+        if(direction === DIRECTION_ENTER) {
+          direction = DIRECTION_NONE;
+        }
+      }
 
       // injected enteringView used for testing
       enteringView = enteringView || getViewById(registerData.viewId) || {};
@@ -615,35 +614,69 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
       var trans = {
 
-        registerData: registerData,
-
-        init: function() {
+        init: function(callback) {
 
           $ionicClickBlock.show();
-          //console.log('transition:', registerData.direction)
+
           trans.render(function(){
 
             trans.before();
 
-            $animate.transition('ios-slide', registerData.direction, navViewElement, enteringEle, leavingEle, function(transData){
-
-              if(transitionId === transitionCounter) {
-                // only run complete on the most recent transition
-                // remove any DOM nodes
-                trans.after(transData);
-
-                // allow clicks to hapen again after the transition
-                $ionicClickBlock.hide();
-
-                navViewScope.$emit('$ionicView.navViewActive', transData);
-              }
-
-              // always clean up any references that could cause memory issues
-              cleanup();
-            });
+            callback && callback();
 
           });
 
+        },
+
+
+        animate: function(childDirection) {
+          var d = trans.getAnimationDirection(childDirection);
+
+          console.log('animate', d.direction)
+
+          $animate.transition( d.animation, d.direction, enteringEle, leavingEle, function(transData){
+
+            if(transitionId === transitionCounter) {
+              // only run complete on the most recent transition
+              // remove any DOM nodes
+              trans.after(transData);
+
+              // allow clicks to hapen again after the transition
+              $ionicClickBlock.hide();
+
+              navViewScope.$emit('$ionicView.navViewActive', transData);
+            }
+
+            // always clean up any references that could cause memory issues
+            cleanup();
+          });
+        },
+
+
+        getAnimationDirection: function(childDirection) {
+          // Priority
+          // 1) Button attribute which initiated the transision
+          // 2) Entering element's attribute
+          // 3) Entering view's $state config property
+          // 4) View registration data
+          // 5) Global config
+          // 6) Fallback value
+
+          var viewState = viewLocals && viewLocals.$$state && viewLocals.$$state.self || {};
+
+          function getConfigViewAnimation() {
+            if($ionicConfig.viewAnimation === 'platform') {
+              var platform = ionic.Platform.platform() || '';
+
+              return $ionicConfig[ platform  + 'ViewAnimation'] || 'ios-transition';
+            }
+            return $ionicConfig.viewAnimation;
+          }
+
+          return {
+            animation: enteringEle.attr('view-animation') || viewState.viewAnimation || getConfigViewAnimation(),
+            direction: enteringEle.attr('view-direction') || viewState.viewDirection || childDirection || direction || DIRECTION_NONE
+          };
         },
 
         render: function(callback) {
@@ -684,21 +717,16 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
             // run link with the view's scope
             link(scope);
-
-            if( $animate.useAnimation() ) {
-              $timeout(function(){
-                callback();
-              }, 12);
-              return;
-            }
           }
 
-          callback();
+          $timeout(function(){
+            callback();
+          }, 16);
         },
 
         before: function() {
           var transData = {
-            direction: registerData.direction
+            direction: direction
           };
           if(enteringEle) {
             var enteringScope = jqLite(enteringEle).scope();
@@ -721,12 +749,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           var x, viewElement, removableEle;
           var activeStateId = enteringEle.data(DATA_ELE_IDENTIFIER);
 
-          // update/ensure each view element has the correct classes
-          for(x=0; x<viewElementsLength; x++) {
-            viewElement = viewElements.eq(x);
-            viewElement.data(DATA_VIEW_IS_ACTIVE, (viewElement.data(DATA_ELE_IDENTIFIER) === activeStateId) );
-          }
-
           if(enteringEle) {
             var enteringScope = jqLite(enteringEle).scope();
             if(enteringScope) {
@@ -743,7 +765,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           }
 
           // check if any views should be removed
-          if( registerData.direction == DIRECTION_BACK && !$ionicConfig.cacheForwardViews && leavingEle ) {
+          if( direction == DIRECTION_BACK && !$ionicConfig.cacheForwardViews && leavingEle ) {
             // if they just navigated back we can destroy the forward view
             // do not remove forward views if cacheForwardViews config is true
             removableEle = leavingEle;
@@ -759,8 +781,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
             for(x=0; x<viewElementsLength; x++) {
               viewElement = viewElements.eq(x);
-
-              if( viewElement.data(DATA_VIEW_IS_ACTIVE) ) continue;
 
               if( viewElement.data(DATA_VIEW_ACCESSED) < oldestAccess ) {
                 // remove the element that was the oldest to be accessed
@@ -785,18 +805,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
       };
 
       return trans;
-    },
-
-    isHistoryTagName: function(element) {
-      // check if this element has a tagName (at its root, not recursively)
-      // that shouldn't be animated, like <ion-tabs> or <ion-side-menu>
-      var x, historyTagNames = ['ION-TABS', 'ION-SIDE-MENUS'];
-      for(x=0; x<historyTagNames.length; x++) {
-        if(element[0].tagName === historyTagNames[x]) {
-          return true;
-        }
-      }
-      return false;
     },
 
     clearHistory: function() {

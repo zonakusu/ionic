@@ -121,7 +121,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
         $scope.$on('$stateChangeSuccess', selectIfMatchesState);
         selectIfMatchesState();
         function selectIfMatchesState() {
-          if (tabCtrl.tabMatchesState()) {
+          if (tabCtrl.tabMatchesState() && tabContent.childElementCount) {
             tabsCtrl.select($scope, false);
           }
         }
@@ -137,7 +137,8 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
             // this tab is being selected
 
             // check if the tab is already in the DOM
-            if(!isTabContentAttached) {
+            // only do this if the tab has child elements
+            if(!isTabContentAttached && tabContent.childElementCount) {
               // tab should be selected and is NOT in the DOM
               // create a new scope and append it
               childScope = $scope.$new();
@@ -146,11 +147,10 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
               tabsCtrl.$element.append( childElement );
               $compile(childElement)(childScope);
               isTabContentAttached = true;
-
             }
 
             // remove the hide class so the tabs content shows up
-            childElement.removeClass('view-cache');
+            childElement && childElement.removeClass('view-cache');
 
           } else if(isTabContentAttached && childElement) {
             // this tab should NOT be selected, and it is already in the DOM
