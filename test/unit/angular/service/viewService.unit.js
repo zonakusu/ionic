@@ -34,7 +34,7 @@ describe('Ionic View Service', function() {
 
   }));
 
-  beforeEach(inject(function($ionicViewService, $rootScope, $window, $location) {
+  beforeEach(inject(function($ionicViewService, $rootScope, $window) {
     viewService = $ionicViewService;
     rootScope = $rootScope;
     window = $window;
@@ -572,7 +572,7 @@ describe('Ionic View Service', function() {
     expect(viewService.viewHistory().histories[aboutReg.historyId].stack.length).toEqual(2);
   }));
 
-  it('should init a view that has tabs in it, two registers, but one page load', inject(function($location, $state) {
+  it('should init a view that has tabs in it, two registers, but one page load', inject(function($state) {
     $state.go('tabs.tab1view1');
     rootScope.$apply();
 
@@ -590,7 +590,7 @@ describe('Ionic View Service', function() {
     expect(registerData.direction).toEqual('none');
   }));
 
-  it('should change to history that already exists, and go to its last current view', inject(function($location, $state) {
+  it('should change to history that already exists, and go to its last current view', inject(function($state) {
     // register tabs
     var tab1Scope = {};
     var tab2Scope = {};
@@ -710,7 +710,7 @@ describe('Ionic View Service', function() {
     expect(viewService.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(1);
   }));
 
-  it('should go one level in tab1, vist tab2 and tab3, come back to tab1 and still be at spot', inject(function($location, $state) {
+  it('should go one level in tab1, vist tab2 and tab3, come back to tab1 and still be at spot', inject(function($state) {
     var tab1Container = {};
     var tab2Container = {};
     var tab3Container = {};
@@ -764,7 +764,7 @@ describe('Ionic View Service', function() {
     expect(currentView.viewId).toEqual(currentViewId);
   }));
 
-  it('should go one level in tab1, visit tab2, go to tab2 page2, visit, tab1, tab3, history still page 2 tab2', inject(function($location, $state) {
+  it('should go one level in tab1, visit tab2, go to tab2 page2, visit, tab1, tab3, history still page 2 tab2', inject(function($state) {
     var tab1Container = {};
     var tab2Container = {};
     var tab3Container = {};
@@ -832,7 +832,7 @@ describe('Ionic View Service', function() {
     expect(viewService.viewHistory().histories[tab2Container.$historyId].stack.length).toEqual(2);
   }));
 
-  it('should go in and out of tabs and root with correct directions', inject(function($location, $state) {
+  it('should go in and out of tabs and root with correct directions', inject(function($state) {
     var tab1Container = {};
     viewService.registerHistory(tab1Container);
 
@@ -862,7 +862,7 @@ describe('Ionic View Service', function() {
     expect(homeReg.direction).toEqual('exit');
   }));
 
-  it('should start in home, go to tabs, exit back to home', inject(function($location, $state) {
+  it('should start in home, go to tabs, exit back to home', inject(function($state) {
     var homeViewScope = {};
     $state.go('home');
     rootScope.$apply();
@@ -887,7 +887,7 @@ describe('Ionic View Service', function() {
     expect(homeReg.direction).toEqual('exit');
   }));
 
-  it('should start in tabs1, switch to tabs2, exit to home, enter to tabs1', inject(function($location, $state) {
+  it('should start in tabs1, switch to tabs2, exit to home, enter to tabs1', inject(function($state) {
     var homeViewScope = {};
     var tab1Container = {};
     var tab2Container = {};
@@ -919,7 +919,38 @@ describe('Ionic View Service', function() {
     expect(tab1view1Reg.direction).toEqual('enter');
   }));
 
-  it('should start in home, go to tabs, switch to another tab, exit back to home', inject(function($location, $state) {
+  it('should start in tabs1, exit to home, move forward to info, enter to tabs1', inject(function($state) {
+    var homeViewScope = {};
+    var infoViewScope = {};
+    var tab1Container = {};
+    viewService.registerHistory(tab1Container);
+
+    $state.go('tabs.tab1view1');
+    rootScope.$apply();
+    var tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    expect(tab1view1Reg.action).toEqual('initialView');
+    expect(tab1view1Reg.direction).toEqual('none');
+
+    $state.go('home');
+    rootScope.$apply();
+    var homeReg = viewService.register(homeViewScope, viewLocals);
+    expect(homeReg.action).toEqual('newView');
+    expect(homeReg.direction).toEqual('exit');
+
+    $state.go('info');
+    rootScope.$apply();
+    var infoReg = viewService.register(infoViewScope, viewLocals);
+    expect(infoReg.action).toEqual('newView');
+    expect(infoReg.direction).toEqual('forward');
+
+    $state.go('tabs.tab1view1');
+    rootScope.$apply();
+    tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    expect(tab1view1Reg.action).toEqual('moveBack');
+    expect(tab1view1Reg.direction).toEqual('enter');
+  }));
+
+  it('should start in home, go to tabs, switch to another tab, exit back to home', inject(function($state) {
     var homeViewScope = {};
     $state.go('home');
     rootScope.$apply();

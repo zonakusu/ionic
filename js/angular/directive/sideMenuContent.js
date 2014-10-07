@@ -191,6 +191,10 @@ function($timeout, $ionicGesture, $window) {
 
         // Cleanup
         $scope.$on('$destroy', function() {
+          if(content) {
+            content.element = null;
+            content = null;
+          }
           $ionicGesture.off(dragLeftGesture, 'dragleft', onDragX);
           $ionicGesture.off(dragRightGesture, 'dragright', onDragX);
           $ionicGesture.off(dragUpGesture, 'dragup', onDragY);

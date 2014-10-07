@@ -287,6 +287,7 @@ describe('Ionic nav-view', function() {
     // transition to state that has an initial view
     $state.go(iState);
     $q.flush();
+    $timeout.flush();
 
     // verify if ng-repeat has been compiled
     expect(elem.find('li').length).toBe(scope.items.length);
@@ -294,12 +295,14 @@ describe('Ionic nav-view', function() {
     // transition to another state that replace the initial content
     $state.go(jState);
     $q.flush();
+    $timeout.flush();
 
     expect(elem[0].querySelector('.view-active').innerText).toBe(jState.template);
 
     // transition back to the state with empty subview and the initial view
     $state.go(iState);
     $q.flush();
+    $timeout.flush();
 
     // verify if the initial view is correct
     expect(elem[0].querySelectorAll('.view-active li').length).toBe(scope.items.length);
@@ -347,13 +350,14 @@ describe('Ionic nav-view', function() {
     expect(elem.find('ion-nav-view').text()).toBe(aState.template);
   }));
 
-  it('should add multiple ion-nav-view', inject(function ($state, $q, $compile) {
+  it('should add multiple ion-nav-view', inject(function ($state, $q, $timeout, $compile) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
     expect(elem.find('ion-nav-view').find('div').length).toBe(0);
 
     $state.go(page1State);
     $q.flush();
+    $timeout.flush();
 
     var divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(1);
@@ -362,6 +366,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(page2State);
     $q.flush();
+    $timeout.flush();
 
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(2);
@@ -376,6 +381,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(page3State);
     $q.flush();
+    $timeout.flush();
 
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(3);
@@ -394,6 +400,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(page4State);
     $q.flush();
+    $timeout.flush();
 
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(4);
@@ -415,17 +422,21 @@ describe('Ionic nav-view', function() {
     expect(divs.eq(3).text()).toBe('page4');
   }));
 
-  it('should remove ion-nav-views when going back', inject(function ($state, $q, $compile) {
+  it('should remove ion-nav-views when going back', inject(function ($state, $q, $timeout, $compile) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
     $state.go(page1State);
     $q.flush();
+    $timeout.flush();
     $state.go(page2State);
     $q.flush();
+    $timeout.flush();
     $state.go(page3State);
     $q.flush();
+    $timeout.flush();
     $state.go(page4State);
     $q.flush();
+    $timeout.flush();
 
     var divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(4);
@@ -436,6 +447,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(page3State);
     $q.flush();
+    $timeout.flush();
 
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(3);
@@ -445,6 +457,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(page2State);
     $q.flush();
+    $timeout.flush();
 
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(2);
@@ -453,83 +466,98 @@ describe('Ionic nav-view', function() {
 
     $state.go(page1State);
     $q.flush();
+    $timeout.flush();
 
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(1);
     expect(divs.eq(0).hasClass('view-active')).toBe(true);
   }));
 
-  it('should not cache more than 2 ion-nav-views when going forward', inject(function ($state, $q, $compile, $ionicConfig) {
+  it('should not cache more than 2 ion-nav-views when going forward', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
     $ionicConfig.maxCachedViews = 2;
 
     $state.go(page1State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(1);
 
     $state.go(page2State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(2);
 
     $state.go(page3State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(3);
 
     $state.go(page4State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(3);
 
     $state.go(page3State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(2);
 
     $state.go(page2State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(1);
 
     $state.go(page1State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(1);
   }));
 
-  it('should not cache ion-views with the cache-view="true" attribute', inject(function ($state, $q, $compile, $ionicConfig) {
+  it('should not cache ion-views with the cache-view="true" attribute', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
     $state.go(ionView1State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(1);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
 
     $state.go(ionViewCacheFalseState);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
     expect(elem.find('ion-nav-view').find('ion-view').eq(1).text()).toBe('ionViewCacheFalse');
 
     $state.go(ionView2State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
     expect(elem.find('ion-nav-view').find('ion-view').eq(1).text()).toBe('ionView2');
   }));
 
-  it('should not cache ion-views with the cache=false state property', inject(function ($state, $q, $compile, $ionicConfig) {
+  it('should not cache ion-views with the cache=false state property', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
     $state.go(ionView1State);
     $q.flush();
+    $timeout.flush();
+
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(1);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
 
     $state.go(ionView3State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
     expect(elem.find('ion-nav-view').find('ion-view').eq(1).text()).toBe('ionView3');
 
     $state.go(ionView2State);
     $q.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
     expect(elem.find('ion-nav-view').find('ion-view').eq(1).text()).toBe('ionView2');

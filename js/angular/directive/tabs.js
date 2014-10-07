@@ -59,7 +59,6 @@ function($ionicViewService, $ionicTabsDelegate, $ionicTabsConfig) {
     scope: true,
     controller: '$ionicTabs',
     compile: function(element, attr) {
-      element.addClass('view');
       //We cannot use regular transclude here because it breaks element.data()
       //inheritance on compile
       var innerElement = jqLite('<div class="tab-nav tabs">');

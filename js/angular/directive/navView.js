@@ -164,9 +164,19 @@ function( $ionicViewService, $state) {
           viewData.state = currentLocals.$$state;
 
           // init the transition of views for this nav-view directive
-          transition.init();
-          console.log('updateView', navViewName)
+          childDirection = null;
+          transition.init(function(){
+            transition.animate( childDirection );
+          });
+
         }
+
+        var childDirection;
+        function childViewRegister(ev, childRegisterData) {
+          childDirection = childRegisterData;
+        }
+
+        navViewScope.$on('$ionicView.direction', childViewRegister)
 
       };
     }

@@ -5,7 +5,8 @@ IonicModule
   '$ionicSideMenuDelegate',
   '$ionicPlatform',
   '$ionicBody',
-function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
+  '$ionicViewService',
+function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody, $ionicViewService) {
   var self = this;
   var rightShowing, leftShowing, isDragging;
   var startX, lastX, offsetX, isAsideExposed;
@@ -17,6 +18,7 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
     self.right = options.right;
     self.setContent(options.content);
     self.dragThresholdX = options.dragThresholdX || 10;
+    $ionicViewService.registerHistory(self.$scope);
   };
 
   /**
@@ -50,7 +52,7 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
    * Toggle the left menu to open 100%
    */
   self.toggleLeft = function(shouldOpen) {
-    if(isAsideExposed || !self.left.isEnabled) return;
+    if(isAsideExposed || !self.left.isEnabled || !self.content) return;
     var openAmount = self.getOpenAmount();
     if (arguments.length === 0) {
       shouldOpen = openAmount <= 0;
@@ -67,7 +69,7 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
    * Toggle the right menu to open 100%
    */
   self.toggleRight = function(shouldOpen) {
-    if(isAsideExposed || !self.right.isEnabled) return;
+    if(isAsideExposed || !self.right.isEnabled || !self.content) return;
     var openAmount = self.getOpenAmount();
     if (arguments.length === 0) {
       shouldOpen = openAmount >= 0;
@@ -383,6 +385,10 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
     deregisterInstance();
     deregisterBackButtonAction();
     self.$scope = null;
+    if(self.content) {
+      self.content.element = null;
+      self.content = null;
+    }
   });
 
   self.initialize({

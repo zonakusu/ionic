@@ -344,7 +344,8 @@ ion-infinite-scroll {
 }
 .pane,
 .view,
-.view-container {
+.view-container,
+.view-pane {
   position: absolute;
   top: 0;
   right: 0;
