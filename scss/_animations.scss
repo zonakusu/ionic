@@ -87,6 +87,100 @@ $ios-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1);
 
 
 
+// Android Transitions
+// -------------------------------
+
+$android-transition-view-duration:              4000ms;
+$android-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1);
+
+
+.android-transition.nav-forward {
+  background-color: #000;
+
+  .ng-animate {
+    // stage where the entering view will start from
+    @include translate3d(98%, 0, 0);
+  }
+
+  .view-pane-add {
+    // set the animation for the entering view
+    @include animation-name( slideInFromRight );
+    @include animation-duration( $android-transition-view-duration );
+    @include animation-timing-function( $android-transition-view-timing-function );
+    z-index: $z-index-view-above;
+  }
+
+  .view-pane-remove {
+    // set the animation for the leaving view
+    @include translate3d(0, 0, 0);
+    @include animation-name( fadeOutToPartial );
+    @include animation-duration( $android-transition-view-duration );
+    @include animation-timing-function( $android-transition-view-timing-function );
+    z-index: $z-index-view-below;
+  }
+
+}
+
+.android-transition.nav-back {
+  background-color: #000;
+
+  .ng-animate {
+    // stage where the entering view will start from
+    @include translate3d(0, 0, 0);
+  }
+
+  .view-pane-add {
+    // set the animation for the entering view
+    @include animation-name( fadeInFromPartial );
+    @include animation-duration( $android-transition-view-duration );
+    @include animation-timing-function( $android-transition-view-timing-function );
+    z-index: $z-index-view-below;
+  }
+
+  .view-pane-remove {
+    // set the animation for the leaving view
+    @include animation-name( slideOutToRight );
+    @include animation-duration( $android-transition-view-duration );
+    @include animation-timing-function( $android-transition-view-timing-function );
+    z-index: $z-index-view-above;
+  }
+
+}
+
+.android-transition.nav-enter,
+.android-transition.nav-exit {
+
+  .ng-animate {
+    // stage where the entering view will start from
+    @include translate3d(0, 0, 0);
+  }
+
+  .view-pane-add {
+    // set the animation for the entering view
+    @include animation-name( fadeIn );
+    @include animation-duration( $android-transition-view-duration / 2 );
+    @include animation-timing-function( $android-transition-view-timing-function );
+    z-index: $z-index-view-above;
+  }
+
+  .view-pane-remove {
+    // set the animation for the leaving view
+    @include animation-name( fadeOutToPartial );
+    @include animation-duration( $android-transition-view-duration / 2 );
+    @include animation-timing-function( $android-transition-view-timing-function );
+    z-index: $z-index-view-below;
+  }
+
+}
+
+.menu-open .ios-transition.nav-back .ng-animate .view-pane-add,
+.menu-open .ios-transition.nav-back .ng-animate .view-pane-remove,
+.menu-open .ios-transition.nav-forward .ng-animate .view-pane-add,
+.menu-open .ios-transition.nav-forward .ng-animate .view-pane-remove {
+  @include animation-duration( 0 );
+}
+
+
 // Intermediate Settings Between Steps Of A Transition
 // -------------------------------
 // These prevent flickers as elements are added and removed,

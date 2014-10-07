@@ -156,9 +156,6 @@ function( $ionicViewService, $state) {
           // histories and nav stacks along with how views should enter/leave
           var transition = $ionicViewService.getTransition(navViewScope, navViewElement, navViewAttrs, currentLocals);
 
-          // let's not continue if its not a valid transition
-          if( !transition.isValid() ) return;
-
           // update the latestLocals
           latestLocals = currentLocals;
           viewData.state = currentLocals.$$state;
@@ -166,17 +163,19 @@ function( $ionicViewService, $state) {
           // init the transition of views for this nav-view directive
           childDirection = null;
           transition.init(function(){
+            // compiled, in the dom and linked, now animate
+            // and pass in a childDirection if one was emitted
             transition.animate( childDirection );
           });
 
         }
 
         var childDirection;
-        function childViewRegister(ev, childRegisterData) {
-          childDirection = childRegisterData;
+        function childViewRegisteredDirection(ev, d) {
+          childDirection = d;
         }
-
-        navViewScope.$on('$ionicView.direction', childViewRegister);
+        // list for any child nav-views that emit a direction
+        navViewScope.$on('$ionicView.direction', childViewRegisteredDirection);
 
       };
     }

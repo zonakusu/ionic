@@ -75,7 +75,6 @@ function($provide) {
 
       if(leavingElement) {
           leavingElement.addClass(CSS_VIEW_LEAVING)
-                        .addClass('view')
                         .removeClass(CSS_VIEW_CACHE)
                         .addClass(CSS_ANIMATION_SUPER);
 
@@ -139,7 +138,6 @@ function($provide) {
       for(var x=0; x<CSS_DIRECTIONS.length; x++) {
         parentElement.removeClass(CSS_DIRECTIONS[x]);
       }
-
     };
 
     $animate.useAnimation = function(val) {
