@@ -56,7 +56,7 @@ function($ionicHistory, $ionicClickBlock, $ionicConfig, $ionicViewConfig, $compi
   }
 
 
-  return {
+  var viewRenderer = {
 
     transition: function(navViewScope, navViewElement, navViewAttrs, viewLocals, registerData, enteringView) {
       var transitionId = ++transitionCounter;
@@ -126,13 +126,12 @@ function($ionicHistory, $ionicClickBlock, $ionicConfig, $ionicViewConfig, $compi
 
         },
 
-
         transition: function(childDirection) {
-          var transData = trans.getTransitionData(viewLocals, enteringEle, childDirection);
+          var transData = viewRenderer.getTransitionData(viewLocals, enteringEle, childDirection, direction);
 
           trans.before(transData);
 
-          $animate.transition( transData.animation, transData.direction, enteringEle, leavingEle, function(){
+          $animate.transition( transData.transition, transData.direction, enteringEle, leavingEle, function(){
 
             if(transitionId === transitionCounter) {
               // only run complete on the most recent transition
@@ -145,24 +144,6 @@ function($ionicHistory, $ionicClickBlock, $ionicConfig, $ionicViewConfig, $compi
             // clean up any references that could cause memory issues
             registerData = enteringView = enteringEle = leavingEle = null;
           });
-        },
-
-
-        getTransitionData: function(viewLocals, enteringEle, childDirection) {
-          // Priority
-          // 1) attribute directive
-          // 2) entering element's attribute
-          // 3) entering view's $state config property
-          // 4) view registration data
-          // 5) global config
-          // 6) fallback value
-
-          var viewState = viewLocals && viewLocals.$$state && viewLocals.$$state.self || {};
-
-          return {
-            animation: nextTransition || enteringEle.attr('view-transition') || viewState.viewTransition || ($ionicConfig.viewTransition === 'platform' ? $ionicViewConfig.transition : $ionicConfig.viewTransition),
-            direction: nextDirection || enteringEle.attr('view-direction') || viewState.viewDirection || childDirection || direction || DIRECTION_NONE
-          };
         },
 
         render: function(callback) {
@@ -211,18 +192,14 @@ function($ionicHistory, $ionicClickBlock, $ionicConfig, $ionicViewConfig, $compi
         },
 
         before: function(transData) {
-          if(enteringEle) {
-            var enteringScope = jqLite(enteringEle).scope();
-            if(enteringScope) {
-              enteringScope.$broadcast('$ionicView.beforeEnter', transData);
-            }
+          var enteringScope = enteringEle && enteringEle.scope();
+          if(enteringScope) {
+            enteringScope.$broadcast('$ionicView.beforeEnter', transData);
           }
 
-          if(leavingEle) {
-            var leavingScope = jqLite(leavingEle).scope();
-            if(leavingScope) {
-              leavingScope.$broadcast('$ionicView.beforeLeave', transData);
-            }
+          var leavingScope = leavingEle && leavingEle.scope();
+          if(leavingScope) {
+            leavingScope.$broadcast('$ionicView.beforeLeave', transData);
           }
         },
 
@@ -284,6 +261,23 @@ function($ionicHistory, $ionicClickBlock, $ionicConfig, $ionicViewConfig, $compi
       return trans;
     },
 
+    getTransitionData: function(viewLocals, enteringEle, childDirection, viewDirection) {
+      // Priority
+      // 1) attribute directive
+      // 2) entering element's attribute
+      // 3) entering view's $state config property
+      // 4) view registration data
+      // 5) global config
+      // 6) fallback value
+
+      var viewState = viewLocals && viewLocals.$$state && viewLocals.$$state.self || {};
+
+      return {
+        transition: nextTransition || enteringEle && enteringEle.attr('view-transition') || viewState.viewTransition || $ionicConfig.viewTransition === 'platform' && $ionicViewConfig.transition || $ionicConfig.viewTransition,
+        direction: nextDirection || enteringEle && enteringEle.attr('view-direction') || viewState.viewDirection || childDirection || viewDirection || 'none'
+      };
+    },
+
     nextTransition: function(val) {
       nextTransition = val;
     },
@@ -293,5 +287,7 @@ function($ionicHistory, $ionicClickBlock, $ionicConfig, $ionicViewConfig, $compi
     }
 
   };
+
+  return viewRenderer;
 
 }]);
