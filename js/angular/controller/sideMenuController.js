@@ -17,6 +17,7 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
     self.right = options.right;
     self.setContent(options.content);
     self.dragThresholdX = options.dragThresholdX || 10;
+    $ionicViewService.registerHistory(self.$scope);
   };
 
   /**

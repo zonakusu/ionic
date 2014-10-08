@@ -131,8 +131,8 @@ describe('Ionic nav-view', function() {
       .state('ionViewCacheFalseProperty', ionViewCacheFalsePropertyState);
   }));
 
-  beforeEach(inject(function(_$compile_, _$animate_, $ionicViewService, $ionicConfig, $rootScope) {
-    viewService = $ionicViewService;
+  beforeEach(inject(function(_$compile_, _$animate_, $ionicHistory, $ionicConfig, $rootScope) {
+    viewService = $ionicHistory;
     $compile = _$compile_;
     $animate = _$animate_;
     scope = $rootScope.$new();

@@ -6,12 +6,12 @@ IonicModule.config([
 function($provide) {
   function $AnimateDecorator($animate, $q, $timeout) {
 
-    var CSS_DIRECTIONS = 'nav-forward nav-back nav-enter nav-exit nav-switch'.split(' ');
+    var CSS_DIRECTIONS = 'nav-forward nav-back nav-enter nav-exit nav-swap'.split(' ');
     var CSS_VIEW_ACTIVE = 'view-active';
     var CSS_VIEW_CACHE = 'view-cache';
     var CSS_VIEW_ENTERING = 'view-entering';
     var CSS_VIEW_LEAVING = 'view-leaving';
-    var CSS_ANIMATION_SUPER = 'view-pane';
+    var CSS_ANIMATION_SUPER = 'nav-view';
     var NG_ANIMATE_PARENT_KEY = '$$ngAnimateKey';
 
     var usedAnimationClasses = [];
@@ -34,17 +34,17 @@ function($provide) {
     };
 
 
-    $animate.doAnimation = function(animationClass, navDirection) {
+    $animate.shouldAnimate = function(animationClass, navDirection) {
       return !!(useAnimation && navDirection && navDirection !== 'none' && animationClass && animationClass !== 'none');
     };
 
 
-    $animate.stage = function(doAnimation, animationClass, navDirection, parentElement, enteringElement, leavingElement) {
+    $animate.stage = function(shouldAnimate, animationClass, navDirection, parentElement, enteringElement, leavingElement) {
 
       var x, isExistingAnimationClass;
 
       for(x=0; x<usedAnimationClasses.length; x++) {
-        if(usedAnimationClasses[x] === animationClass && doAnimation) {
+        if(usedAnimationClasses[x] === animationClass && shouldAnimate) {
           isExistingAnimationClass = true;
         } else {
           parentElement.removeClass( usedAnimationClasses[x] );
@@ -57,7 +57,7 @@ function($provide) {
         }
       }
 
-      if( doAnimation ) {
+      if( shouldAnimate ) {
         if(!isExistingAnimationClass) {
           usedAnimationClasses.push(animationClass);
         }
@@ -84,7 +84,7 @@ function($provide) {
                         .removeClass(CSS_VIEW_CACHE)
                         .addClass(CSS_ANIMATION_SUPER);
 
-        if( doAnimation ) {
+        if( shouldAnimate ) {
           leavingElement.addClass('ng-animate');
         }
       }

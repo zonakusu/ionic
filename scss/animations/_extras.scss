@@ -16,7 +16,7 @@ $zoom-switch-container-bg-color:         #333 !default;
     @include translate3d(98%, 0, 0);
   }
 
-  .view-pane-add {
+  .nav-view-add {
     // set the animation for the entering view
     @include animation-name( zoomSwitchInFromRight );
     @include animation-duration( $zoom-switch-view-duration );
@@ -24,7 +24,7 @@ $zoom-switch-container-bg-color:         #333 !default;
     z-index: $z-index-view-above;
   }
 
-  .view-pane-remove {
+  .nav-view-remove {
     // set the animation for the leaving view
     @include animation-name( zoomSwitchOutToLeft );
     @include animation-duration( $zoom-switch-view-duration );
@@ -42,7 +42,7 @@ $zoom-switch-container-bg-color:         #333 !default;
     @include translate3d(-33%, 0, 0);
   }
 
-  .view-pane-add {
+  .nav-view-add {
     // set the animation for the entering view
     @include animation-name( zoomSwitchInFromLeft );
     @include animation-duration( $zoom-switch-view-duration );
@@ -50,7 +50,7 @@ $zoom-switch-container-bg-color:         #333 !default;
     z-index: $z-index-view-below;
   }
 
-  .view-pane-remove {
+  .nav-view-remove {
     // set the animation for the leaving view
     @include animation-name( zoomSwitchOutToRight );
     @include animation-duration( $zoom-switch-view-duration );
@@ -68,7 +68,7 @@ $zoom-switch-container-bg-color:         #333 !default;
     @include translate3d(0, 0, 0);
   }
 
-  .view-pane-add {
+  .nav-view-add {
     // set the animation for the entering view
     @include animation-name( fadeIn );
     @include animation-duration( $zoom-switch-view-duration / 2 );
@@ -76,7 +76,7 @@ $zoom-switch-container-bg-color:         #333 !default;
     z-index: $z-index-view-above;
   }
 
-  .view-pane-remove {
+  .nav-view-remove {
     // set the animation for the leaving view
     @include animation-name( fadeOutToPartial );
     @include animation-duration( $zoom-switch-view-duration / 2 );

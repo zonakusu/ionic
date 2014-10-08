@@ -32,21 +32,21 @@ describe('tabs', function() {
       expect(ctrl.selectedIndex()).toBe(-1);
     });
 
-    it('.add should add tab and NOT select if empty, & set historyId', inject(function($ionicViewService) {
+    it('.add should add tab and NOT select if empty, & set historyId', inject(function($ionicHistory) {
       var tab1 = {};
       var tab2 = {};
-      spyOn($ionicViewService, 'registerHistory');
+      spyOn($ionicHistory, 'registerHistory');
       spyOn(ctrl, 'select');
 
       ctrl.add(tab1);
       ctrl.select(tab1);
-      expect($ionicViewService.registerHistory).toHaveBeenCalledWith(tab1);
+      expect($ionicHistory.registerHistory).toHaveBeenCalledWith(tab1);
       expect(ctrl.tabs).toEqual([tab1]);
       expect(ctrl.select).toHaveBeenCalledWith(tab1);
 
       ctrl.select.reset();
       ctrl.add(tab2);
-      expect($ionicViewService.registerHistory).toHaveBeenCalledWith(tab2);
+      expect($ionicHistory.registerHistory).toHaveBeenCalledWith(tab2);
       expect(ctrl.tabs).toEqual([tab1, tab2]);
       expect(ctrl.select).not.toHaveBeenCalled();
     }));
@@ -117,8 +117,8 @@ describe('tabs', function() {
       expect(ctrl.selectedTab()).toBe(tab1);
     });
 
-    it('.select on selected tab should do nothing or go to history root', inject(function($ionicViewService) {
-      spyOn($ionicViewService, 'goToHistoryRoot');
+    it('.select on selected tab should do nothing or go to history root', inject(function($ionicHistory) {
+      spyOn($ionicHistory, 'goToHistoryRoot');
       var tab = { $historyId: '1' };
       ctrl.add(tab);
       ctrl.select(tab);
@@ -126,10 +126,10 @@ describe('tabs', function() {
 
       //Do nothing unless emit event is passed
       ctrl.select(tab);
-      expect($ionicViewService.goToHistoryRoot).not.toHaveBeenCalled();
+      expect($ionicHistory.goToHistoryRoot).not.toHaveBeenCalled();
 
       ctrl.select(tab, true);
-      expect($ionicViewService.goToHistoryRoot).toHaveBeenCalledWith(tab.$historyId);
+      expect($ionicHistory.goToHistoryRoot).toHaveBeenCalledWith(tab.$historyId);
     }));
 
     it('.select should deselect all other tabs and set selected', function() {
@@ -172,7 +172,7 @@ describe('tabs', function() {
       expect(scope.$emit).not.toHaveBeenCalled();
       ctrl.select(tab3, true);
       expect(scope.$emit).toHaveBeenCalled();
-      expect(eName).toBe('viewState.changeHistory');
+      expect(eName).toBe('$ionicHistory.change');
       expect(eData).toEqual({
         type: 'tab',
         tabIndex: 2,
@@ -328,15 +328,15 @@ describe('tabs', function() {
       expect($state.includes).toHaveBeenCalledWith('def');
     }));
 
-    it('.navNameMatchesState', inject(function($ionicViewService) {
-      spyOn($ionicViewService, 'isCurrentStateNavView').andReturn(123);
+    it('.navNameMatchesState', inject(function($ionicHistory) {
+      spyOn($ionicHistory, 'isCurrentStateNavView').andReturn(123);
 
       var ctrl = setup();
       expect(ctrl.navNameMatchesState()).toBeFalsy();
 
       ctrl.navViewName = 'foo';
       expect(ctrl.navNameMatchesState()).toBe(123);
-      expect($ionicViewService.isCurrentStateNavView).toHaveBeenCalledWith('foo');
+      expect($ionicHistory.isCurrentStateNavView).toHaveBeenCalledWith('foo');
     }));
   });
 
@@ -450,7 +450,7 @@ describe('tabs', function() {
       expect(tabEl.controller('ionTab').navViewName).toBeUndefined();
     });
 
-    it('should set navViewName if a child ion-nav-view', inject(function($ionicViewService, $rootScope) {
+    it('should set navViewName if a child ion-nav-view', inject(function($ionicHistory, $rootScope) {
       setup('', '<ion-nav-view name="banana"></ion-nav-view>');
       spyOn(tabsCtrl, 'select');
       var tab = tabsCtrl.tabs[0];

@@ -30,8 +30,8 @@
  * {@link ionic.directive:ionNavBar} by default.
  */
 IonicModule
-.directive('ionView', ['$ionicViewService', '$rootScope',
-           function( $ionicViewService,   $rootScope) {
+.directive('ionView', ['$ionicHistory', '$rootScope',
+           function( $ionicHistory,   $rootScope) {
   return {
     restrict: 'EA',
     priority: 1000,

@@ -44,8 +44,8 @@ IonicModule
   '$ionicBind',
   '$compile',
   '$state',
-  '$ionicViewService',
-function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewService) {
+  '$ionicHistory',
+function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) {
 
   //Returns ' key="value"' if value exists
   function attrStr(k,v) {

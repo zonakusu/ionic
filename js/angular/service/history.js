@@ -3,29 +3,24 @@
  * TODO document
  */
 IonicModule
-
-.constant('$ionicViewConfig', {
-  transition: 'ios-transition'
-})
-
 .run([
   '$rootScope',
   '$state',
   '$location',
   '$document',
   '$ionicPlatform',
-  '$ionicViewService',
-function($rootScope, $state, $location, $document, $ionicPlatform, $ionicViewService) {
+  '$ionicHistory',
+function($rootScope, $state, $location, $document, $ionicPlatform, $ionicHistory) {
 
   // always reset the keyboard state when change stage
   $rootScope.$on('$stateChangeStart', function(){
     ionic.keyboard.hide();
   });
 
-  $rootScope.$on('viewState.changeHistory', function(e, data) {
+  $rootScope.$on('$ionicHistory.change', function(e, data) {
     if(!data) return;
 
-    var viewHistory = $ionicViewService.viewHistory();
+    var viewHistory = $ionicHistory.viewHistory();
 
     var hist = (data.historyId ? viewHistory.histories[ data.historyId ] : null );
     if(hist && hist.cursor > -1 && hist.cursor < hist.stack.length) {
@@ -80,45 +75,29 @@ function($rootScope, $state, $location, $document, $ionicPlatform, $ionicViewSer
 
 }])
 
-.factory('$ionicViewService', [
+.factory('$ionicHistory', [
   '$rootScope',
   '$state',
-  '$compile',
-  '$controller',
   '$location',
   '$window',
-  '$timeout',
-  '$ionicClickBlock',
-  '$ionicConfig',
-  '$animate',
-  '$ionicViewConfig',
-function($rootScope, $state, $compile, $controller, $location, $window, $timeout, $ionicClickBlock, $ionicConfig, $animate, $ionicViewConfig) {
-
-  // data keys for jqLite elements
-  var DATA_ELE_IDENTIFIER = '$ionicEleId';
-  var DATA_VIEW_ACCESSED = '$ionicAccessed';
-  var DATA_NO_CACHE = '$ionicNoCache';
+function($rootScope, $state, $location, $window) {
 
   // history actions while navigating views
   var ACTION_INITIAL_VIEW = 'initialView';
   var ACTION_NEW_VIEW = 'newView';
   var ACTION_MOVE_BACK = 'moveBack';
   var ACTION_MOVE_FORWARD = 'moveForward';
-  var ACTION_HISTORY_TAG_NAME = 'historyView';
 
   // direction of navigation
   var DIRECTION_BACK = 'back';
   var DIRECTION_FORWARD = 'forward';
   var DIRECTION_ENTER = 'enter';
   var DIRECTION_EXIT = 'exit';
-  var DIRECTION_SWITCH = 'switch';
+  var DIRECTION_SWAP = 'swap';
   var DIRECTION_NONE = 'none';
 
-  var transitionCounter = 0;
   var stateChangeCounter = 0;
   var lastStateId;
-  var nextTransition;
-  var nextDirection;
 
   var viewHistory = {
     histories: { root: { historyId: 'root', parentHistoryId: null, stack: [], cursor: -1 } },
@@ -210,60 +189,56 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
     return { historyId: 'root', scope: $rootScope };
   }
 
-  function setNavViews(viewId, rsp) {
+  function setNavViews(viewId) {
     viewHistory.currentView = getViewById(viewId);
     viewHistory.backView = getBackView(viewHistory.currentView);
     viewHistory.forwardView = getForwardView(viewHistory.currentView);
   }
 
-  function createViewElement(viewLocals) {
-    if(viewLocals && viewLocals.$template) {
-      var div = jqLite('<div>').html(viewLocals.$template);
-      var nodes = div.contents();
-      for(var i = 0; i < nodes.length; i++) {
-        if(nodes[i].nodeType == 1) {
-          // first try to get just a child element
-          return nodes.eq(i);
+  function getCurrentStateId() {
+    var id;
+    if($state && $state.current && $state.current.name) {
+      id = $state.current.name;
+      if($state.params) {
+        for(var key in $state.params) {
+          if($state.params.hasOwnProperty(key) && $state.params[key]) {
+            id += "_" + key + "=" + $state.params[key];
+          }
         }
       }
-      // fallback to return the div so it has one parent element
-      return div;
+      return id;
     }
-  }
-
-  function getViewElementIdentifier(locals, view) {
-    if(locals && view) {
-      if(locals.$$state.self.abstract) {
-        return locals.$$state.self.name;
-      }
-      if(view.stateId) return view.stateId;
-    }
+    // if something goes wrong make sure its got a unique stateId
     return ionic.Utils.nextUid();
   }
 
-  return {
-
-    viewHistory: function(val) {
-      if(arguments.length) {
-        viewHistory = val;
+  function getCurrentStateParams() {
+    var rtn;
+    if ($state && $state.params) {
+      for(var key in $state.params) {
+        if($state.params.hasOwnProperty(key)) {
+          rtn = rtn || {};
+          rtn[key] = $state.params[key];
+        }
       }
-      return viewHistory;
-    },
+    }
+    return rtn;
+  }
+
+
+  return {
 
     register: function(parentScope, viewLocals) {
 
-      var currentStateId = this.getCurrentStateId(),
+      var currentStateId = getCurrentStateId(),
           hist = getHistory(parentScope),
           currentView = viewHistory.currentView,
           backView = viewHistory.backView,
           forwardView = viewHistory.forwardView,
-          nextViewOptions = this.nextViewOptions(),
           viewId = null,
           action = null,
           direction = DIRECTION_NONE,
           historyId = hist.historyId,
-          showBack = false,
-          ele,
           tmp;
 
       if( viewLocals && viewLocals.$$state && viewLocals.$$state.self && viewLocals.$$state.self.abstract ) {
@@ -303,7 +278,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           } else {
             tmp = getHistoryById(currentView.historyId);
             if(tmp && tmp.parentHistoryId === hist.parentHistoryId) {
-              direction = DIRECTION_SWITCH;
+              direction = DIRECTION_SWAP;
             }
           }
         }
@@ -325,7 +300,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           } else {
             tmp = getHistoryById(currentView.historyId);
             if(tmp && tmp.parentHistoryId === hist.parentHistoryId) {
-              direction = DIRECTION_SWITCH;
+              direction = DIRECTION_SWAP;
             }
           }
         }
@@ -345,7 +320,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
         viewId = switchToView.viewId;
         historyId = switchToView.historyId;
         action = ACTION_MOVE_BACK;
-        direction = DIRECTION_SWITCH;
+        direction = DIRECTION_SWAP;
 
         tmp = getHistoryById(currentView.historyId);
         if(tmp && tmp.parentHistoryId === historyId) {
@@ -367,13 +342,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
         }
 
       } else {
-        // does not exist yet
-        ele = createViewElement(viewLocals);
-        if(!ele) {
-          return {
-            action: 'invalidLocals'
-          };
-        }
 
         // set a new unique viewId
         viewId = ionic.Utils.nextUid();
@@ -410,7 +378,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
             tmp = getHistoryById(currentView.historyId);
             if(tmp && tmp.parentHistoryId === hist.parentHistoryId) {
-              direction = DIRECTION_SWITCH;
+              direction = DIRECTION_SWAP;
 
             } else {
               tmp = getHistoryById(tmp.parentHistoryId);
@@ -438,8 +406,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           backViewId: (currentView && currentView.viewId ? currentView.viewId : null),
           forwardViewId: null,
           stateId: currentStateId,
-          stateName: this.getCurrentStateName(),
-          stateParams: this.getCurrentStateParams(),
+          stateName: this.currentStateName(),
+          stateParams: getCurrentStateParams(),
           url: $location.url()
         });
 
@@ -447,14 +415,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
         hist.stack.push(viewHistory.views[viewId]);
       }
 
-      if(nextViewOptions) {
-        if(nextViewOptions.disableAnimate) direction = null;
-        if(nextViewOptions.disableBack) viewHistory.views[viewId].backViewId = null;
-        this.nextViewOptions(null);
-      }
-
       setNavViews(viewId);
-      showBack = !!(viewHistory.backView && viewHistory.backView.historyId === viewHistory.currentView.historyId);
 
       hist.cursor = viewHistory.currentView.index;
 
@@ -465,8 +426,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
         action: action,
         direction: direction,
         historyId: historyId,
-        showBack: showBack,
-        ele: ele
+        showBack: !!(viewHistory.backView && viewHistory.backView.historyId === viewHistory.currentView.historyId)
       };
     },
 
@@ -475,62 +435,35 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
       return scope.$historyId;
     },
 
+    viewHistory: function() {
+      return viewHistory;
+    },
+
     createView: function(data) {
       var newView = new View();
       return newView.initialize(data);
     },
 
-    getCurrentView: function() {
+    currentView: function() {
       return viewHistory.currentView;
     },
 
-    getBackView: function() {
+    backView: function() {
       return viewHistory.backView;
     },
 
-    getForwardView: function() {
+    forwardView: function() {
       return viewHistory.forwardView;
     },
 
-    getCurrentStateName: function() {
+    getViewById: getViewById,
+
+    currentStateName: function() {
       return ($state && $state.current ? $state.current.name : null);
     },
 
     isCurrentStateNavView: function(navView) {
-      return ($state &&
-              $state.current &&
-              $state.current.views &&
-              $state.current.views[navView] ? true : false);
-    },
-
-    getCurrentStateParams: function() {
-      var rtn;
-      if ($state && $state.params) {
-        for(var key in $state.params) {
-          if($state.params.hasOwnProperty(key)) {
-            rtn = rtn || {};
-            rtn[key] = $state.params[key];
-          }
-        }
-      }
-      return rtn;
-    },
-
-    getCurrentStateId: function() {
-      var id;
-      if($state && $state.current && $state.current.name) {
-        id = $state.current.name;
-        if($state.params) {
-          for(var key in $state.params) {
-            if($state.params.hasOwnProperty(key) && $state.params[key]) {
-              id += "_" + key + "=" + $state.params[key];
-            }
-          }
-        }
-        return id;
-      }
-      // if something goes wrong make sure its got a unique stateId
-      return ionic.Utils.nextUid();
+      return !!($state && $state.current && $state.current.views && $state.current.views[navView]);
     },
 
     goToHistoryRoot: function(historyId) {
@@ -548,264 +481,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           hist.stack[0].go();
         }
       }
-    },
-
-    nextViewOptions: function(opts) {
-      if(arguments.length) {
-        this._nextOpts = opts;
-      } else {
-        return this._nextOpts;
-      }
-    },
-
-    nextTransition: function(val) {
-      nextTransition = val;
-    },
-
-    nextDirection: function(val) {
-      nextDirection = val;
-    },
-
-    getTransition: function(navViewScope, navViewElement, navViewAttrs, viewLocals, registerData, enteringView) {
-      var transitionId = ++transitionCounter;
-
-      // injected registerData used for testing
-      registerData = registerData || this.register(navViewScope, viewLocals);
-
-      var direction = registerData.direction;
-
-      if(direction === DIRECTION_ENTER || direction === DIRECTION_EXIT) {
-        // this direction should happen on the parent nav-view, not this one
-        // emit it up to the parent, and this direction should be none
-        navViewScope.$emit('$ionicView.direction', direction);
-        if(direction === DIRECTION_ENTER) {
-          direction = DIRECTION_NONE;
-        }
-      }
-
-      // injected enteringView used for testing
-      enteringView = enteringView || getViewById(registerData.viewId) || {};
-
-      // get a reference to an entering/leaving element if they exist
-      // loop through to see if the view is already in the navViewElement
-      var enteringEle, leavingEle;
-      var viewElements = navViewElement.children();
-      var enteringEleIdentifier = getViewElementIdentifier(viewLocals, enteringView);
-
-      for(var x=0, l=viewElements.length; x<l; x++) {
-
-        if(enteringEleIdentifier && viewElements.eq(x).data(DATA_ELE_IDENTIFIER) == enteringEleIdentifier) {
-          // we found an existing element in the DOM that should be entering the view
-          enteringEle = viewElements.eq(x);
-
-        } else if(viewElements.eq(x).hasClass('view-active')) {
-          // this element is currently the active one, so it will be the leaving element
-          leavingEle = viewElements.eq(x);
-        }
-
-        if(enteringEle && leavingEle) break;
-      }
-
-      // if we got an entering element than it's already in the DOM
-      var alreadyInDom = !!enteringEle;
-
-      if(!enteringEle && registerData.ele) {
-        // already created a new element within the register
-        // instead of doing it twice, just use the one we got from register
-        enteringEle = registerData.ele;
-      }
-
-      if(!enteringEle) {
-        // still no existing element to use
-        // create it using existing template/scope/locals
-        enteringEle = createViewElement(viewLocals);
-      }
-
-      function cleanup() {
-        if(registerData) {
-          registerData.ele = null;
-          registerData = null;
-        }
-        enteringView = null;
-        enteringEle = null;
-        leavingEle = null;
-      }
-
-
-      var trans = {
-
-        init: function(callback) {
-
-          $ionicClickBlock.show();
-
-          trans.render(function(){
-
-            callback && callback();
-
-          });
-
-        },
-
-
-        animate: function(childDirection) {
-          var d = trans.getAnimationDirection(viewLocals, enteringEle, childDirection);
-
-          trans.before(d);
-
-          $animate.transition( d.animation, d.direction, enteringEle, leavingEle, function(transData){
-
-            if(transitionId === transitionCounter) {
-              // only run complete on the most recent transition
-              // remove any DOM nodes
-              trans.after(transData);
-
-              // allow clicks to hapen again after the transition
-              $ionicClickBlock.hide();
-            }
-
-            // always clean up any references that could cause memory issues
-            cleanup();
-          });
-        },
-
-
-        getAnimationDirection: function(viewLocals, enteringEle, childDirection) {
-          // Priority
-          // 1) attribute directive
-          // 2) entering element's attribute
-          // 3) entering view's $state config property
-          // 4) view registration data
-          // 5) global config
-          // 6) fallback value
-
-          var viewState = viewLocals && viewLocals.$$state && viewLocals.$$state.self || {};
-
-          return {
-            animation: nextTransition || enteringEle.attr('view-transition') || viewState.viewTransition || ($ionicConfig.viewTransition === 'platform' ? $ionicViewConfig.transition : $ionicConfig.viewTransition),
-            direction: nextDirection || enteringEle.attr('view-direction') || viewState.viewDirection || childDirection || direction || DIRECTION_NONE
-          };
-        },
-
-        render: function(callback) {
-          if(!alreadyInDom) {
-            // the entering element is not already in the DOM
-            // hasn't been compiled and isn't linked up yet
-
-            // add the DATA_NO_CACHE data
-            // if the current state has cache:false
-            // or the element has cache-view="false" attribute
-            if( (viewLocals && viewLocals.$$state.self.cache === false) ||
-                (enteringEle.attr('cache-view') == 'false') ) {
-              enteringEle.data(DATA_NO_CACHE, true);
-            }
-
-            // compile the entering element and get the link function
-            var link = $compile(enteringEle);
-
-            // existing elements in the DOM are looked up by their state name and state id
-            enteringEle.data(DATA_ELE_IDENTIFIER, getViewElementIdentifier(viewLocals, enteringView) );
-
-            // append the entering element to the DOM
-            enteringEle.addClass('view-entering');
-            navViewElement.append(enteringEle);
-
-            // create a new scope for the entering element
-            var scope = navViewScope.$new();
-
-            // if it's got a controller then spin it all up
-            if (viewLocals.$$controller) {
-              viewLocals.$scope = scope;
-              var controller = $controller(viewLocals.$$controller, viewLocals);
-              navViewElement.children().data('$ngControllerController', controller);
-            }
-
-            // run link with the view's scope
-            link(scope);
-          }
-
-          // update that this view was just accessed
-          enteringEle.data(DATA_VIEW_ACCESSED, Date.now());
-
-          $timeout(function(){
-            callback();
-          }, 16);
-        },
-
-        before: function(transData) {
-          if(enteringEle) {
-            var enteringScope = jqLite(enteringEle).scope();
-            if(enteringScope) {
-              enteringScope.$broadcast('$ionicView.beforeEnter', transData);
-            }
-          }
-
-          if(leavingEle) {
-            var leavingScope = jqLite(leavingEle).scope();
-            if(leavingScope) {
-              leavingScope.$broadcast('$ionicView.beforeLeave', transData);
-            }
-          }
-        },
-
-        after: function(transData) {
-          var viewElements = navViewElement.children();
-          var viewElementsLength = viewElements.length;
-          var x, viewElement, removableEle;
-          var activeStateId = enteringEle.data(DATA_ELE_IDENTIFIER);
-
-          if(enteringEle) {
-            var enteringScope = jqLite(enteringEle).scope();
-            if(enteringScope) {
-              enteringScope.$broadcast('$ionicView.afterEnter', transData);
-              enteringScope.$emit('$viewContentLoaded', transData);
-            }
-          }
-
-          if(leavingEle) {
-            var leavingScope = jqLite(leavingEle).scope();
-            if(leavingScope) {
-              leavingScope.$broadcast('$ionicView.afterLeave', transData);
-            }
-          }
-
-          // check if any views should be removed
-          if( direction == DIRECTION_BACK && !$ionicConfig.cacheForwardViews && leavingEle ) {
-            // if they just navigated back we can destroy the forward view
-            // do not remove forward views if cacheForwardViews config is true
-            removableEle = leavingEle;
-
-          } else if( leavingEle && leavingEle.data(DATA_NO_CACHE) ) {
-            // remove if the leaving element has DATA_NO_CACHE===false
-            removableEle = leavingEle;
-
-          } else if( (viewElementsLength - 1) > $ionicConfig.maxCachedViews ) {
-            // check to see if we have more cached views than we should
-            // the total number of child elements has exceeded how many to keep in the DOM
-            var oldestAccess = Date.now();
-
-            for(x=0; x<viewElementsLength; x++) {
-              viewElement = viewElements.eq(x);
-
-              if( viewElement.data(DATA_VIEW_ACCESSED) < oldestAccess ) {
-                // remove the element that was the oldest to be accessed
-                oldestAccess = viewElement.data(DATA_VIEW_ACCESSED);
-                removableEle = viewElements.eq(x);
-              }
-            }
-          }
-
-          if(removableEle) {
-            // we found an element that should be removed
-            // destroy its scope, then remove the element
-            jqLite(removableEle).scope().$destroy();
-            removableEle.remove();
-          }
-
-          nextTransition = nextDirection = null;
-        }
-      };
-
-      return trans;
     },
 
     clearHistory: function() {

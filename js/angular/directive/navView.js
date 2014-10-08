@@ -95,9 +95,9 @@
  */
 IonicModule
 .directive('ionNavView', [
-  '$ionicViewService',
+  '$ionicViewRenderer',
   '$state',
-function( $ionicViewService, $state) {
+function( $ionicViewRenderer, $state) {
   // IONIC's fork of Angular UI Router, v0.2.10
   // the navView handles registering views in the history and how to transition between them
 
@@ -107,6 +107,7 @@ function( $ionicViewService, $state) {
     priority: 2000,
     transclude: true,
     controller: function(){},
+    //require: '^?ionNavView',
     compile: function (tElement, attr, transclude) {
 
       // a nav view element is a container for numerous views
@@ -152,20 +153,20 @@ function( $ionicViewService, $state) {
           // if the currentLocals are the same as THIS latestLocals, then nothing to do
           if (!currentLocals || (!firstTime && currentLocals === latestLocals)) return;
 
-          // register the view and figure out where it lives in the various
-          // histories and nav stacks along with how views should enter/leave
-          var transition = $ionicViewService.getTransition(navViewScope, navViewElement, navViewAttrs, currentLocals);
-
           // update the latestLocals
           latestLocals = currentLocals;
           viewData.state = currentLocals.$$state;
 
-          // init the transition of views for this nav-view directive
+          // register the view and figure out where it lives in the various
+          // histories and nav stacks along with how views should enter/leave
+          var renderer = $ionicViewRenderer.transition(navViewScope, navViewElement, navViewAttrs, currentLocals);
+
+          // init the rendering of views for this nav-view directive
           childDirection = null;
-          transition.init(function(){
+          renderer.init(function(){
             // compiled, in the dom and linked, now animate
             // and pass in a childDirection if one was emitted
-            transition.animate( childDirection );
+            renderer.transition( childDirection );
           });
 
         }

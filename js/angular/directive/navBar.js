@@ -81,12 +81,12 @@ IonicModule.constant('$ionicNavBarConfig', {
  */
 IonicModule
 .directive('ionNavBar', [
-  '$ionicViewService',
+  '$ionicHistory',
   '$rootScope',
   '$animate',
   '$compile',
   '$ionicNavBarConfig',
-function($ionicViewService, $rootScope, $animate, $compile, $ionicNavBarConfig) {
+function($ionicHistory, $rootScope, $animate, $compile, $ionicNavBarConfig) {
 
   var navBarContainer = '<div class="nav-bar-container hide"><div class="buttons left-buttons"></div><div class="title"></div><div class="buttons right-buttons"></div></div>';
 
