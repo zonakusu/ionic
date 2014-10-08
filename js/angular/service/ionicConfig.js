@@ -31,10 +31,10 @@ IonicModule
    * maximum cached is `0`, then after each view transition, the view's element will
    * be removed from the DOM, and the next time the same view is shown it will have to
    * re-compile, attach to the DOM, and link the element again.
-   * @param {number} maxNumber Maximum number of views to retain. Default `10`.
+   * @param {number} maxNumber Maximum number of views to retain. Default `15`.
    * @returns {number} How many views Ionic will hold onto until the a view is removed.
    */
-  config.maxCachedViews = 10;
+  config.maxCachedViews = 15;
 
 
   /**

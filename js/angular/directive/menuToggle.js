@@ -21,7 +21,7 @@
  * ```
  */
 IonicModule
-.directive('menuToggle', ['$ionicViewService', function($ionicViewService) {
+.directive('menuToggle', ['$ionicHistory', function($ionicHistory) {
   return {
     restrict: 'AC',
     require: '^ionSideMenus',

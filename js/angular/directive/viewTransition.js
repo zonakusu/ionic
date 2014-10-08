@@ -13,13 +13,13 @@
  * ```
  */
 IonicModule
-.directive('viewTransition', ['$ionicViewService', function($ionicViewService) {
+.directive('viewTransition', ['$ionicViewRenderer', function($ionicViewRenderer) {
   return {
     restrict: 'A',
     priority: 1000,
     link: function($scope, $element, $attr) {
       $element.bind('click', function(){
-        $ionicViewService.nextTransition( $attr.viewTransition );
+        $ionicViewRenderer.nextTransition( $attr.viewTransition );
       });
     }
   };

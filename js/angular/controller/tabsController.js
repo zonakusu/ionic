@@ -1,9 +1,9 @@
 IonicModule
 .controller('$ionicTabs', [
   '$scope',
-  '$ionicViewService',
+  '$ionicHistory',
   '$element',
-function($scope, $ionicViewService, $element) {
+function($scope, $ionicHistory, $element) {
   var _selectedTab = null;
   var self = this;
   self.tabs = [];
@@ -16,7 +16,7 @@ function($scope, $ionicViewService, $element) {
   };
 
   self.add = function(tab) {
-    $ionicViewService.registerHistory(tab);
+    $ionicHistory.registerHistory(tab);
     self.tabs.push(tab);
   };
 
@@ -64,7 +64,7 @@ function($scope, $ionicViewService, $element) {
 
     if (_selectedTab && _selectedTab.$historyId == tab.$historyId) {
       if (shouldEmitEvent) {
-        $ionicViewService.goToHistoryRoot(tab.$historyId);
+        $ionicHistory.goToHistoryRoot(tab.$historyId);
       }
     } else {
       forEach(self.tabs, function(tab) {
@@ -87,7 +87,7 @@ function($scope, $ionicViewService, $element) {
           url: tab.href,
           uiSref: tab.uiSref
         };
-        $scope.$emit('viewState.changeHistory', viewData);
+        $scope.$emit('$ionicHistory.change', viewData);
       }
     }
   };

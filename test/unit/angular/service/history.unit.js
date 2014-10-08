@@ -1,5 +1,5 @@
-describe('Ionic View Service', function() {
-  var viewService, viewLocals, rootScope, stateProvider, window;
+describe('Ionic History', function() {
+  var ionicHistory, viewLocals, rootScope, stateProvider, window;
 
   beforeEach(module('ionic', function ($stateProvider, $provide) {
     stateProvider = $stateProvider;
@@ -34,8 +34,8 @@ describe('Ionic View Service', function() {
 
   }));
 
-  beforeEach(inject(function($ionicViewService, $rootScope, $window) {
-    viewService = $ionicViewService;
+  beforeEach(inject(function($ionicHistory, $rootScope, $window) {
+    ionicHistory = $ionicHistory;
     rootScope = $rootScope;
     window = $window;
     window.history.go = function(val) { return val; };
@@ -44,23 +44,14 @@ describe('Ionic View Service', function() {
     };
   }));
 
-  it('should do nothing if the viewLocals are invalid', inject(function($state) {
-    var uiViewScope = {};
-    $state.go('home');
-    rootScope.$apply();
-    registerData = viewService.register(uiViewScope, null);
-
-    expect(registerData.action).toEqual('invalidLocals');
-  }));
-
   it('should create a new view', inject(function($location, $state) {
     $location.url('/home');
     var view1Scope = {};
-    var rsp = viewService.register(view1Scope, viewLocals);
+    var rsp = ionicHistory.register(view1Scope, viewLocals);
     expect(rsp.action).toEqual('initialView');
     expect(rsp.historyId).toEqual('root');
 
-    var currentView = viewService.getCurrentView();
+    var currentView = ionicHistory.currentView();
     expect(currentView.viewId).toBeDefined();
     expect(currentView.index).toEqual(0);
     expect(currentView.historyId).toBeDefined();
@@ -68,7 +59,7 @@ describe('Ionic View Service', function() {
     expect(currentView.forwardViewId).toEqual(null);
     expect(currentView.url).toEqual('/home');
 
-    var hist = viewService.viewHistory().histories.root;
+    var hist = ionicHistory.viewHistory().histories.root;
     expect(hist.cursor).toEqual(0);
     expect(hist.stack.length).toEqual(1);
   }));
@@ -76,30 +67,30 @@ describe('Ionic View Service', function() {
   it('should register two sequential views', inject(function($state) {
     $state.go('home');
     rootScope.$apply();
-    expect(viewService.getCurrentStateName()).toEqual('home');
+    expect(ionicHistory.currentStateName()).toEqual('home');
     var view1Scope = {};
-    var rsp = viewService.register(view1Scope, viewLocals);
-    expect(viewService.viewHistory().currentView.stateName).toEqual('home');
+    var rsp = ionicHistory.register(view1Scope, viewLocals);
+    expect(ionicHistory.viewHistory().currentView.stateName).toEqual('home');
 
     expect(rsp.viewId).not.toBeUndefined();
-    expect(viewService.viewHistory().views[rsp.viewId].viewId).toEqual(rsp.viewId);
-    expect(viewService.getBackView()).toEqual(null);
-    expect(viewService.getForwardView()).toEqual(null);
+    expect(ionicHistory.viewHistory().views[rsp.viewId].viewId).toEqual(rsp.viewId);
+    expect(ionicHistory.backView()).toEqual(null);
+    expect(ionicHistory.forwardView()).toEqual(null);
 
-    expect(viewService.viewHistory().currentView.stateName).toEqual('home');
-    var currentView = viewService.getCurrentView();
+    expect(ionicHistory.viewHistory().currentView.stateName).toEqual('home');
+    var currentView = ionicHistory.currentView();
     expect(currentView.index).toEqual(0);
 
     $state.go('about');
     rootScope.$apply();
-    expect(viewService.getCurrentStateName()).toEqual('about');
-    rsp = viewService.register({}, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('about');
+    rsp = ionicHistory.register({}, viewLocals);
     expect(rsp.action).toEqual('newView');
-    expect(viewService.getCurrentView().stateName).toEqual('about');
-    expect(viewService.getBackView().stateName).toEqual('home');
-    expect(viewService.getForwardView()).toEqual(null);
+    expect(ionicHistory.currentView().stateName).toEqual('about');
+    expect(ionicHistory.backView().stateName).toEqual('home');
+    expect(ionicHistory.forwardView()).toEqual(null);
 
-    var hist = viewService.viewHistory().histories.root;
+    var hist = ionicHistory.viewHistory().histories.root;
     expect(hist.cursor).toEqual(1);
     expect(hist.stack.length).toEqual(2);
   }));
@@ -107,20 +98,20 @@ describe('Ionic View Service', function() {
   it('should register views and go back to start', inject(function($state) {
     $state.go('home');
     rootScope.$apply();
-    var registerData = viewService.register({}, viewLocals);
-    expect(viewService.getCurrentView().stateName).toEqual('home');
-    expect(viewService.getBackView()).toEqual(null);
-    expect(viewService.getForwardView()).toEqual(null);
+    var registerData = ionicHistory.register({}, viewLocals);
+    expect(ionicHistory.currentView().stateName).toEqual('home');
+    expect(ionicHistory.backView()).toEqual(null);
+    expect(ionicHistory.forwardView()).toEqual(null);
     expect(registerData.direction).toEqual('none');
     expect(registerData.action).toEqual('initialView');
-    var currentView = viewService.getCurrentView();
+    var currentView = ionicHistory.currentView();
 
     $state.go('about');
     rootScope.$apply();
-    registerData = viewService.register({}, viewLocals);
-    currentView = viewService.getCurrentView();
-    var backView = viewService.getBackView();
-    var forwardView = viewService.getForwardView();
+    registerData = ionicHistory.register({}, viewLocals);
+    currentView = ionicHistory.currentView();
+    var backView = ionicHistory.backView();
+    var forwardView = ionicHistory.forwardView();
     expect(currentView.stateName).toEqual('about');
     expect(currentView.backViewId).toEqual(backView.viewId);
     expect(backView.stateName).toEqual('home');
@@ -128,31 +119,31 @@ describe('Ionic View Service', function() {
     expect(registerData.direction).toEqual('forward');
     expect(registerData.action).toEqual('newView');
 
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(1);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(2);
 
     $state.go('contact');
     rootScope.$apply();
-    registerData = viewService.register({}, viewLocals);
-    currentView = viewService.getCurrentView();
+    registerData = ionicHistory.register({}, viewLocals);
+    currentView = ionicHistory.currentView();
     //Set test value for remembered scroll
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
     expect(backView.stateName).toEqual('about');
     expect(currentView.backViewId).toEqual(backView.viewId);
-    expect(viewService.getForwardView()).toEqual(null);
+    expect(ionicHistory.forwardView()).toEqual(null);
     expect(registerData.direction).toEqual('forward');
     expect(registerData.action).toEqual('newView');
 
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(2);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(3);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(2);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(3);
 
     $state.go('about');
     rootScope.$apply();
-    registerData = viewService.register({}, viewLocals);
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    registerData = ionicHistory.register({}, viewLocals);
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
     expect(currentView.backViewId).toEqual(backView.viewId);
     expect(currentView.forwardViewId).toEqual(forwardView.viewId);
     expect(backView.stateName).toEqual('home');
@@ -160,15 +151,15 @@ describe('Ionic View Service', function() {
     expect(registerData.direction).toEqual('back');
     expect(registerData.action).toEqual('moveBack');
 
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(1);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(3);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(3);
 
     $state.go('home');
     rootScope.$apply();
-    registerData = viewService.register({}, viewLocals);
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    registerData = ionicHistory.register({}, viewLocals);
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
     expect(currentView.stateName).toEqual('home');
     expect(currentView.forwardViewId).toEqual(forwardView.viewId);
     expect(backView).toEqual(null);
@@ -176,58 +167,58 @@ describe('Ionic View Service', function() {
     expect(registerData.direction).toEqual('back');
     expect(registerData.action).toEqual('moveBack');
 
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(0);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(3);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(3);
   }));
 
   it('should register four views, and not go back to the first', inject(function($state) {
     var homeViewScope = {};
     $state.go('home');
     rootScope.$apply();
-    var homeReg = viewService.register(homeViewScope, viewLocals);
+    var homeReg = ionicHistory.register(homeViewScope, viewLocals);
     expect(homeReg.action).toEqual('initialView');
-    expect(viewService.getCurrentStateName()).toEqual('home');
-    expect(viewService.getCurrentView().stateName).toEqual('home');
-    expect(viewService.getBackView()).toEqual(null);
-    expect(viewService.getForwardView()).toEqual(null);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(0);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(1);
+    expect(ionicHistory.currentStateName()).toEqual('home');
+    expect(ionicHistory.currentView().stateName).toEqual('home');
+    expect(ionicHistory.backView()).toEqual(null);
+    expect(ionicHistory.forwardView()).toEqual(null);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(1);
 
     var aboutViewScope = {};
     $state.go('about');
     rootScope.$apply();
-    var aboutReg = viewService.register(aboutViewScope, viewLocals);
-    var currentView = viewService.getCurrentView();
-    var backView = viewService.getBackView();
-    var forwardView = viewService.getForwardView();
+    var aboutReg = ionicHistory.register(aboutViewScope, viewLocals);
+    var currentView = ionicHistory.currentView();
+    var backView = ionicHistory.backView();
+    var forwardView = ionicHistory.forwardView();
     expect(aboutReg.action).toEqual('newView');
     expect(currentView.viewId).toEqual(aboutReg.viewId);
     expect(currentView.backViewId).toEqual(homeReg.viewId);
     expect(currentView.forwardViewId).toEqual(null);
     expect(backView.viewId).toEqual(homeReg.viewId);
     expect(backView.forwardViewId).toEqual(currentView.viewId);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(1);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(2);
 
     var tab1Scope = {};
-    viewService.registerHistory(tab1Scope);
+    ionicHistory.registerHistory(tab1Scope);
     var tab1view1Scope = { $parent: tab1Scope };
 
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Reg = viewService.register(tab1view1Scope, viewLocals);
+    var tab1view1Reg = ionicHistory.register(tab1view1Scope, viewLocals);
     expect(tab1view1Reg.action).toEqual('newView');
 
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].historyId).toEqual(tab1Scope.$historyId);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack[0].viewId).toEqual(tab1view1Reg.viewId);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(1);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].historyId).toEqual(tab1Scope.$historyId);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack[0].viewId).toEqual(tab1view1Reg.viewId);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(2);
 
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
     expect(currentView.viewId).toEqual(tab1view1Reg.viewId);
     expect(currentView.historyId).toEqual(tab1Scope.$historyId);
     expect(currentView.historyId).toEqual(tab1view1Reg.historyId);
@@ -238,69 +229,69 @@ describe('Ionic View Service', function() {
 
     $state.go('home');
     rootScope.$apply();
-    var home2reg = viewService.register({}, viewLocals);
+    var home2reg = ionicHistory.register({}, viewLocals);
     expect(home2reg.action).toEqual('newView');
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
     expect(currentView.backViewId).toEqual(tab1view1Reg.viewId);
     expect(currentView.forwardViewId).toEqual(null);
     expect(backView.viewId).toEqual(tab1view1Reg.viewId);
     expect(backView.forwardViewId).toEqual(currentView.viewId);
 
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(2);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(3);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(2);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(3);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
   }));
 
   it('should register views in the same history, go back, then overwrite the forward views', inject(function($state) {
     var homeViewScope = {};
     $state.go('home');
     rootScope.$apply();
-    var homeReg = viewService.register(homeViewScope, viewLocals);
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    var homeReg = ionicHistory.register(homeViewScope, viewLocals);
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
     expect(currentView.viewId).toEqual(homeReg.viewId);
     expect(currentView.backViewId).toEqual(null);
     expect(currentView.forwardViewId).toEqual(null);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(0);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(1);
     expect(homeReg.action).toEqual('initialView');
     expect(homeReg.direction).toEqual('none');
 
     var aboutScope = {};
     $state.go('about');
     rootScope.$apply();
-    var aboutReg = viewService.register(aboutScope, viewLocals);
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    var aboutReg = ionicHistory.register(aboutScope, viewLocals);
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
     expect(currentView.viewId).toEqual(aboutReg.viewId);
     expect(currentView.backViewId).toEqual(homeReg.viewId);
     expect(currentView.forwardViewId).toEqual(null);
     expect(backView.viewId).toEqual(homeReg.viewId);
     expect(backView.forwardViewId).toEqual(currentView.viewId);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(1);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(2);
     expect(aboutReg.action).toEqual('newView');
     expect(aboutReg.direction).toEqual('forward');
 
     homeViewScope = {};
     $state.go('home');
     rootScope.$apply();
-    var homeReg2 = viewService.register(homeViewScope, viewLocals);
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    var homeReg2 = ionicHistory.register(homeViewScope, viewLocals);
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
     expect(currentView.viewId).toEqual(homeReg.viewId);
     expect(currentView.backViewId).toEqual(null);
     expect(currentView.forwardViewId).toEqual(aboutReg.viewId);
     expect(forwardView.viewId).toEqual(aboutReg.viewId);
     expect(forwardView.backViewId).toEqual(currentView.viewId);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(0);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(2);
     expect(homeReg2.action).toEqual('moveBack');
     expect(homeReg2.direction).toEqual('back');
 
@@ -308,17 +299,17 @@ describe('Ionic View Service', function() {
     contactScope = {};
     $state.go('contact');
     rootScope.$apply();
-    var contactReg = viewService.register(contactScope, viewLocals);
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    var contactReg = ionicHistory.register(contactScope, viewLocals);
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
     expect(currentView.backViewId).toEqual(homeReg.viewId);
     expect(currentView.forwardViewId).toEqual(null);
     expect(forwardView).toEqual(null);
     expect(backView.viewId).toEqual(homeReg.viewId);
     expect(backView.forwardViewId).toEqual(currentView.viewId);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(1);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(2);
     expect(contactReg.action).toEqual('newView');
     expect(contactReg.direction).toEqual('forward');
   }));
@@ -327,14 +318,14 @@ describe('Ionic View Service', function() {
     var rootViewContainer = {};
     $state.go('home');
     rootScope.$apply();
-    var registerData = viewService.register(rootViewContainer, viewLocals);
+    var registerData = ionicHistory.register(rootViewContainer, viewLocals);
     expect(registerData.action).toEqual('initialView');
     expect(registerData.direction).toEqual('none');
     expect(registerData.historyId).toEqual('root');
 
     // register the tabs container
     var tabsContainer = { $parent: tabsContainer };
-    var tabsHistoryId = viewService.registerHistory(tabsContainer);
+    var tabsHistoryId = ionicHistory.registerHistory(tabsContainer);
 
     // put a view inside of the tabs container
     var tabView1 = { $parent: tabsContainer };
@@ -342,8 +333,8 @@ describe('Ionic View Service', function() {
     // nav to the tab view
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    registerData = viewService.register(tabView1, viewLocals);
-    var currentView = viewService.getCurrentView();
+    registerData = ionicHistory.register(tabView1, viewLocals);
+    var currentView = ionicHistory.currentView();
     expect(registerData.action).toEqual('newView');
     expect(registerData.direction).toEqual('enter');
     expect(currentView.historyId).toEqual(tabsHistoryId);
@@ -351,8 +342,8 @@ describe('Ionic View Service', function() {
     // nav back to the root
     $state.go('home');
     rootScope.$apply();
-    registerData = viewService.register(rootViewContainer, viewLocals);
-    currentView = viewService.getCurrentView();
+    registerData = ionicHistory.register(rootViewContainer, viewLocals);
+    currentView = ionicHistory.currentView();
     expect(registerData.action).toEqual('moveBack');
     expect(registerData.direction).toEqual('exit');
     expect(currentView.historyId).toEqual('root');
@@ -360,8 +351,8 @@ describe('Ionic View Service', function() {
     // nav back to the tabs
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    registerData = viewService.register(tabView1, viewLocals);
-    currentView = viewService.getCurrentView();
+    registerData = ionicHistory.register(tabView1, viewLocals);
+    currentView = ionicHistory.currentView();
     expect(registerData.action).toEqual('moveForward');
     expect(registerData.direction).toEqual('enter');
     expect(currentView.historyId).toEqual(tabsHistoryId);
@@ -369,8 +360,8 @@ describe('Ionic View Service', function() {
     // nav back to the root
     $state.go('home');
     rootScope.$apply();
-    registerData = viewService.register(rootViewContainer, viewLocals);
-    currentView = viewService.getCurrentView();
+    registerData = ionicHistory.register(rootViewContainer, viewLocals);
+    currentView = ionicHistory.currentView();
     expect(registerData.action).toEqual('moveBack');
     expect(registerData.direction).toEqual('exit');
     expect(currentView.historyId).toEqual('root');
@@ -380,17 +371,17 @@ describe('Ionic View Service', function() {
     var rootViewContainer = {};
     $state.go('home');
     rootScope.$apply();
-    var homeReg = viewService.register(rootViewContainer, viewLocals);
-    var currentView = viewService.getCurrentView();
+    var homeReg = ionicHistory.register(rootViewContainer, viewLocals);
+    var currentView = ionicHistory.currentView();
     expect(currentView.historyId).toEqual('root');
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(0);
     expect(homeReg.action).toEqual('initialView');
     expect(homeReg.historyId).toEqual('root');
 
     // each tab gets its own history in the tabs directive
     // create a new tab and its history
     var tabs1Container = { $parent: rootViewContainer };
-    viewService.registerHistory(tabs1Container);
+    ionicHistory.registerHistory(tabs1Container);
     expect(tabs1Container.$historyId).toBeDefined();
     expect(rootViewContainer.$historyId).not.toEqual(tabs1Container.$historyId);
     var originalTab1ViewId = tabs1Container.$historyId;
@@ -400,19 +391,19 @@ describe('Ionic View Service', function() {
     var tab1View = { $parent: tabs1Container };
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Reg = viewService.register(tab1View, viewLocals);
-    currentView = viewService.getCurrentView();
+    var tab1view1Reg = ionicHistory.register(tab1View, viewLocals);
+    currentView = ionicHistory.currentView();
     expect(currentView.historyId).toEqual(tabs1Container.$historyId);
-    expect(viewService.viewHistory().histories[tabs1Container.$historyId].parentHistoryId).toEqual('root');
-    expect(viewService.viewHistory().histories[tabs1Container.$historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tabs1Container.$historyId].stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tabs1Container.$historyId].parentHistoryId).toEqual('root');
+    expect(ionicHistory.viewHistory().histories[tabs1Container.$historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tabs1Container.$historyId].stack.length).toEqual(1);
     expect(tab1view1Reg.historyId).not.toEqual(homeReg.historyId);
     expect(tab1view1Reg.action).toEqual('newView');
     expect(tab1view1Reg.direction).toEqual('enter');
 
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
 
     expect(currentView.stateName).toEqual('tabs.tab1view1');
     expect(currentView.viewId).toEqual(tab1view1Reg.viewId);
@@ -429,16 +420,16 @@ describe('Ionic View Service', function() {
     homeViewScope = {};
     $state.go('home');
     rootScope.$apply();
-    homeReg = viewService.register(homeViewScope, viewLocals);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(0);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(1);
+    homeReg = ionicHistory.register(homeViewScope, viewLocals);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(1);
     expect(homeReg.historyId).toEqual('root');
     expect(homeReg.action).toEqual('moveBack');
     expect(homeReg.direction).toEqual('exit');
 
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
 
     expect(currentView.stateName).toEqual('home');
     expect(currentView.backViewId).toEqual(null);
@@ -448,33 +439,33 @@ describe('Ionic View Service', function() {
     expect(forwardView.viewId).toEqual(tab1view1Reg.viewId);
     expect(forwardView.backViewId).toEqual(currentView.viewId);
     expect(forwardView.forwardViewId).toEqual(null);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(0);
-    expect(viewService.viewHistory().histories.root.stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories.root.stack.length).toEqual(1);
 
     // create a new tab and its history
     tabs1Container = { $parent: rootViewContainer };
-    viewService.registerHistory(tabs1Container);
+    ionicHistory.registerHistory(tabs1Container);
     expect(originalTab1ViewId).not.toEqual(tabs1Container.$historyId);
 
     tab1View = { $parent: tabs1Container };
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    tab1view1Reg = viewService.register(tab1View);
+    tab1view1Reg = ionicHistory.register(tab1View);
     expect(tab1view1Reg.action).toEqual('moveForward');
     expect(tab1view1Reg.direction).toEqual('enter');
     expect(tab1view1Reg.historyId).toEqual(originalTab1ViewId);
     expect(originalTab1ViewId).toEqual(tabs1Container.$historyId);
     expect(tab1view1Reg.historyId).not.toEqual('root');
-    expect(viewService.viewHistory().histories[tab1view1Reg.historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tab1view1Reg.historyId].stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab1view1Reg.historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab1view1Reg.historyId].stack.length).toEqual(1);
 
-    currentView = viewService.getCurrentView();
+    currentView = ionicHistory.currentView();
     expect(currentView.historyId).toEqual(tabs1Container.$historyId);
-    expect(viewService.viewHistory().histories[tabs1Container.$historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tabs1Container.$historyId].cursor).toEqual(0);
 
-    currentView = viewService.getCurrentView();
-    backView = viewService.getBackView();
-    forwardView = viewService.getForwardView();
+    currentView = ionicHistory.currentView();
+    backView = ionicHistory.backView();
+    forwardView = ionicHistory.forwardView();
 
     expect(currentView.stateName).toEqual('tabs.tab1view1');
     expect(currentView.viewId).toEqual(tab1view1Reg.viewId);
@@ -487,89 +478,89 @@ describe('Ionic View Service', function() {
     expect(backView.forwardViewId).toEqual(currentView.viewId);
 
     expect(forwardView).toEqual(null);
-    expect(viewService.viewHistory().histories.root.cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories.root.cursor).toEqual(0);
   }));
 
   it('should nav to a history, move around in it, and come back', inject(function($state) {
     // go to the first page
     $state.go('home');
     rootScope.$apply();
-    var homeReg = viewService.register({}, viewLocals);
+    var homeReg = ionicHistory.register({}, viewLocals);
 
     // each tab gets its own history in the tabs directive
     var tab1Scope = { };
     var tab2Scope = { };
     var tab3Scope = { };
-    viewService.registerHistory(tab1Scope);
-    viewService.registerHistory(tab2Scope);
-    viewService.registerHistory(tab3Scope);
+    ionicHistory.registerHistory(tab1Scope);
+    ionicHistory.registerHistory(tab2Scope);
+    ionicHistory.registerHistory(tab3Scope);
 
     // the actual view renders
     var tab1view1Scope = { $parent: tab1Scope };
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1ScopeReg = viewService.register(tab1view1Scope, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab1view1');
-    expect(viewService.getBackView().stateName).toEqual('home');
-    expect(viewService.getForwardView()).toEqual(null);
-    var lastView = viewService.getCurrentView();
+    var tab1view1ScopeReg = ionicHistory.register(tab1view1Scope, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab1view1');
+    expect(ionicHistory.backView().stateName).toEqual('home');
+    expect(ionicHistory.forwardView()).toEqual(null);
+    var lastView = ionicHistory.currentView();
     expect(lastView.index).toEqual(0);
     expect(tab1view1ScopeReg.viewId).toEqual(lastView.viewId);
     expect(tab1view1ScopeReg.action).toEqual('newView');
     expect(tab1view1ScopeReg.direction).toEqual('enter');
-    expect(viewService.viewHistory().histories[tab1view1ScopeReg.historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tab1view1ScopeReg.historyId].stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab1view1ScopeReg.historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab1view1ScopeReg.historyId].stack.length).toEqual(1);
 
     // inside first tab, go to another list inside the same tab
     var tab1view2Scope = { $parent: tab1Scope };
     $state.go('tabs.tab1view2');
     rootScope.$apply();
-    var tab1view2ScopeReg = viewService.register(tab1view2Scope, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab1view2');
-    expect(viewService.getBackView().stateName).toEqual('tabs.tab1view1');
-    expect(viewService.getForwardView()).toEqual(null);
-    lastView = viewService.getCurrentView();
+    var tab1view2ScopeReg = ionicHistory.register(tab1view2Scope, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab1view2');
+    expect(ionicHistory.backView().stateName).toEqual('tabs.tab1view1');
+    expect(ionicHistory.forwardView()).toEqual(null);
+    lastView = ionicHistory.currentView();
     expect(lastView.index).toEqual(1);
     expect(tab1view2ScopeReg.viewId).toEqual(lastView.viewId);
     expect(tab1view2ScopeReg.action).toEqual('newView');
     expect(tab1view2ScopeReg.direction).toEqual('forward');
-    expect(viewService.viewHistory().histories[tab1view2ScopeReg.historyId].cursor).toEqual(1);
-    expect(viewService.viewHistory().histories[tab1view2ScopeReg.historyId].stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories[tab1view2ScopeReg.historyId].cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab1view2ScopeReg.historyId].stack.length).toEqual(2);
 
     // go back one within the tab
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Scope2Reg = viewService.register(tab1view1Scope, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab1view1');
-    expect(viewService.getBackView().stateName).toEqual('home');
-    expect(viewService.getForwardView().stateName).toEqual('tabs.tab1view2');
-    lastView = viewService.getCurrentView();
+    var tab1view1Scope2Reg = ionicHistory.register(tab1view1Scope, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab1view1');
+    expect(ionicHistory.backView().stateName).toEqual('home');
+    expect(ionicHistory.forwardView().stateName).toEqual('tabs.tab1view2');
+    lastView = ionicHistory.currentView();
     expect(lastView.index).toEqual(0);
     expect(tab1view1Scope2Reg.action).toEqual('moveBack');
     expect(tab1view1Scope2Reg.direction).toEqual('back');
-    expect(viewService.viewHistory().histories[tab1view1Scope2Reg.historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tab1view1Scope2Reg.historyId].stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories[tab1view1Scope2Reg.historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab1view1Scope2Reg.historyId].stack.length).toEqual(2);
 
     // go back again, and should break out of the tab's history
     $state.go('home');
     rootScope.$apply();
-    var homeReg2 = viewService.register({}, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('home');
+    var homeReg2 = ionicHistory.register({}, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('home');
     expect(homeReg2.historyId).toEqual('root');
     expect(homeReg2.action).toEqual('moveBack');
     expect(homeReg2.direction).toEqual('exit');
-    expect(viewService.viewHistory().histories[homeReg2.historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[homeReg2.historyId].stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[homeReg2.historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[homeReg2.historyId].stack.length).toEqual(1);
 
     $state.go('about');
     rootScope.$apply();
-    var aboutReg = viewService.register({}, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('about');
+    var aboutReg = ionicHistory.register({}, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('about');
     expect(aboutReg.historyId).toEqual('root');
     expect(aboutReg.action).toEqual('newView');
     expect(aboutReg.direction).toEqual('forward');
-    expect(viewService.viewHistory().histories[aboutReg.historyId].cursor).toEqual(1);
-    expect(viewService.viewHistory().histories[aboutReg.historyId].stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories[aboutReg.historyId].cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[aboutReg.historyId].stack.length).toEqual(2);
   }));
 
   it('should init a view that has tabs in it, two registers, but one page load', inject(function($state) {
@@ -577,15 +568,15 @@ describe('Ionic View Service', function() {
     rootScope.$apply();
 
     var rootViewScope = {};
-    var rootReg = viewService.register(rootViewScope, viewLocals);
+    var rootReg = ionicHistory.register(rootViewScope, viewLocals);
     expect(rootReg.action).toEqual('initialView');
     expect(rootReg.direction).toEqual('none');
 
     var tab1Scope = {};
-    viewService.registerHistory(tab1Scope);
+    ionicHistory.registerHistory(tab1Scope);
     var tab1view1Scope = { $parent: tab1Scope };
 
-    var registerData = viewService.register(tab1view1Scope, viewLocals);
+    var registerData = ionicHistory.register(tab1view1Scope, viewLocals);
     expect(registerData.action).toEqual('newView');
     expect(registerData.direction).toEqual('none');
   }));
@@ -594,18 +585,18 @@ describe('Ionic View Service', function() {
     // register tabs
     var tab1Scope = {};
     var tab2Scope = {};
-    viewService.registerHistory(tab1Scope);
-    viewService.registerHistory(tab2Scope);
+    ionicHistory.registerHistory(tab1Scope);
+    ionicHistory.registerHistory(tab2Scope);
     var orgTab1HistoryId = tab1Scope.$historyId;
 
     // render first view in tab1
     var tab1view1Scope = { $parent: tab1Scope };
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var registerData = viewService.register(tab1view1Scope, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab1view1');
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
+    var registerData = ionicHistory.register(tab1view1Scope, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab1view1');
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
     expect(registerData.action).toEqual('initialView');
     expect(registerData.direction).toEqual('none');
 
@@ -613,28 +604,28 @@ describe('Ionic View Service', function() {
     var tab1view2Scope = { $parent: tab1Scope };
     $state.go('tabs.tab1view2');
     rootScope.$apply();
-    registerData = viewService.register(tab1view2Scope, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab1view2');
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(1);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(2);
+    registerData = ionicHistory.register(tab1view2Scope, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab1view2');
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(2);
     expect(registerData.action).toEqual('newView');
     expect(registerData.direction).toEqual('forward');
-    currentView = viewService.getCurrentView();
+    currentView = ionicHistory.currentView();
     expect(currentView.viewId).toEqual(registerData.viewId);
 
     // go back to the first view again in tab 1
     tab1view1Scope = { $parent: tab1Scope };
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    registerData = viewService.register(tab1view1Scope, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab1view1');
-    currentView = viewService.getCurrentView();
+    registerData = ionicHistory.register(tab1view1Scope, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab1view1');
+    currentView = ionicHistory.currentView();
     expect(currentView.viewId).toEqual(registerData.viewId);
-    forwardView = viewService.getForwardView();
-    expect(currentView.forwardViewId).toEqual(viewService.viewHistory().histories[tab1Scope.$historyId].stack[1].viewId);
+    forwardView = ionicHistory.forwardView();
+    expect(currentView.forwardViewId).toEqual(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack[1].viewId);
     expect(forwardView.backViewId).toEqual(currentView.viewId);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(2);
     expect(registerData.action).toEqual('moveBack');
     expect(registerData.direction).toEqual('back');
 
@@ -642,37 +633,37 @@ describe('Ionic View Service', function() {
     var tab2view1Scope = { $parent: tab2Scope };
     $state.go('tabs.tab2view1');
     rootScope.$apply();
-    registerData = viewService.register(tab2view1Scope, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab2view1');
-    expect(viewService.viewHistory().histories[tab2Scope.$historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tab2Scope.$historyId].stack.length).toEqual(1);
+    registerData = ionicHistory.register(tab2view1Scope, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab2view1');
+    expect(ionicHistory.viewHistory().histories[tab2Scope.$historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab2Scope.$historyId].stack.length).toEqual(1);
     expect(registerData.action).toEqual('newView');
-    expect(registerData.direction).toEqual('switch');
+    expect(registerData.direction).toEqual('swap');
     var tab2view1ViewId = registerData.viewId;
 
     // tab1's forward history should be destroyed
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack[0].forwardViewId).toEqual(registerData.viewId);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack[0].forwardViewId).toEqual(registerData.viewId);
 
     // go back to tab1, and it should load the first view of tab1
     expect(tab1Scope.$historyId).toEqual(orgTab1HistoryId);
-    rootScope.$broadcast("viewState.changeHistory", { historyId: tab1Scope.$historyId, enableUrlChange: false });
+    rootScope.$broadcast("$ionicHistory.change", { historyId: tab1Scope.$historyId, enableUrlChange: false });
     rootScope.$apply();
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab1view1');
-    registerData = viewService.register(tab1view1Scope, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab1view1');
+    registerData = ionicHistory.register(tab1view1Scope, viewLocals);
     var tab1view1ViewId = registerData.viewId;
     expect(registerData.action).toEqual('moveBack');
-    expect(registerData.direction).toEqual('switch');
+    expect(registerData.direction).toEqual('swap');
 
-    currentView = viewService.getCurrentView();
+    currentView = ionicHistory.currentView();
     expect(currentView.viewId).toEqual(registerData.viewId);
     expect(currentView.historyId).toEqual(orgTab1HistoryId);
     expect(currentView.forwardViewId).toEqual(tab2view1ViewId);
 
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(1);
 
-    currentView = viewService.getCurrentView();
+    currentView = ionicHistory.currentView();
     expect(currentView.stateName).toEqual('tabs.tab1view1');
     expect(currentView.historyId).toEqual(tab1Scope.$historyId);
 
@@ -680,87 +671,87 @@ describe('Ionic View Service', function() {
     tab1view2Scope = { $parent: tab1Scope };
     $state.go('tabs.tab1view2');
     rootScope.$apply();
-    registerData = viewService.register(tab1view2Scope, viewLocals);
+    registerData = ionicHistory.register(tab1view2Scope, viewLocals);
     expect(registerData.historyId).toEqual(orgTab1HistoryId);
     var tab1view2ViewId = registerData.viewId;
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab1view2');
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(2);
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(1);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab1view2');
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(1);
     expect(registerData.action).toEqual('newView');
     expect(registerData.direction).toEqual('forward');
-    expect(viewService.viewHistory().views[tab1view2ViewId].backViewId).toEqual(tab1view1ViewId);
+    expect(ionicHistory.viewHistory().views[tab1view2ViewId].backViewId).toEqual(tab1view1ViewId);
 
     // go to view 1 in tab 2
     tab2view1Scope = { $parent: tab2Scope };
     $state.go('tabs.tab2view1');
     rootScope.$apply();
-    registerData = viewService.register(tab2view1Scope, viewLocals);
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab2view1');
-    expect(viewService.viewHistory().histories[tab2Scope.$historyId].cursor).toEqual(0);
+    registerData = ionicHistory.register(tab2view1Scope, viewLocals);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab2view1');
+    expect(ionicHistory.viewHistory().histories[tab2Scope.$historyId].cursor).toEqual(0);
     expect(registerData.action).toEqual('moveBack');
-    expect(registerData.direction).toEqual('switch');
-    currentView = viewService.getCurrentView();
+    expect(registerData.direction).toEqual('swap');
+    currentView = ionicHistory.currentView();
     expect(currentView.backViewId).toEqual(tab1view2ViewId);
     expect(currentView.forwardViewId).toEqual(null);
 
     // should be remembered at the tab 1 view 2
-    rootScope.$broadcast("viewState.changeHistory", { historyId: tab1Scope.$historyId });
+    rootScope.$broadcast("$ionicHistory.change", { historyId: tab1Scope.$historyId });
     rootScope.$apply();
-    expect(viewService.getCurrentStateName()).toEqual('tabs.tab1view2');
-    expect(viewService.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(1);
+    expect(ionicHistory.currentStateName()).toEqual('tabs.tab1view2');
+    expect(ionicHistory.viewHistory().histories[tab1Scope.$historyId].cursor).toEqual(1);
   }));
 
   it('should go one level in tab1, vist tab2 and tab3, come back to tab1 and still be at spot', inject(function($state) {
     var tab1Container = {};
     var tab2Container = {};
     var tab3Container = {};
-    viewService.registerHistory(tab1Container);
-    viewService.registerHistory(tab2Container);
-    viewService.registerHistory(tab3Container);
+    ionicHistory.registerHistory(tab1Container);
+    ionicHistory.registerHistory(tab2Container);
+    ionicHistory.registerHistory(tab3Container);
 
     // register tab1, view1
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Reg = viewService.register(tab1Container, viewLocals);
-    expect(viewService.viewHistory().histories[tab1Container.$historyId].cursor).toEqual(0);
+    var tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
+    expect(ionicHistory.viewHistory().histories[tab1Container.$historyId].cursor).toEqual(0);
 
     // register tab1, view2
     $state.go('tabs.tab1view2');
     rootScope.$apply();
-    var tab1view2Reg = viewService.register(tab1Container, viewLocals);
-    expect(viewService.viewHistory().histories[tab1Container.$historyId].cursor).toEqual(1);
-    currentView = viewService.getCurrentView();
+    var tab1view2Reg = ionicHistory.register(tab1Container, viewLocals);
+    expect(ionicHistory.viewHistory().histories[tab1Container.$historyId].cursor).toEqual(1);
+    currentView = ionicHistory.currentView();
     expect(currentView.backViewId).toEqual(tab1view1Reg.viewId);
 
     // register tab2, view1
     $state.go('tabs.tab2view1');
     rootScope.$apply();
-    var tab2view1Reg = viewService.register(tab2Container, viewLocals);
+    var tab2view1Reg = ionicHistory.register(tab2Container, viewLocals);
 
     // register tab3, view1
     $state.go('tabs.tab3view1');
     rootScope.$apply();
-    var tab3view1Reg = viewService.register(tab3Container, viewLocals);
+    var tab3view1Reg = ionicHistory.register(tab3Container, viewLocals);
 
     // register tab 1, view 2 again
     $state.go('tabs.tab1view2');
     rootScope.$apply();
-    var tab1view2Reg2 = viewService.register(tab1Container, viewLocals);
+    var tab1view2Reg2 = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view2Reg2.action).toEqual('moveBack');
     expect(tab1view2Reg2.viewId).toEqual(tab1view2Reg.viewId);
 
 
     var currentViewId = tab1view2Reg.viewId;
-    expect(viewService.viewHistory().histories[tab1view2Reg.historyId].stack.length).toEqual(2);
-    backView = viewService.getBackView();
+    expect(ionicHistory.viewHistory().histories[tab1view2Reg.historyId].stack.length).toEqual(2);
+    backView = ionicHistory.backView();
     expect(backView).toBeDefined();
-    expect( Object.keys(viewService.viewHistory().views).length ).toEqual(4);
-    viewService.clearHistory();
-    expect( Object.keys(viewService.viewHistory().views).length ).toEqual(1);
-    expect(viewService.viewHistory().histories[tab1view2Reg.historyId].stack.length).toEqual(1);
-    backView = viewService.getBackView();
+    expect( Object.keys(ionicHistory.viewHistory().views).length ).toEqual(4);
+    ionicHistory.clearHistory();
+    expect( Object.keys(ionicHistory.viewHistory().views).length ).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab1view2Reg.historyId].stack.length).toEqual(1);
+    backView = ionicHistory.backView();
     expect(backView).toEqual(null);
-    currentView = viewService.getCurrentView();
+    currentView = ionicHistory.currentView();
     expect(currentView.viewId).toEqual(currentViewId);
   }));
 
@@ -768,55 +759,54 @@ describe('Ionic View Service', function() {
     var tab1Container = {};
     var tab2Container = {};
     var tab3Container = {};
-    viewService.registerHistory(tab1Container);
-    viewService.registerHistory(tab2Container);
-    viewService.registerHistory(tab3Container);
+    ionicHistory.registerHistory(tab1Container);
+    ionicHistory.registerHistory(tab2Container);
+    ionicHistory.registerHistory(tab3Container);
 
     // register tab1, view1
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    var tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('initialView');
     expect(tab1view1Reg.direction).toEqual('none');
-    expect(viewService.viewHistory().histories[tab1Container.$historyId].cursor).toEqual(0);
+    expect(ionicHistory.viewHistory().histories[tab1Container.$historyId].cursor).toEqual(0);
 
     // register tab2, view1
     $state.go('tabs.tab2view1');
     rootScope.$apply();
-    var tab2view1Reg = viewService.register(tab2Container, viewLocals);
+    var tab2view1Reg = ionicHistory.register(tab2Container, viewLocals);
     expect(tab2view1Reg.action).toEqual('newView');
-    expect(tab2view1Reg.direction).toEqual('switch');
-    expect(viewService.viewHistory().histories[tab1Container.$historyId].stack[0].forwardViewId).toEqual(tab2view1Reg.viewId);
-    expect(viewService.viewHistory().histories[tab2Container.$historyId].cursor).toEqual(0);
+    expect(tab2view1Reg.direction).toEqual('swap');
+    expect(ionicHistory.viewHistory().histories[tab1Container.$historyId].stack[0].forwardViewId).toEqual(tab2view1Reg.viewId);
+    expect(ionicHistory.viewHistory().histories[tab2Container.$historyId].cursor).toEqual(0);
 
     // register tab2, view2
     $state.go('tabs.tab2view2');
     rootScope.$apply();
-    var tab2view2Reg = viewService.register(tab2Container, viewLocals);
+    var tab2view2Reg = ionicHistory.register(tab2Container, viewLocals);
     expect(tab2view2Reg.action).toEqual('newView');
     expect(tab2view2Reg.direction).toEqual('forward');
-    expect(viewService.viewHistory().histories[tab2Container.$historyId].cursor).toEqual(1);
-    expect(viewService.viewHistory().histories[tab2Container.$historyId].stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories[tab2Container.$historyId].cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab2Container.$historyId].stack.length).toEqual(2);
 
     // register tab1, view1
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('moveBack');
-    expect(tab1view1Reg.direction).toEqual('switch');
-    expect(viewService.viewHistory().histories[tab2Container.$historyId].cursor).toEqual(1);
-    expect(viewService.viewHistory().histories[tab2Container.$historyId].stack.length).toEqual(2);
+    expect(tab1view1Reg.direction).toEqual('swap');
+    expect(ionicHistory.viewHistory().histories[tab2Container.$historyId].cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab2Container.$historyId].stack.length).toEqual(2);
 
     // register tab3, view1
     $state.go('tabs.tab3view1');
     rootScope.$apply();
-    var tab3view1Reg = viewService.register(tab3Container, viewLocals);
+    var tab3view1Reg = ionicHistory.register(tab3Container, viewLocals);
     expect(tab3view1Reg.action).toEqual('newView');
-    expect(tab3view1Reg.direction).toEqual('switch');
+    expect(tab3view1Reg.direction).toEqual('swap');
 
-    var tab2Hist = viewService.viewHistory().histories[ tab2Container.$historyId ];
-    var currentStateId = viewService.getCurrentStateId();
-    currentView = viewService.getCurrentView();
+    var tab2Hist = ionicHistory.viewHistory().histories[ tab2Container.$historyId ];
+    currentView = ionicHistory.currentView();
     expect(currentView).toBeDefined();
     expect(currentView.historyId).not.toEqual(tab2Hist.historyId);
     expect(tab2Hist.cursor).toEqual(1);
@@ -826,38 +816,38 @@ describe('Ionic View Service', function() {
     // register tab2, view2
     $state.go('tabs.tab2view2');
     rootScope.$apply();
-    var tab2view2RegAgain = viewService.register(tab2Container, viewLocals);
+    var tab2view2RegAgain = ionicHistory.register(tab2Container, viewLocals);
     expect(tab2view2RegAgain.historyId).toEqual(tab2view2Reg.historyId);
-    expect(viewService.viewHistory().histories[tab2Container.$historyId].cursor).toEqual(1);
-    expect(viewService.viewHistory().histories[tab2Container.$historyId].stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().histories[tab2Container.$historyId].cursor).toEqual(1);
+    expect(ionicHistory.viewHistory().histories[tab2Container.$historyId].stack.length).toEqual(2);
   }));
 
   it('should go in and out of tabs and root with correct directions', inject(function($state) {
     var tab1Container = {};
-    viewService.registerHistory(tab1Container);
+    ionicHistory.registerHistory(tab1Container);
 
     // register tab1, view1
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    var tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('initialView');
     expect(tab1view1Reg.direction).toEqual('none');
 
     $state.go('home');
     rootScope.$apply();
-    var homeReg = viewService.register({}, viewLocals);
+    var homeReg = ionicHistory.register({}, viewLocals);
     expect(homeReg.action).toEqual('newView');
     expect(homeReg.direction).toEqual('exit');
 
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    var tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('moveBack');
     expect(tab1view1Reg.direction).toEqual('enter');
 
     $state.go('home');
     rootScope.$apply();
-    var homeReg = viewService.register({}, viewLocals);
+    var homeReg = ionicHistory.register({}, viewLocals);
     expect(homeReg.action).toEqual('moveForward');
     expect(homeReg.direction).toEqual('exit');
   }));
@@ -866,23 +856,23 @@ describe('Ionic View Service', function() {
     var homeViewScope = {};
     $state.go('home');
     rootScope.$apply();
-    var homeReg = viewService.register(homeViewScope, viewLocals);
+    var homeReg = ionicHistory.register(homeViewScope, viewLocals);
     expect(homeReg.action).toEqual('initialView');
     expect(homeReg.direction).toEqual('none');
 
     var tab1Container = {};
-    viewService.registerHistory(tab1Container);
+    ionicHistory.registerHistory(tab1Container);
 
     $state.go('tabs.tab1view1');
     rootScope.$apply();
 
-    var tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    var tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('newView');
     expect(tab1view1Reg.direction).toEqual('enter');
 
     $state.go('home');
     rootScope.$apply();
-    homeReg = viewService.register(homeViewScope, viewLocals);
+    homeReg = ionicHistory.register(homeViewScope, viewLocals);
     expect(homeReg.action).toEqual('moveBack');
     expect(homeReg.direction).toEqual('exit');
   }));
@@ -891,30 +881,30 @@ describe('Ionic View Service', function() {
     var homeViewScope = {};
     var tab1Container = {};
     var tab2Container = {};
-    viewService.registerHistory(tab1Container);
-    viewService.registerHistory(tab2Container);
+    ionicHistory.registerHistory(tab1Container);
+    ionicHistory.registerHistory(tab2Container);
 
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    var tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('initialView');
     expect(tab1view1Reg.direction).toEqual('none');
 
     $state.go('tabs.tab2view1');
     rootScope.$apply();
-    var tab2view1Reg = viewService.register(tab2Container, viewLocals);
+    var tab2view1Reg = ionicHistory.register(tab2Container, viewLocals);
     expect(tab2view1Reg.action).toEqual('newView');
-    expect(tab2view1Reg.direction).toEqual('switch');
+    expect(tab2view1Reg.direction).toEqual('swap');
 
     $state.go('home');
     rootScope.$apply();
-    homeReg = viewService.register(homeViewScope, viewLocals);
+    homeReg = ionicHistory.register(homeViewScope, viewLocals);
     expect(homeReg.action).toEqual('newView');
     expect(homeReg.direction).toEqual('exit');
 
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('moveBack');
     expect(tab1view1Reg.direction).toEqual('enter');
   }));
@@ -923,29 +913,29 @@ describe('Ionic View Service', function() {
     var homeViewScope = {};
     var infoViewScope = {};
     var tab1Container = {};
-    viewService.registerHistory(tab1Container);
+    ionicHistory.registerHistory(tab1Container);
 
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    var tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('initialView');
     expect(tab1view1Reg.direction).toEqual('none');
 
     $state.go('home');
     rootScope.$apply();
-    var homeReg = viewService.register(homeViewScope, viewLocals);
+    var homeReg = ionicHistory.register(homeViewScope, viewLocals);
     expect(homeReg.action).toEqual('newView');
     expect(homeReg.direction).toEqual('exit');
 
     $state.go('info');
     rootScope.$apply();
-    var infoReg = viewService.register(infoViewScope, viewLocals);
+    var infoReg = ionicHistory.register(infoViewScope, viewLocals);
     expect(infoReg.action).toEqual('newView');
     expect(infoReg.direction).toEqual('forward');
 
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('moveBack');
     expect(tab1view1Reg.direction).toEqual('enter');
   }));
@@ -954,52 +944,52 @@ describe('Ionic View Service', function() {
     var homeViewScope = {};
     $state.go('home');
     rootScope.$apply();
-    var homeReg = viewService.register(homeViewScope, viewLocals);
+    var homeReg = ionicHistory.register(homeViewScope, viewLocals);
     expect(homeReg.action).toEqual('initialView');
     expect(homeReg.direction).toEqual('none');
 
     var tab1Container = {};
     var tab2Container = {};
-    viewService.registerHistory(tab1Container);
-    viewService.registerHistory(tab2Container);
+    ionicHistory.registerHistory(tab1Container);
+    ionicHistory.registerHistory(tab2Container);
 
     $state.go('tabs.tab1view1');
     rootScope.$apply();
-    var tab1view1Reg = viewService.register(tab1Container, viewLocals);
+    var tab1view1Reg = ionicHistory.register(tab1Container, viewLocals);
     expect(tab1view1Reg.action).toEqual('newView');
     expect(tab1view1Reg.direction).toEqual('enter');
 
     $state.go('tabs.tab2view1');
     rootScope.$apply();
 
-    var tab2view1Reg = viewService.register(tab2Container, viewLocals);
+    var tab2view1Reg = ionicHistory.register(tab2Container, viewLocals);
     expect(tab2view1Reg.action).toEqual('newView');
-    expect(tab2view1Reg.direction).toEqual('switch');
+    expect(tab2view1Reg.direction).toEqual('swap');
 
     $state.go('home');
     rootScope.$apply();
-    homeReg = viewService.register(homeViewScope, viewLocals);
+    homeReg = ionicHistory.register(homeViewScope, viewLocals);
     expect(homeReg.action).toEqual('moveBack');
     expect(homeReg.direction).toEqual('exit');
   }));
 
   it('should be an abstract view', inject(function($document) {
-    var reg = viewService.register({}, {});
+    var reg = ionicHistory.register({}, {});
     expect(reg.action).not.toEqual('abstractView');
 
-    reg = viewService.register({}, {
+    reg = ionicHistory.register({}, {
       $$state: {}
     });
     expect(reg.action).not.toEqual('abstractView');
 
-    reg = viewService.register({}, {
+    reg = ionicHistory.register({}, {
       $$state: {
         self: {}
       }
     });
     expect(reg.action).not.toEqual('abstractView');
 
-    reg = viewService.register({}, {
+    reg = ionicHistory.register({}, {
       $$state: {
         self: {
           abstract: true
@@ -1010,53 +1000,53 @@ describe('Ionic View Service', function() {
   }));
 
   it('should init root viewHistory data', inject(function() {
-    expect(viewService.viewHistory().backView).toEqual(null);
-    expect(viewService.viewHistory().currentView).toEqual(null);
-    expect(viewService.viewHistory().forwardView).toEqual(null);
-    expect(viewService.viewHistory().histories).toEqual({
+    expect(ionicHistory.viewHistory().backView).toEqual(null);
+    expect(ionicHistory.viewHistory().currentView).toEqual(null);
+    expect(ionicHistory.viewHistory().forwardView).toEqual(null);
+    expect(ionicHistory.viewHistory().histories).toEqual({
         root: { historyId: 'root', parentHistoryId: null, stack: [], cursor: -1 }
     });
   }));
 
   it('should not error when clearing empty history', function() {
     expect(function() {
-      viewService.clearHistory();
+      ionicHistory.clearHistory();
     }).not.toThrow();
   });
 
-  it('should create a viewService view', inject(function($location) {
-    var newView = viewService.createView();
+  it('should create a ionicHistory view', inject(function($location) {
+    var newView = ionicHistory.createView();
     expect(newView).toEqual(null);
 
-    newView = viewService.createView({ stateName: 'about', url: '/url'  });
+    newView = ionicHistory.createView({ stateName: 'about', url: '/url'  });
     expect(newView.stateName).toEqual('about');
   }));
 
   it('should go() to a view', inject(function($location) {
-    var newView = viewService.createView({ stateName: 'about' });
+    var newView = ionicHistory.createView({ stateName: 'about' });
     newView.go();
     rootScope.$apply();
     expect($location.url()).toEqual('/about');
 
     $location.url('/nochange');
-    newView = viewService.createView({ url: '/nochange' });
+    newView = ionicHistory.createView({ url: '/nochange' });
     var result = newView.go();
     expect(result).toEqual(null);
 
     $location.url('/nochange');
-    newView = viewService.createView({ url: '/nochange' });
+    newView = ionicHistory.createView({ url: '/nochange' });
     result = newView.go();
     expect(result).toEqual(null);
 
-    newView = viewService.viewHistory().backView = viewService.createView({ url: '/url' });
+    newView = ionicHistory.viewHistory().backView = ionicHistory.createView({ url: '/url' });
     result = newView.go();
     expect(result).toEqual(-1);
 
-    newView = viewService.viewHistory().forwardView = viewService.createView({ url: '/url' });
+    newView = ionicHistory.viewHistory().forwardView = ionicHistory.createView({ url: '/url' });
     result = newView.go();
     expect(result).toEqual(1);
 
-    newView = viewService.createView({ url: '/url' });
+    newView = ionicHistory.createView({ url: '/url' });
     newView.go();
     expect($location.url()).toEqual('/url');
   }));
@@ -1064,23 +1054,23 @@ describe('Ionic View Service', function() {
   it('should change history on event changeHistory', inject(function($location, $state) {
     $location.url('/original');
 
-    rootScope.$broadcast("viewState.changeHistory");
+    rootScope.$broadcast("$ionicHistory.change");
     expect($location.url()).toEqual('/original');
 
-    rootScope.$broadcast("viewState.changeHistory", { uiSref: 'about' });
+    rootScope.$broadcast("$ionicHistory.change", { uiSref: 'about' });
     expect($location.url()).toEqual('/about');
 
-    rootScope.$broadcast("viewState.changeHistory", { url: '/url' });
+    rootScope.$broadcast("$ionicHistory.change", { url: '/url' });
     expect($location.url()).toEqual('/url');
 
-    viewService.viewHistory().histories.h123 = { stack: [], cursor: -1 };
-    rootScope.$broadcast("viewState.changeHistory", { historyId: 'h123' });
+    ionicHistory.viewHistory().histories.h123 = { stack: [], cursor: -1 };
+    rootScope.$broadcast("$ionicHistory.change", { historyId: 'h123' });
     expect($location.url()).toEqual('/url');
 
-    var newView = viewService.createView({ stateName: 'about' });
-    viewService.viewHistory().histories.h123.stack.push(newView);
-    viewService.viewHistory().histories.h123.cursor++;
-    rootScope.$broadcast("viewState.changeHistory", { historyId: 'h123' });
+    var newView = ionicHistory.createView({ stateName: 'about' });
+    ionicHistory.viewHistory().histories.h123.stack.push(newView);
+    ionicHistory.viewHistory().histories.h123.cursor++;
+    rootScope.$broadcast("$ionicHistory.change", { historyId: 'h123' });
     rootScope.$apply();
     expect($state.current.name).toEqual('about');
   }));

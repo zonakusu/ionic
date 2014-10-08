@@ -16,7 +16,7 @@ $ios-transition-container-bg-color:         #000 !default;
     @include translate3d(98%, 0, 0);
   }
 
-  .view-pane-add {
+  .nav-view-add {
     // set the animation for the entering view
     @include animation-name( slideInFromRight, addBoxShadow );
     @include animation-duration( $ios-transition-view-duration );
@@ -24,7 +24,7 @@ $ios-transition-container-bg-color:         #000 !default;
     z-index: $z-index-view-above;
   }
 
-  .view-pane-remove {
+  .nav-view-remove {
     // set the animation for the leaving view
     @include animation-name( slideOutToLeft33, fadeOutToPartial );
     @include animation-duration( $ios-transition-view-duration );
@@ -42,7 +42,7 @@ $ios-transition-container-bg-color:         #000 !default;
     @include translate3d(-33%, 0, 0);
   }
 
-  .view-pane-add {
+  .nav-view-add {
     // set the animation for the entering view
     @include animation-name( slideInFromLeft33, fadeInFromPartial );
     @include animation-duration( $ios-transition-view-duration );
@@ -50,7 +50,7 @@ $ios-transition-container-bg-color:         #000 !default;
     z-index: $z-index-view-below;
   }
 
-  .view-pane-remove {
+  .nav-view-remove {
     // set the animation for the leaving view
     @include animation-name( slideOutToRight, removeBoxShadow );
     @include animation-duration( $ios-transition-view-duration );
@@ -68,7 +68,7 @@ $ios-transition-container-bg-color:         #000 !default;
     @include translate3d(0, 0, 0);
   }
 
-  .view-pane-add {
+  .nav-view-add {
     // set the animation for the entering view
     @include animation-name( fadeIn );
     @include animation-duration( $ios-transition-view-duration / 2 );
@@ -76,7 +76,7 @@ $ios-transition-container-bg-color:         #000 !default;
     z-index: $z-index-view-above;
   }
 
-  .view-pane-remove {
+  .nav-view-remove {
     // set the animation for the leaving view
     @include animation-name( fadeOutToPartial );
     @include animation-duration( $ios-transition-view-duration / 2 );
@@ -104,7 +104,7 @@ $android-transition-container-bg-color:         #000 !default;
     @include translate3d(98%, 0, 0);
   }
 
-  .view-pane-add {
+  .nav-view-add {
     // set the animation for the entering view
     @include animation-name( slideInFromRight );
     @include animation-duration( $android-transition-view-duration );
@@ -112,7 +112,7 @@ $android-transition-container-bg-color:         #000 !default;
     z-index: $z-index-view-above;
   }
 
-  .view-pane-remove {
+  .nav-view-remove {
     // set the animation for the leaving view
     @include translate3d(0, 0, 0);
     @include animation-name( fadeOutToPartial );
@@ -131,7 +131,7 @@ $android-transition-container-bg-color:         #000 !default;
     @include translate3d(0, 0, 0);
   }
 
-  .view-pane-add {
+  .nav-view-add {
     // set the animation for the entering view
     @include animation-name( fadeInFromPartial );
     @include animation-duration( $android-transition-view-duration );
@@ -139,7 +139,7 @@ $android-transition-container-bg-color:         #000 !default;
     z-index: $z-index-view-below;
   }
 
-  .view-pane-remove {
+  .nav-view-remove {
     // set the animation for the leaving view
     @include animation-name( slideOutToRight );
     @include animation-duration( $android-transition-view-duration );
@@ -157,7 +157,7 @@ $android-transition-container-bg-color:         #000 !default;
     @include translate3d(0, 0, 0);
   }
 
-  .view-pane-add {
+  .nav-view-add {
     // set the animation for the entering view
     @include animation-name( fadeIn );
     @include animation-duration( $android-transition-view-duration / 2 );
@@ -165,7 +165,7 @@ $android-transition-container-bg-color:         #000 !default;
     z-index: $z-index-view-above;
   }
 
-  .view-pane-remove {
+  .nav-view-remove {
     // set the animation for the leaving view
     @include animation-name( fadeOutToPartial );
     @include animation-duration( $android-transition-view-duration / 2 );
@@ -187,7 +187,7 @@ $android-transition-container-bg-color:         #000 !default;
   opacity: 0;
 }
 
-.view-entering.view-pane, // entering: during and after animate
+.view-entering.nav-view, // entering: during and after animate
 .view-active.view-leaving.ng-animate // leaving: before and during animate
 {
   opacity: 1;
@@ -198,16 +198,16 @@ $android-transition-container-bg-color:         #000 !default;
 // View Transition Defaults (no animation)
 // -------------------------------
 
-.view-pane-add {
+.nav-view-add {
   @include animation-name( fadeIn );
 }
 
-.view-pane-remove {
+.nav-view-remove {
   @include animation-name( fadeOut );
 }
 
-.view-pane-add,
-.view-pane-remove {
+.nav-view-add,
+.nav-view-remove {
   opacity: 1;
   @include animation-duration( 0 );
   @include animation-fill-mode( forwards );

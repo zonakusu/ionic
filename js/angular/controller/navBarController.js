@@ -3,11 +3,11 @@ IonicModule
   '$scope',
   '$element',
   '$attrs',
-  '$ionicViewService',
+  '$ionicHistory',
   '$animate',
   '$compile',
   '$ionicNavBarDelegate',
-function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionicNavBarDelegate) {
+function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavBarDelegate) {
   //Let the parent know about our controller too so that children of
   //sibling content elements can know about us
   var CSS_NAV_BAR_ACTIVE = 'nav-bar-active';
@@ -194,7 +194,7 @@ function($scope, $element, $attrs, $ionicViewService, $animate, $compile, $ionic
   };
 
   this.back = function() {
-    var backView = $ionicViewService.getBackView();
+    var backView = $ionicHistory.backView();
     backView && backView.go();
     return false;
   };

@@ -6,12 +6,12 @@ IonicModule.config([
 function($provide) {
   function $AnimateDecorator($animate) {
 
-    var CSS_DIRECTIONS = 'nav-forward nav-back nav-enter nav-exit nav-switch'.split(' ');
+    var CSS_DIRECTIONS = 'nav-forward nav-back nav-enter nav-exit nav-swap'.split(' ');
     var CSS_VIEW_ACTIVE = 'view-active';
     var CSS_VIEW_CACHE = 'view-cache';
     var CSS_VIEW_ENTERING = 'view-entering';
     var CSS_VIEW_LEAVING = 'view-leaving';
-    var CSS_ANIMATION_SUPER = 'view-pane';
+    var CSS_ANIMATION_SUPER = 'nav-view';
     var NG_ANIMATE_PARENT_KEY = '$$ngAnimateKey';
 
     var usedAnimationClasses = [];
@@ -20,32 +20,32 @@ function($provide) {
 
     $animate.transition = function(animationClass, navDirection, enteringElement, leavingElement, callback) {
       var parentElement = enteringElement.parent();
-      var doAnimation = $animate.doAnimation(animationClass, navDirection);
+      var shouldAnimate = $animate.shouldAnimate(animationClass, navDirection);
 
-      $animate.stage(doAnimation, animationClass, navDirection, parentElement, enteringElement, leavingElement);
+      $animate.stage(shouldAnimate, animationClass, navDirection, parentElement, enteringElement, leavingElement);
 
-      $animate.start(doAnimation, enteringElement, leavingElement, function(){
+      $animate.start(shouldAnimate, enteringElement, leavingElement, function(){
 
         $animate.end(animationClass, parentElement, enteringElement, leavingElement);
 
-         callback && callback();
+        callback && callback();
 
       });
 
     };
 
 
-    $animate.doAnimation = function(animationClass, navDirection) {
+    $animate.shouldAnimate = function(animationClass, navDirection) {
       return !!(useAnimation && navDirection && navDirection !== 'none' && animationClass && animationClass !== 'none');
     };
 
 
-    $animate.stage = function(doAnimation, animationClass, navDirection, parentElement, enteringElement, leavingElement) {
+    $animate.stage = function(shouldAnimate, animationClass, navDirection, parentElement, enteringElement, leavingElement) {
 
       var x, isExistingAnimationClass;
 
       for(x=0; x<usedAnimationClasses.length; x++) {
-        if(usedAnimationClasses[x] === animationClass && doAnimation) {
+        if(usedAnimationClasses[x] === animationClass && shouldAnimate) {
           isExistingAnimationClass = true;
         } else {
           parentElement.removeClass( usedAnimationClasses[x] );
@@ -58,7 +58,7 @@ function($provide) {
         }
       }
 
-      if( doAnimation ) {
+      if( shouldAnimate ) {
         if(!isExistingAnimationClass) {
           usedAnimationClasses.push(animationClass);
         }
@@ -85,7 +85,7 @@ function($provide) {
                         .removeClass(CSS_VIEW_CACHE)
                         .addClass(CSS_ANIMATION_SUPER);
 
-        if( doAnimation ) {
+        if( shouldAnimate ) {
           leavingElement.addClass('ng-animate');
         }
       }
@@ -94,30 +94,23 @@ function($provide) {
 
 
 
-    $animate.start = function(doAnimation, enteringElement, leavingElement, callback) {
-      var enteringDone, leavingDone;
+    $animate.start = function(shouldAnimate, enteringElement, leavingElement, callback) {
 
       function next() {
-        enteringDone && leavingDone && callback && callback();
+        next.callCount++;
+        next.callCount > 1 && callback && callback();
       }
+      next.callCount = 0;
 
-      if(enteringElement && doAnimation) {
-        $animate.addClass(enteringElement, CSS_ANIMATION_SUPER, function(){
-          enteringDone = true;
-          next();
-        });
+      if(enteringElement && shouldAnimate) {
+        $animate.addClass(enteringElement, CSS_ANIMATION_SUPER, next);
       } else {
-        enteringDone = true;
         next();
       }
 
-      if(leavingElement && doAnimation) {
-        $animate.removeClass(leavingElement, CSS_ANIMATION_SUPER, function(){
-          leavingDone = true;
-          next();
-        });
+      if(leavingElement && shouldAnimate) {
+        $animate.removeClass(leavingElement, CSS_ANIMATION_SUPER, next);
       } else {
-        leavingDone = true;
         next();
       }
 
