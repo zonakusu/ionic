@@ -13,6 +13,9 @@ function componentConfig(defaults) {
 IonicModule
 .constant('$ionicPlatformDefaults', {
   'ios': {
+    '$ionicViewConfig': {
+      transition: 'ios-transition'
+    },
     '$ionicNavBarConfig': {
       alignTitle: 'center',
       backButtonIcon: 'ion-ios7-arrow-back'
@@ -23,6 +26,9 @@ IonicModule
     }
   },
   'android': {
+    '$ionicViewConfig': {
+      transition: 'android-transition'
+    },
     '$ionicNavBarConfig': {
       alignTitle: 'center',
       backButtonIcon: 'ion-ios7-arrow-back'
