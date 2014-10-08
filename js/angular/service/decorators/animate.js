@@ -71,7 +71,8 @@ function($provide) {
 
       // ensure
       enteringElement.addClass(CSS_VIEW_ENTERING)
-                     .removeClass(CSS_VIEW_CACHE);
+                     .removeClass(CSS_VIEW_CACHE)
+                     .removeClass(CSS_ANIMATION_SUPER);
 
       if(leavingElement) {
           leavingElement.addClass(CSS_VIEW_LEAVING)

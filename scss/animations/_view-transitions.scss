@@ -3,12 +3,13 @@
 // iOS Transitions
 // -------------------------------
 
-$ios-transition-view-duration:              400ms;
-$ios-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1);
+$ios-transition-view-duration:              400ms !default;
+$ios-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1) !default;
+$ios-transition-container-bg-color:         #000 !default;
 
 
 .ios-transition.nav-forward {
-  background-color: #000;
+  background-color: $ios-transition-container-bg-color;
 
   .ng-animate {
     // stage where the entering view will start from
@@ -34,7 +35,7 @@ $ios-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1);
 }
 
 .ios-transition.nav-back {
-  background-color: #000;
+  background-color: $ios-transition-container-bg-color;
 
   .ng-animate {
     // stage where the entering view will start from
@@ -90,12 +91,13 @@ $ios-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1);
 // Android Transitions
 // -------------------------------
 
-$android-transition-view-duration:              4000ms;
-$android-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1);
+$android-transition-view-duration:              400ms !default;
+$android-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1) !default;
+$android-transition-container-bg-color:         #000 !default;
 
 
 .android-transition.nav-forward {
-  background-color: #000;
+  background-color: $android-transition-container-bg-color;
 
   .ng-animate {
     // stage where the entering view will start from
@@ -122,7 +124,7 @@ $android-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1);
 }
 
 .android-transition.nav-back {
-  background-color: #000;
+  background-color: $android-transition-container-bg-color;
 
   .ng-animate {
     // stage where the entering view will start from
@@ -173,13 +175,6 @@ $android-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1);
 
 }
 
-.menu-open .ios-transition.nav-back .ng-animate .view-pane-add,
-.menu-open .ios-transition.nav-back .ng-animate .view-pane-remove,
-.menu-open .ios-transition.nav-forward .ng-animate .view-pane-add,
-.menu-open .ios-transition.nav-forward .ng-animate .view-pane-remove {
-  @include animation-duration( 0 );
-}
-
 
 // Intermediate Settings Between Steps Of A Transition
 // -------------------------------
@@ -217,23 +212,6 @@ $android-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1);
   @include animation-duration( 0 );
   @include animation-fill-mode( forwards );
 }
-
-.no-animation {
-  > .ng-enter, &.ng-enter, > .ng-leave, &.ng-leave {
-    @include transition(none);
-  }
-}
-.noop-animation {
-  > .ng-enter, &.ng-enter, > .ng-leave, &.ng-leave {
-    @include transition(all cubic-bezier(0.250, 0.460, 0.450, 0.940) 250ms);
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
-}
-
 
 // required for Android
 .ng-animate .pane {
