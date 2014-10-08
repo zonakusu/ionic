@@ -20,18 +20,23 @@ function($provide) {
 
     $animate.transition = function(animationClass, navDirection, enteringElement, leavingElement, callback) {
       var parentElement = enteringElement.parent();
-      var doAnimation = !!(useAnimation && navDirection && navDirection !== 'none' && animationClass !== 'none');
+      var doAnimation = $animate.doAnimation(animationClass, navDirection);
 
       $animate.stage(doAnimation, animationClass, navDirection, parentElement, enteringElement, leavingElement);
 
       $animate.start(doAnimation, enteringElement, leavingElement, function(){
 
-        $animate.end(animationClass, navDirection, parentElement, enteringElement, leavingElement);
+        $animate.end(animationClass, parentElement, enteringElement, leavingElement);
 
          callback && callback();
 
       });
 
+    };
+
+
+    $animate.doAnimation = function(animationClass, navDirection) {
+      return !!(useAnimation && navDirection && navDirection !== 'none' && animationClass && animationClass !== 'none');
     };
 
 
@@ -119,7 +124,7 @@ function($provide) {
     };
 
 
-    $animate.end = function(animationClass, navDirection, parentElement, enteringElement, leavingElement) {
+    $animate.end = function(animationClass, parentElement, enteringElement, leavingElement) {
 
       if(enteringElement) {
         enteringElement.addClass(CSS_VIEW_ACTIVE)

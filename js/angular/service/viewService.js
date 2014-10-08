@@ -5,7 +5,7 @@
 IonicModule
 
 .constant('$ionicViewConfig', {
-  transition: 'ion-transition'
+  transition: 'ios-transition'
 })
 
 .run([
