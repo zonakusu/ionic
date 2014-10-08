@@ -261,10 +261,6 @@ $view-box-shadow: 0px 2px 12px black;
   from { -webkit-transform: scale(1);   opacity: 1; }
   to   { -webkit-transform: scale(0.8); opacity: 0; }
 }
-@-moz-keyframes scaleOut {
-  from { -moz-transform: scale(1);   opacity: 1; }
-  to   { -moz-transform: scale(0.8); opacity: 0; }
-}
 @keyframes scaleOut {
   from { transform: scale(1);   opacity: 1; }
   to   { transform: scale(0.8); opacity: 0; }
@@ -277,10 +273,6 @@ $view-box-shadow: 0px 2px 12px black;
 @-webkit-keyframes scaleIn {
   from { -webkit-transform: scale(0); }
   to   { -webkit-transform: scale(1); }
-}
-@-moz-keyframes scaleIn {
-  from { -moz-transform: scale(0); }
-  to   { -moz-transform: scale(1); }
 }
 @keyframes scaleIn {
   from { transform: scale(0); }
@@ -296,10 +288,6 @@ $view-box-shadow: 0px 2px 12px black;
   from { -webkit-transform: scale(1.2); opacity: 0; }
   to   { -webkit-transform: scale(1);   opacity: 1 }
 }
-@-moz-keyframes superScaleIn {
-  from { -moz-transform: scale(1.2); opacity: 0; }
-  to   { -moz-transform: scale(1);   opacity: 1; }
-}
 @keyframes superScaleIn {
   from { transform: scale(1.2); opacity: 0; }
   to   { transform: scale(1);   opacity: 1; }
@@ -311,9 +299,6 @@ $view-box-shadow: 0px 2px 12px black;
 
 @-webkit-keyframes spin {
   100% { -webkit-transform: rotate(360deg); }
-}
-@-moz-keyframes spin {
-  100% { -moz-transform: rotate(360deg); }
 }
 @keyframes spin {
   100% { transform: rotate(360deg); }

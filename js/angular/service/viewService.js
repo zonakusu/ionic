@@ -3,6 +3,11 @@
  * TODO document
  */
 IonicModule
+
+.constant('$ionicViewConfig', {
+  transition: 'ion-transition'
+})
+
 .run([
   '$rootScope',
   '$state',
@@ -86,7 +91,8 @@ function($rootScope, $state, $location, $document, $ionicPlatform, $ionicViewSer
   '$ionicClickBlock',
   '$ionicConfig',
   '$animate',
-function($rootScope, $state, $compile, $controller, $location, $window, $timeout, $ionicClickBlock, $ionicConfig, $animate) {
+  '$ionicViewConfig',
+function($rootScope, $state, $compile, $controller, $location, $window, $timeout, $ionicClickBlock, $ionicConfig, $animate, $ionicViewConfig) {
 
   // data keys for jqLite elements
   var DATA_ELE_IDENTIFIER = '$ionicEleId';
@@ -111,7 +117,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
   var transitionCounter = 0;
   var stateChangeCounter = 0;
   var lastStateId;
-  var nextAnimation;
+  var nextTransition;
+  var nextDirection;
 
   var viewHistory = {
     histories: { root: { historyId: 'root', parentHistoryId: null, stack: [], cursor: -1 } },
@@ -236,8 +243,12 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
   return {
 
-    nextAnimation: function(val) {
-      nextAnimation = val;
+    nextTransition: function(val) {
+      nextTransition = val;
+    },
+
+    nextDirection: function(val) {
+      nextDirection = val;
     },
 
     viewHistory: function(val) {
@@ -660,27 +671,18 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
         getAnimationDirection: function(childDirection) {
           // Priority
-          // 1) nav-animation attribute directive
-          // 2) Entering element's attribute
-          // 3) Entering view's $state config property
-          // 4) View registration data
-          // 5) Global config
-          // 6) Fallback value
+          // 1) attribute directive
+          // 2) entering element's attribute
+          // 3) entering view's $state config property
+          // 4) view registration data
+          // 5) global config
+          // 6) fallback value
 
           var viewState = viewLocals && viewLocals.$$state && viewLocals.$$state.self || {};
 
-          function getConfigViewAnimation() {
-            if($ionicConfig.viewAnimation === 'platform') {
-              var platform = ionic.Platform.platform() || '';
-
-              return $ionicConfig[ platform  + 'ViewAnimation'] || 'ios-transition';
-            }
-            return $ionicConfig.viewAnimation;
-          }
-
           return {
-            animation: nextAnimation || enteringEle.attr('view-animation') || viewState.viewAnimation || getConfigViewAnimation(),
-            direction: enteringEle.attr('view-direction') || viewState.viewDirection || childDirection || direction || DIRECTION_NONE
+            animation: nextTransition || enteringEle.attr('view-transition') || viewState.viewTransition || ($ionicConfig.viewTransition === 'platform' ? $ionicViewConfig.transition : $ionicConfig.viewTransition),
+            direction: nextDirection || enteringEle.attr('view-direction') || viewState.viewDirection || childDirection || direction || DIRECTION_NONE
           };
         },
 
@@ -802,7 +804,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
             removableEle.remove();
           }
 
-          nextAnimation = null;
+          nextTransition = nextDirection = null;
         }
       };
 
@@ -823,8 +825,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           }
 
           if(currentView && currentView.historyId === historyId) {
-            currentView.backViewId = null;
-            currentView.forwardViewId = null;
+            currentView.backViewId = currentView.forwardViewId = null;
             histories[historyId].stack.push(currentView);
           } else if(histories[historyId].destroy) {
             histories[historyId].destroy();

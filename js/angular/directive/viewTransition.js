@@ -1,6 +1,6 @@
 /**
  * @ngdoc directive
- * @name navAnimation
+ * @name viewTransition
  * @module ionic
  * @restrict A
  *
@@ -9,17 +9,17 @@
  * @usage
  *
  * ```html
- * <a nav-animation="none" href="#/home">Home</a>
+ * <a view-transition="none" href="#/home">Home</a>
  * ```
  */
 IonicModule
-.directive('navAnimation', ['$ionicViewService', function($ionicViewService) {
+.directive('viewTransition', ['$ionicViewService', function($ionicViewService) {
   return {
     restrict: 'A',
     priority: 1000,
     link: function($scope, $element, $attr) {
       $element.bind('click', function(){
-        $ionicViewService.nextAnimation( $attr.navAnimation );
+        $ionicViewService.nextTransition( $attr.viewTransition );
       });
     }
   };

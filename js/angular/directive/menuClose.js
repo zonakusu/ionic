@@ -26,7 +26,7 @@ IonicModule
       $element.bind('click', function(){
         // lower priority than navAnimation which allows navAnimation
         // to override this directives nextAnimation() call
-        $ionicViewService.nextAnimation('none');
+        $ionicViewService.nextTransition('none');
         sideMenuCtrl.close();
       });
     }
