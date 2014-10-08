@@ -36,7 +36,7 @@ IonicModule
     restrict: 'EA',
     priority: 1000,
     require: ['^?ionNavBar', '^?ionModal'],
-    compile: function(tElement, tAttrs, transclude) {
+    compile: function(tElement) {
       tElement.addClass('pane');
       tElement[0].removeAttribute('title');
 
@@ -49,15 +49,15 @@ IonicModule
           return;
         }
 
-        $scope.$on('$ionicView.beforeEnter', function(ev, viewRegisterData) {
+        $scope.$on('$ionicView.beforeEnter', function(ev, transData) {
           navBarCtrl.navBarEnter({
             title: $attr.title,
-            direction: viewRegisterData.direction,
-            showBack: viewRegisterData.showBack
+            direction: transData.direction,
+            showBack: transData.showBack
           });
         });
 
-        $scope.$on('$ionicView.navViewActive', function() {
+        $scope.$on('$ionicView.afterEnter', function() {
           $element && $element.removeClass('view-cache');
         });
 

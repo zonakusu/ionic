@@ -467,7 +467,7 @@ describe('tabs', function() {
       expect(tabEl.controller('ionTab').tabMatchesState).toHaveBeenCalled();
     });
 
-    it('should call selectIfMatchesState on $stateChangeSuccess when there is content', function() {
+    it('should call selectIfMatchesState on $stateChangeSuccess', function() {
       setup('', '<ion-nav-view name="banana"></ion-nav-view>');
       var tabMatchesState = tabEl.controller('ionTab').tabMatchesState;
 
@@ -485,26 +485,6 @@ describe('tabs', function() {
       tabEl.scope().$broadcast('$stateChangeSuccess');
       expect(tabMatchesState).toHaveBeenCalled();
       expect(tabsCtrl.select).toHaveBeenCalledWith(tabEl.scope(), false);
-    });
-
-    it('should not call selectIfMatchesState on $stateChangeSuccess when there is not content', function() {
-      setup();
-      var tabMatchesState = tabEl.controller('ionTab').tabMatchesState;
-
-      tabMatchesState.reset();
-      spyOn(tabsCtrl, 'select');
-      tabDoesMatch = false;
-
-      tabEl.scope().$broadcast('$stateChangeSuccess');
-      expect(tabMatchesState).toHaveBeenCalled();
-      expect(tabsCtrl.select).not.toHaveBeenCalled();
-
-      tabMatchesState.reset();
-      tabDoesMatch = true;
-
-      tabEl.scope().$broadcast('$stateChangeSuccess');
-      expect(tabMatchesState).toHaveBeenCalled();
-      expect(tabsCtrl.select).not.toHaveBeenCalled();
     });
 
     it('should transclude on $tabSelected=true', function() {
