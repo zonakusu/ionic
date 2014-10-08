@@ -121,7 +121,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
         $scope.$on('$stateChangeSuccess', selectIfMatchesState);
         selectIfMatchesState();
         function selectIfMatchesState() {
-          if (tabCtrl.tabMatchesState() && tabContent.childElementCount) {
+          if (tabCtrl.tabMatchesState()) {
             tabsCtrl.select($scope, false);
           }
         }
@@ -133,12 +133,12 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
 
 
         function tabSelected(isSelected) {
-          if (isSelected) {
+          if (isSelected && tabContent.childElementCount) {
             // this tab is being selected
 
             // check if the tab is already in the DOM
             // only do this if the tab has child elements
-            if(!isTabContentAttached && tabContent.childElementCount) {
+            if(!isTabContentAttached) {
               // tab should be selected and is NOT in the DOM
               // create a new scope and append it
               childScope = $scope.$new();
@@ -173,7 +173,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicViewServi
 
         $scope.$watch('$tabSelected', tabSelected);
 
-        $scope.$on('$ionicView.navViewActive', function() {
+        $scope.$on('$ionicView.afterEnter', function() {
           childElement && childElement.removeClass('view-cache');
         });
 

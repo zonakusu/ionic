@@ -243,14 +243,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
   return {
 
-    nextTransition: function(val) {
-      nextTransition = val;
-    },
-
-    nextDirection: function(val) {
-      nextDirection = val;
-    },
-
     viewHistory: function(val) {
       if(arguments.length) {
         viewHistory = val;
@@ -566,6 +558,14 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
       }
     },
 
+    nextTransition: function(val) {
+      nextTransition = val;
+    },
+
+    nextDirection: function(val) {
+      nextDirection = val;
+    },
+
     getTransition: function(navViewScope, navViewElement, navViewAttrs, viewLocals, registerData, enteringView) {
       var transitionId = ++transitionCounter;
 
@@ -602,6 +602,8 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
           // this element is currently the active one, so it will be the leaving element
           leavingEle = viewElements.eq(x);
         }
+
+        if(enteringEle && leavingEle) break;
       }
 
       // if we got an entering element than it's already in the DOM
@@ -638,8 +640,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
           trans.render(function(){
 
-            trans.before();
-
             callback && callback();
 
           });
@@ -648,7 +648,9 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
 
         animate: function(childDirection) {
-          var d = trans.getAnimationDirection(childDirection);
+          var d = trans.getAnimationDirection(viewLocals, enteringEle, childDirection);
+
+          trans.before(d);
 
           $animate.transition( d.animation, d.direction, enteringEle, leavingEle, function(transData){
 
@@ -659,8 +661,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
 
               // allow clicks to hapen again after the transition
               $ionicClickBlock.hide();
-
-              navViewScope.$emit('$ionicView.navViewActive', transData);
             }
 
             // always clean up any references that could cause memory issues
@@ -669,7 +669,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
         },
 
 
-        getAnimationDirection: function(childDirection) {
+        getAnimationDirection: function(viewLocals, enteringEle, childDirection) {
           // Priority
           // 1) attribute directive
           // 2) entering element's attribute
@@ -687,9 +687,6 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
         },
 
         render: function(callback) {
-          // update that this view was just accessed
-          enteringEle.data(DATA_VIEW_ACCESSED, Date.now());
-
           if(!alreadyInDom) {
             // the entering element is not already in the DOM
             // hasn't been compiled and isn't linked up yet
@@ -726,15 +723,15 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
             link(scope);
           }
 
+          // update that this view was just accessed
+          enteringEle.data(DATA_VIEW_ACCESSED, Date.now());
+
           $timeout(function(){
             callback();
           }, 16);
         },
 
-        before: function() {
-          var transData = {
-            direction: direction
-          };
+        before: function(transData) {
           if(enteringEle) {
             var enteringScope = jqLite(enteringEle).scope();
             if(enteringScope) {
@@ -760,7 +757,7 @@ function($rootScope, $state, $compile, $controller, $location, $window, $timeout
             var enteringScope = jqLite(enteringEle).scope();
             if(enteringScope) {
               enteringScope.$broadcast('$ionicView.afterEnter', transData);
-              enteringScope.$broadcast('$viewContentLoaded', transData);
+              enteringScope.$emit('$viewContentLoaded', transData);
             }
           }
 

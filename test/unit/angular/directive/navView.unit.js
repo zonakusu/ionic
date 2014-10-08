@@ -87,17 +87,20 @@ describe('Ionic nav-view', function() {
   page4State = {
     template: 'page4'
   },
+  page5State = {
+    template: 'page5'
+  },
   ionView1State = {
     template: '<ion-view>ionView1</ion-view>'
   },
   ionView2State = {
     template: '<ion-view>ionView2</ion-view>'
   },
-  ionViewCacheFalseState = {
-    template: '<ion-view cache-view="false">ionViewCacheFalse</ion-view>'
+  ionViewCacheFalseAttrState = {
+    template: '<ion-view cache-view="false">ionViewCacheFalseAttr</ion-view>'
   },
-  ionView3State = {
-    template: '<ion-view>ionView3</ion-view>',
+  ionViewCacheFalsePropertyState = {
+    template: '<ion-view>ionViewCacheFalsePropertyState</ion-view>',
     cache: false
   };
 
@@ -121,10 +124,11 @@ describe('Ionic nav-view', function() {
       .state('page2', page2State)
       .state('page3', page3State)
       .state('page4', page4State)
+      .state('page5', page5State)
       .state('ionView1', ionView1State)
       .state('ionView2', ionView2State)
-      .state('ionViewCacheFalse', ionViewCacheFalseState)
-      .state('ionView3', ionView3State);
+      .state('ionViewCacheFalseAttr', ionViewCacheFalseAttrState)
+      .state('ionViewCacheFalseProperty', ionViewCacheFalsePropertyState);
   }));
 
   beforeEach(inject(function(_$compile_, _$animate_, $ionicViewService, $ionicConfig, $rootScope) {
@@ -136,6 +140,7 @@ describe('Ionic nav-view', function() {
 
     $ionicConfig.viewTransition = 'none';
     $ionicConfig.maxCachedViews = 30;
+    $ionicConfig.cacheForwardViews = false;
     $animate.useAnimation(false);
   }));
 
@@ -473,7 +478,7 @@ describe('Ionic nav-view', function() {
     expect(divs.eq(0).hasClass('view-active')).toBe(true);
   }));
 
-  it('should not cache more than 2 ion-nav-views when going forward', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
+  it('should not cache ion-nav-views that were forward when moving back', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
     $ionicConfig.maxCachedViews = 2;
@@ -514,6 +519,47 @@ describe('Ionic nav-view', function() {
     expect(elem.find('ion-nav-view').find('div').length).toBe(1);
   }));
 
+  it('should cache ion-nav-views that were forward when moving back with $ionicConfig.cacheForwardViews=true', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
+    elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
+
+    $ionicConfig.cacheForwardViews = true;
+
+    $state.go(page1State);
+    $q.flush();
+    $timeout.flush();
+    expect(elem.find('ion-nav-view').find('div').length).toBe(1);
+
+    $state.go(page2State);
+    $q.flush();
+    $timeout.flush();
+    expect(elem.find('ion-nav-view').find('div').length).toBe(2);
+
+    $state.go(page3State);
+    $q.flush();
+    $timeout.flush();
+    expect(elem.find('ion-nav-view').find('div').length).toBe(3);
+
+    $state.go(page4State);
+    $q.flush();
+    $timeout.flush();
+    expect(elem.find('ion-nav-view').find('div').length).toBe(4);
+
+    $state.go(page3State);
+    $q.flush();
+    $timeout.flush();
+    expect(elem.find('ion-nav-view').find('div').length).toBe(4);
+
+    $state.go(page2State);
+    $q.flush();
+    $timeout.flush();
+    expect(elem.find('ion-nav-view').find('div').length).toBe(4);
+
+    $state.go(page1State);
+    $q.flush();
+    $timeout.flush();
+    expect(elem.find('ion-nav-view').find('div').length).toBe(4);
+  }));
+
   it('should not cache ion-views with the cache-view="true" attribute', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
@@ -523,12 +569,12 @@ describe('Ionic nav-view', function() {
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(1);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
 
-    $state.go(ionViewCacheFalseState);
+    $state.go(ionViewCacheFalseAttrState);
     $q.flush();
     $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
-    expect(elem.find('ion-nav-view').find('ion-view').eq(1).text()).toBe('ionViewCacheFalse');
+    expect(elem.find('ion-nav-view').find('ion-view').eq(1).text()).toBe('ionViewCacheFalseAttr');
 
     $state.go(ionView2State);
     $q.flush();
@@ -544,16 +590,15 @@ describe('Ionic nav-view', function() {
     $state.go(ionView1State);
     $q.flush();
     $timeout.flush();
-
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(1);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
 
-    $state.go(ionView3State);
+    $state.go(ionViewCacheFalsePropertyState);
     $q.flush();
     $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
-    expect(elem.find('ion-nav-view').find('ion-view').eq(1).text()).toBe('ionView3');
+    expect(elem.find('ion-nav-view').find('ion-view').eq(1).text()).toBe('ionViewCacheFalsePropertyState');
 
     $state.go(ionView2State);
     $q.flush();
@@ -561,6 +606,56 @@ describe('Ionic nav-view', function() {
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
     expect(elem.find('ion-nav-view').find('ion-view').eq(1).text()).toBe('ionView2');
+  }));
+
+  it('should remove the oldest accessed view (not the oldest, but oldest accessed)', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
+    elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
+
+    $ionicConfig.maxCachedViews = 3;
+
+    $state.go(page1State);
+    $q.flush();
+    $timeout.flush();
+    var divs = elem.find('ion-nav-view').find('div');
+    expect(divs.length).toBe(1);
+    expect(divs.eq(0).text()).toBe('page1');
+
+    $state.go(page2State);
+    $q.flush();
+    $timeout.flush();
+    divs = elem.find('ion-nav-view').find('div');
+    expect(divs.length).toBe(2);
+    expect(divs.eq(1).text()).toBe('page2');
+
+    $state.go(page3State);
+    $q.flush();
+    $timeout.flush();
+    divs = elem.find('ion-nav-view').find('div');
+    expect(divs.length).toBe(3);
+    expect(divs.eq(2).text()).toBe('page3');
+
+    $state.go(page4State);
+    $q.flush();
+    $timeout.flush();
+    divs = elem.find('ion-nav-view').find('div');
+    expect(divs.length).toBe(4);
+
+    $state.go(page1State);
+    $q.flush();
+    $timeout.flush();
+    var divs = elem.find('ion-nav-view').find('div');
+    expect(divs.length).toBe(4);
+
+    $state.go(page5State);
+    $q.flush();
+    $timeout.flush();
+    divs = elem.find('ion-nav-view').find('div');
+    expect(divs.length).toBe(4);
+    expect(divs.eq(0).text()).toBe('page1');
+    expect(divs.eq(1).text()).toBe('page3');
+    expect(divs.eq(2).text()).toBe('page4');
+    expect(divs.eq(3).text()).toBe('page5');
+
   }));
 
 });
