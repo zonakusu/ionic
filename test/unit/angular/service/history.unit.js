@@ -325,7 +325,8 @@ describe('Ionic History', function() {
 
     // register the tabs container
     var tabsContainer = { $parent: tabsContainer };
-    var tabsHistoryId = ionicHistory.registerHistory(tabsContainer);
+    ionicHistory.registerHistory(tabsContainer);
+    var tabsHistoryId = tabsContainer.$historyId;
 
     // put a view inside of the tabs container
     var tabView1 = { $parent: tabsContainer };

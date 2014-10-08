@@ -432,7 +432,6 @@ function($rootScope, $state, $location, $window) {
 
     registerHistory: function(scope) {
       scope.$historyId = ionic.Utils.nextUid();
-      return scope.$historyId;
     },
 
     viewHistory: function() {
