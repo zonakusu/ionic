@@ -24,13 +24,18 @@ function($provide) {
 
       $animate.start(animationClass, navDirection, parentElement, enteringElement, leavingElement).then(function(){
 
-        $animate.end(animationClass, navDirection, parentElement, enteringElement, leavingElement);
+        $animate.end(animationClass, parentElement, enteringElement, leavingElement);
 
          deferred.resolve();
 
       });
 
       return deferred.promise;
+    };
+
+
+    $animate.doAnimation = function(animationClass, navDirection) {
+      return !!(useAnimation && navDirection && navDirection !== 'none' && animationClass && animationClass !== 'none');
     };
 
 
@@ -118,7 +123,7 @@ function($provide) {
     };
 
 
-    $animate.end = function(animationClass, navDirection, parentElement, enteringElement, leavingElement) {
+    $animate.end = function(animationClass, parentElement, enteringElement, leavingElement) {
 
       if(enteringElement) {
         enteringElement.addClass(CSS_VIEW_ACTIVE)

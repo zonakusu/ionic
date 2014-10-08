@@ -1,113 +1,115 @@
 describe('$animate decorator', function() {
-  var topElement;
+  var parentElement, enteringElement, leavingElement;
 
   beforeEach(module('ionic'));
 
-  beforeEach(function(){
-    topElement = angular.element('<div class="top">')
-  });
+  function setupStage() {
+    parentElement = angular.element('<div class="test-parent">');
+    enteringElement = angular.element('<div class="test-entering">');
+    leavingElement = angular.element('<div class="test-leaving">');
+    parentElement.append(enteringElement).append(leavingElement);
+  }
 
+  it('should end transition and add/remove correct classnames from the entering element', inject(function($animate) {
+    setupStage();
 
-  // describe('commonParent', function(){
+    enteringElement.addClass('view-cache').addClass('view-entering').addClass('view-leaving');
 
-  //   it('should find the common parent when siblings', inject(function($animate) {
+    $animate.end('ios-transition', parentElement, enteringElement, leavingElement);
+    expect( enteringElement.attr('class') ).toEqual('test-entering view-active view-pane');
+  }));
 
-  //     var elementA = angular.element('<div class="a">');
-  //     topElement.append(elementA);
+  it('should end transition and add/remove correct classnames from the leaving element', inject(function($animate) {
+    setupStage();
 
-  //     var elementB = angular.element('<div class="b">');
-  //     topElement.append(elementB);
+    leavingElement.addClass('view-active').addClass('view-entering').addClass('view-leaving');
 
-  //     expect( $animate.commonParent(elementA, elementB).hasClass('top') ).toEqual(true);
+    $animate.end('ios-transition', parentElement, enteringElement, leavingElement);
+    expect( leavingElement.attr('class') ).toEqual('test-leaving view-cache');
+  }));
 
-  //   }));
+  it('should stage transition and add/remove correct classnames to the entering element', inject(function($animate) {
+    setupStage();
 
-  //   it('should find the common parent when A is one level above B', inject(function($animate) {
+    enteringElement.removeClass('view-entering').addClass('view-cache').addClass('view-pane');
 
-  //     var elementA = angular.element('<div class="a">');
-  //     topElement.append(elementA);
+    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( enteringElement.attr('class') ).toEqual('test-entering view-entering');
+  }));
 
-  //     var level1 = angular.element('<div class="level-1">');
-  //     elementA.append(level1);
+  it('should stage transition and add/remove correct classnames to the leaving element', inject(function($animate) {
+    setupStage();
 
-  //     var elementB = angular.element('<div class="b">');
-  //     level1.append(elementB);
+    leavingElement.addClass('view-cache').addClass('view-pane').removeClass('view-leaving');
 
-  //     expect( $animate.commonParent(elementA, elementB).hasClass('top') ).toEqual(true);
+    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( leavingElement.attr('class') ).toEqual('test-leaving view-pane view-leaving ng-animate');
+  }));
 
-  //   }));
+  it('should stage transition and not freak without a leaving element', inject(function($animate) {
+    parentElement = angular.element('<div class="test-parent">');
+    enteringElement = angular.element('<div class="test-entering">');
+    leavingElement = null;
 
-  //   it('should find the common parent when A is two levels above B', inject(function($animate) {
+    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( parentElement.hasClass('ios-transition') ).toEqual(true);
+  }));
 
-  //     var elementA = angular.element('<div class="a">');
-  //     topElement.append(elementA);
+  it('should stage transition and add correct animate class and remove the others', inject(function($animate) {
+    setupStage();
 
-  //     var level1 = angular.element('<div class="level-1">');
-  //     elementA.append(level1);
+    $animate.stage(true, 'larry-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( parentElement.attr('class') ).toEqual('test-parent larry-transition nav-forward');
 
-  //     var level2 = angular.element('<div class="level-2">');
-  //     level1.append(level2);
+    $animate.stage(true, 'curly-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( parentElement.attr('class') ).toEqual('test-parent curly-transition nav-forward');
 
-  //     var elementB = angular.element('<div class="b">');
-  //     level2.append(elementB);
+    $animate.stage(true, 'moe-transition', 'back', parentElement, enteringElement, leavingElement);
+    expect( parentElement.attr('class') ).toEqual('test-parent moe-transition nav-back');
 
-  //     expect( $animate.commonParent(elementA, elementB).hasClass('top') ).toEqual(true);
+    $animate.stage(true, 'shemp-transition', 'exit', parentElement, enteringElement, leavingElement);
+    expect( parentElement.attr('class') ).toEqual('test-parent shemp-transition nav-exit');
+  }));
 
-  //   }));
+  it('should stage transition and remove all directions except for the one being used on the parent', inject(function($animate) {
+    setupStage();
 
-  //   it('should find the common parent when A is one level above B, but B as the first arg', inject(function($animate) {
+    parentElement.addClass('nav-enter').addClass('nav-exit').addClass('nav-forward').addClass('nav-switch');
+    $animate.stage(true, 'ios-transition', 'back', parentElement, enteringElement, leavingElement);
+    expect( parentElement.attr('class') ).toEqual('test-parent ios-transition nav-back');
 
-  //     var elementA = angular.element('<div class="a">');
-  //     topElement.append(elementA);
+    parentElement.addClass('nav-enter').addClass('nav-exit').addClass('nav-back').addClass('nav-switch');
+    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( parentElement.attr('class') ).toEqual('test-parent ios-transition nav-forward');
+  }));
 
-  //     var level1 = angular.element('<div class="level-1">');
-  //     elementA.append(level1);
+  it('should custom $$ngAnimateKey on parent', inject(function($animate) {
+    setupStage();
+    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( parentElement.data('$$ngAnimateKey') ).toEqual('test-parent ios-transition nav-forward');
+  }));
 
-  //     var elementB = angular.element('<div class="b">');
-  //     level1.append(elementB);
+  it('should doAnimation', inject(function($animate) {
+    expect( $animate.doAnimation('ios-transition', 'forward') ).toEqual(true);
+    expect( $animate.doAnimation('ios-transition', 'back') ).toEqual(true);
+    expect( $animate.doAnimation('ios-transition', 'exit') ).toEqual(true);
+    $animate.useAnimation(true);
+    expect( $animate.doAnimation('ios-transition', 'exit') ).toEqual(true);
+  }));
 
-  //     expect( $animate.commonParent(elementB, elementA).hasClass('top') ).toEqual(true);
+  it('should not doAnimation', inject(function($animate) {
+    expect( $animate.doAnimation('', 'forward') ).toEqual(false);
+    expect( $animate.doAnimation('none', 'forward') ).toEqual(false);
+    expect( $animate.doAnimation(null, 'forward') ).toEqual(false);
+    expect( $animate.doAnimation(undefined, 'forward') ).toEqual(false);
 
-  //   }));
+    expect( $animate.doAnimation('android-transition', '') ).toEqual(false);
+    expect( $animate.doAnimation('android-transition', 'none') ).toEqual(false);
+    expect( $animate.doAnimation('android-transition', null) ).toEqual(false);
+    expect( $animate.doAnimation('android-transition', undefined) ).toEqual(false);
 
-  //   it('should find the common parent when A is two levels above B, but B as the first arg', inject(function($animate) {
-
-  //     var elementA = angular.element('<div class="a">');
-  //     topElement.append(elementA);
-
-  //     var level1 = angular.element('<div class="level-1">');
-  //     elementA.append(level1);
-
-  //     var level2 = angular.element('<div class="level-2">');
-  //     level1.append(level2);
-
-  //     var elementB = angular.element('<div class="b">');
-  //     level2.append(elementB);
-
-  //     expect( $animate.commonParent(elementB, elementA).hasClass('top') ).toEqual(true);
-
-  //   }));
-
-  //   it('should return parent of elementA when null or length=0 elementB', inject(function($animate) {
-
-  //     var elementA = angular.element('<div class="a">');
-  //     topElement.append(elementA);
-
-  //     expect( $animate.commonParent(elementA, null).hasClass('top') ).toEqual(true);
-  //     expect( $animate.commonParent(elementA, angular.element.find('no-element')).hasClass('top') ).toEqual(true);
-
-  //   }));
-
-  //   it('should return parent of elementB when null or length=0 elementA', inject(function($animate) {
-
-  //     var elementB = angular.element('<div class="b">');
-  //     topElement.append(elementB);
-
-  //     expect( $animate.commonParent(null, elementB).hasClass('top') ).toEqual(true);
-  //     expect( $animate.commonParent(angular.element.find('no-element'), elementB).hasClass('top') ).toEqual(true);
-
-  //   }));
-
-  // });
+    $animate.useAnimation(false);
+    expect( $animate.doAnimation('ios-transition', 'exit') ).toEqual(false);
+  }));
 
 });
