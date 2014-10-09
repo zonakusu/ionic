@@ -30,39 +30,42 @@
  * {@link ionic.directive:ionNavBar} by default.
  */
 IonicModule
-.directive('ionView', ['$ionicHistory', '$rootScope',
-           function( $ionicHistory,   $rootScope) {
+.directive('ionView', function() {
   return {
     restrict: 'EA',
     priority: 1000,
-    require: ['^?ionNavBar', '^?ionModal'],
+    require: ['^?ionModal'],
     compile: function(tElement) {
       tElement.addClass('pane');
       tElement[0].removeAttribute('title');
 
       return function link($scope, $element, $attr, ctrls) {
-        var navBarCtrl = ctrls[0];
-        var modalCtrl = ctrls[1];
+        var navViewCtrl = $element.inheritedData('$ionNavViewController');
+        var modalCtrl = ctrls[0];
+        var navBarCtrl = $element.inheritedData('$ionNavBarController');
 
-        //Don't use the ionView if we're inside a modal or there's no navbar
-        if (!navBarCtrl || modalCtrl) {
-          return;
-        }
+        // don't bother if inside a modal or there's no parent navView
+        if (!navBarCtrl || !navViewCtrl || modalCtrl) return;
+
+
 
         $scope.$on('$ionicView.beforeEnter', function(ev, transData) {
-          navBarCtrl.navBarEnter({
-            title: $attr.title,
-            direction: transData.direction,
-            showBack: transData.showBack
-          });
+          if (!transData.notified) {
+            transData.notified = true;
+
+            navViewCtrl.beforeEnter({
+              title: $attr.title,
+              direction: transData.direction,
+              transition: transData.transition,
+              showBack: transData.showBack
+            });
+
+          }
         });
+
 
         $scope.$on('$ionicView.afterEnter', function() {
-          $element && $element.removeClass('view-cache');
-        });
-
-        $scope.$on('$ionicView.navViewActive', function() {
-          $element && $element.removeClass('view-cache');
+          $element.removeClass('view-cache');
         });
 
         var hideBackAttr = angular.isDefined($attr.hideBackButton) ?
@@ -76,12 +79,13 @@ IonicModule
         var hideNavAttr = angular.isDefined($attr.hideNavBar) ?
           $attr.hideNavBar :
           'false';
+
         $scope.$watch(hideNavAttr, function(value) {
-          // Should the nav bar be hidden for this view or not?
+          // should the nav bar be hidden for this view or not?
           navBarCtrl.showBar(!value);
         });
 
       };
     }
   };
-}]);
+});

@@ -106,38 +106,29 @@ function( $ionicViewRenderer, $state) {
     terminal: true,
     priority: 2000,
     transclude: true,
-    controller: function(){},
-    //require: '^?ionNavView',
+    controller: '$ionicNavView',
+    require: 'ionNavView',
     compile: function (tElement, attr, transclude) {
 
       // a nav view element is a container for numerous views
       tElement.addClass('view-container');
       tElement.removeAttr('title');
 
-      return function(navViewScope, navViewElement, navViewAttrs, navViewCtrl) {
+      return function($scope, $element, $attr, navViewCtrl) {
         var latestLocals;
-        var navViewName = navViewAttrs[directive.name] || navViewAttrs.name || '';
 
         // Put in the compiled initial view
-        transclude(navViewScope, function(clone){
-          navViewElement.append( clone );
+        transclude($scope, function(clone){
+          $element.append( clone );
         });
 
-        // Find the details of the parent view directive (if any) and use it
-        // to derive our own qualified view name, then hang our own details
-        // off the DOM so child directives can find it.
-        var parent = navViewElement.parent().inheritedData('$uiView');
-        var parentViewName = ((parent && parent.state) ? parent.state.name : '');
-        if (navViewName.indexOf('@') < 0) navViewName  = navViewName + '@' + parentViewName;
-
-        var viewData = { name: navViewName, state: null };
-        navViewElement.data('$uiView', viewData);
+        var viewData = navViewCtrl.init();
 
         // listen for $stateChangeSuccess
-        navViewScope.$on('$stateChangeSuccess', function() {
+        $scope.$on('$stateChangeSuccess', function() {
           updateView(false);
         });
-        navViewScope.$on('$viewContentLoading', function() {
+        $scope.$on('$viewContentLoading', function() {
           updateView(false);
         });
 
@@ -147,36 +138,19 @@ function( $ionicViewRenderer, $state) {
 
         function updateView(firstTime) {
           // get the current local according to the $state
-          var currentLocals = $state.$current && $state.$current.locals[navViewName];
+          var viewLocals = $state.$current && $state.$current.locals[viewData.name];
 
           // do not update THIS nav-view if its is not the container for the given state
-          // if the currentLocals are the same as THIS latestLocals, then nothing to do
-          if (!currentLocals || (!firstTime && currentLocals === latestLocals)) return;
+          // if the viewLocals are the same as THIS latestLocals, then nothing to do
+          if (!viewLocals || (!firstTime && viewLocals === latestLocals)) return;
 
           // update the latestLocals
-          latestLocals = currentLocals;
-          viewData.state = currentLocals.$$state;
+          latestLocals = viewLocals;
+          viewData.state = viewLocals.$$state;
 
-          // register the view and figure out where it lives in the various
-          // histories and nav stacks along with how views should enter/leave
-          var renderer = $ionicViewRenderer.transition(navViewScope, navViewElement, navViewAttrs, currentLocals);
-
-          // init the rendering of views for this nav-view directive
-          childDirection = null;
-          renderer.init(function(){
-            // compiled, in the dom and linked, now animate
-            // and pass in a childDirection if one was emitted
-            renderer.transition( childDirection );
-          });
-
+          // register, update and transition to the new view
+          navViewCtrl.register(viewLocals);
         }
-
-        var childDirection;
-        function childViewRegisteredDirection(ev, d) {
-          childDirection = d;
-        }
-        // list for any child nav-views that emit a direction
-        navViewScope.$on('$ionicView.direction', childViewRegisteredDirection);
 
       };
     }

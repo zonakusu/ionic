@@ -113,20 +113,20 @@ function($ionicHistory, $rootScope, $animate, $compile, $ionicNavBarConfig) {
         // $scope.backButtonShown = false;
         // $scope.shouldAnimate = true;
         // $scope.isReverse = false;
-        $scope.isInvisible = true;
+        // $scope.isInvisible = true;
 
         $scope.$on('$destroy', function() {
           $scope.$parent.$hasHeader = false;
         });
 
-        $scope.$watch(function() {
-          return ($scope.isReverse ? ' reverse' : '') +
-            ($scope.isInvisible ? ' invisible' : '') +
-            (!$scope.shouldAnimate ? ' no-animation' : '');
-        }, function(className, oldClassName) {
-          $element.removeClass(oldClassName);
-          $element.addClass(className);
-        });
+        // $scope.$watch(function() {
+        //   return ($scope.isReverse ? ' reverse' : '') +
+        //     ($scope.isInvisible ? ' invisible' : '') +
+        //     (!$scope.shouldAnimate ? ' no-animation' : '');
+        // }, function(className, oldClassName) {
+        //   $element.removeClass(oldClassName);
+        //   $element.addClass(className);
+        // });
 
       }
     }
