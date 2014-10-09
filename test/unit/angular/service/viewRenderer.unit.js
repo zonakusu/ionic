@@ -49,12 +49,7 @@ describe('Ionic History', function() {
     expect(d.direction).toEqual('none');
   }));
 
-  it('should get direction from view direction', inject(function($ionicViewRenderer) {
-    var d = $ionicViewRenderer.getTransitionData(null, null, null, 'forward');
-    expect(d.direction).toEqual('forward');
-  }));
-
-  it('should get direction from child direction', inject(function($ionicViewRenderer) {
+  it('should get direction from direction', inject(function($ionicViewRenderer) {
     var d = $ionicViewRenderer.getTransitionData(null, null, 'back');
     expect(d.direction).toEqual('back');
   }));

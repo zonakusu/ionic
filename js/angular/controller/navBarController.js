@@ -18,21 +18,18 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
   var DATA_IS_USED = '$isUsed';
   var DATA_TITLE = '$title';
 
-  this._leftButtons;
-  this._rightButtons;
-
-
   $element.parent().data('$ionNavBarController', this);
 
   var deregisterInstance = $ionicNavBarDelegate._registerInstance(this, $attrs.delegateHandle);
 
   $scope.$on('$destroy', function(){
+    $element.parent().removeData('$ionNavBarController');
     this._rightButtons = null;
     this._leftButtons = null;
     deregisterInstance();
   });
 
-  this.navBarEnter = function(viewData) {
+  this.beforeEnter = function(viewData) {
     this.enable();
 
     var navBarElements = getNavBarElements();
@@ -41,8 +38,8 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
     var x, l = navBarElements.length;
 
     // find the active element that should leave
-    for(x=0; x<l; x++) {
-      if( navBarElements.eq(x).data(DATA_IS_ACTIVE) ) {
+    for (x=0; x<l; x++) {
+      if ( navBarElements.eq(x).data(DATA_IS_ACTIVE) ) {
         leavingEle = navBarElements.eq(x);
         leavingEle.data(DATA_IS_USED, true);
         leavingEle.data(DATA_IS_ACTIVE, false);
@@ -50,15 +47,15 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
     }
 
     // find an available element that's not being used
-    for(x=0; x<l; x++) {
-      if( !navBarElements.eq(x).data(DATA_IS_USED) ) {
+    for (x=0; x<l; x++) {
+      if ( !navBarElements.eq(x).data(DATA_IS_USED) ) {
         enteringEle = navBarElements.eq(x);
         enteringEle.data(DATA_IS_USED, true);
         break;
       }
     }
 
-    if(enteringEle) {
+    if (enteringEle) {
       this.renderActive(enteringEle, viewData);
     }
 
@@ -69,36 +66,36 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
     setTitleElement(viewData.title, navBarEle);
 
     var backButtonEle = getBackButtonElement();
-    if(backButtonEle) {
-      if(viewData.showBack) {
+    if (backButtonEle) {
+      if (viewData.showBack) {
         backButtonEle.removeClass('hide');
       } else {
         backButtonEle.addClass('hide');
       }
     }
 
-    if(this._leftButtons) {
+    if (this._leftButtons) {
       setButtonsElement(this._leftButtons, 'left', navBarEle);
     }
 
-    if(this._rightButtons) {
+    if (this._rightButtons) {
       setButtonsElement(this._rightButtons, 'right', navBarEle);
     }
 
   };
 
   this.transition = function(enteringEle, leavingEle, viewData) {
-    if(enteringEle) {
+    if (enteringEle) {
       enteringEle.data(DATA_IS_ACTIVE, true);
       enteringEle.removeClass(CSS_HIDE);
     }
 
     var navBarElements = getNavBarElements();
     var ele;
-    for(var x=0, l=navBarElements.length; x<l; x++) {
+    for (var x=0, l=navBarElements.length; x<l; x++) {
       ele = navBarElements.eq(x);
       ele.data(DATA_IS_USED, false);
-      if( !ele.data(DATA_IS_ACTIVE) ) {
+      if ( !ele.data(DATA_IS_ACTIVE) ) {
         ele.addClass(CSS_HIDE);
       }
     }
@@ -107,10 +104,16 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
 
   this._enableBar = function(enable) {
     $scope.isInvisible = !enable;
+    if (enable) {
+      $element.removeClass('hide');
+    } else {
+      $element.addClass('hide')
+    }
   };
 
   this.enable = function() {
-    for(var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
+    for (var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
+      //console.log('enable', this.myId(), $ionicNavBarDelegate._instances[x].myId(), $ionicNavBarDelegate._instances[x].myId() === this.myId())
       $ionicNavBarDelegate._instances[x]._enableBar( $ionicNavBarDelegate._instances[x] === this );
     }
   };
@@ -129,7 +132,7 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
 
   function getBackButtonElement() {
     var ele = $element[0].querySelector('.back-button');
-    if(ele) {
+    if (ele) {
       return jqLite(ele);
     }
   }
@@ -137,12 +140,12 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
   function getActiveElement() {
     var navBarElements = getNavBarElements();
     var x, l=navBarElements.length;
-    for(x=0; x<l; x++) {
-      if(navBarElements.eq(x).data(DATA_IS_ACTIVE)) {
+    for (x=0; x<l; x++) {
+      if (navBarElements.eq(x).data(DATA_IS_ACTIVE)) {
         return navBarElements.eq(x);
       }
     }
-    if(l) {
+    if (l) {
       navBarElements.eq(x).data(DATA_IS_ACTIVE, true);
       return navBarElements.eq(0);
     }
@@ -152,11 +155,11 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
     $scope.oldTitle = $scope.title;
     $scope.title = title = title || '';
 
-    if(navBarEle) {
+    if (navBarEle) {
       var titleEle = navBarEle[0].querySelector('.title');
-      if(titleEle) {
+      if (titleEle) {
         titleEle = jqLite(titleEle);
-        if(titleEle.data(DATA_TITLE) !== title) {
+        if (titleEle.data(DATA_TITLE) !== title) {
           // only make an update if there is a title change
           titleEle.html(title);
           titleEle.data(DATA_TITLE, title);
@@ -166,9 +169,9 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
   }
 
   function setButtonsElement(buttons, side, navBarEle) {
-    if(navBarEle) {
+    if (navBarEle) {
       var navBarButtonEle = navBarEle[0].querySelector('.' + side + '-buttons');
-      if(navBarButtonEle) {
+      if (navBarButtonEle) {
         jqLite(navBarButtonEle).append( buttons );
       }
     }
@@ -200,7 +203,7 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
   };
 
   this.registerButtons = function(buttons, side) {
-    if(side === 'right') {
+    if (side === 'right') {
       this._rightButtons = buttons;
     } else {
       this._leftButtons = buttons;
