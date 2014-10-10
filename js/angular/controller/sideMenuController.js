@@ -5,7 +5,8 @@ IonicModule
   '$ionicSideMenuDelegate',
   '$ionicPlatform',
   '$ionicBody',
-function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
+  '$ionicHistory',
+function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody, $ionicHistory) {
   var self = this;
   var rightShowing, leftShowing, isDragging;
   var startX, lastX, offsetX, isAsideExposed;
@@ -17,6 +18,7 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
     self.right = options.right;
     self.setContent(options.content);
     self.dragThresholdX = options.dragThresholdX || 10;
+    $ionicHistory.registerHistory(self.$scope);
   };
 
   /**
