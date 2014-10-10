@@ -128,7 +128,10 @@ function($rootScope, $ionicHistory, $ionicClickBlock, $ionicConfig, $ionicViewCo
         },
 
         render: function(callback) {
-          if (!alreadyInDom) {
+          if ( alreadyInDom) {
+            ionic.Utils.reconnectScope( enteringEle.scope() );
+
+          } else {
             // the entering element is not already in the DOM
             // hasn't been compiled and isn't linked up yet
 
@@ -222,6 +225,8 @@ function($rootScope, $ionicHistory, $ionicClickBlock, $ionicConfig, $ionicViewCo
             removableEle.scope().$destroy();
             removableEle.remove();
           }
+
+          ionic.Utils.disconnectScope( leavingEle && leavingEle.scope() );
 
           nextTransition = nextDirection = null;
         }
