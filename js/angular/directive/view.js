@@ -68,13 +68,13 @@ IonicModule
           $element.removeClass('view-cache');
         });
 
-        var hideBackAttr = angular.isDefined($attr.hideBackButton) ?
-          $attr.hideBackButton :
-          'false';
-        $scope.$watch(hideBackAttr, function(value) {
-          // Should we hide a back button when this tab is shown
-          navBarCtrl.showBackButton(!value);
-        });
+        // var hideBackAttr = angular.isDefined($attr.hideBackButton) ?
+        //   $attr.hideBackButton :
+        //   'false';
+        // $scope.$watch(hideBackAttr, function(value) {
+        //   // should we hide a back button when this tab is shown
+        //   navBarCtrl.showBackButton(!value);
+        // });
 
         var hideNavAttr = angular.isDefined($attr.hideNavBar) ?
           $attr.hideNavBar :

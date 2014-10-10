@@ -105,7 +105,7 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewRenderer) {
       hasNestedNavView = val;
     }
     return hasNestedNavView;
-  }
+  };
 
 
   self.render = function(viewId, viewLocals) {

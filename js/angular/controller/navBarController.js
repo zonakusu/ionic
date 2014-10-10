@@ -107,7 +107,7 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
     if (enable) {
       $element.removeClass('hide');
     } else {
-      $element.addClass('hide')
+      $element.addClass('hide');
     }
   };
 
