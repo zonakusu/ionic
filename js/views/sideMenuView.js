@@ -11,6 +11,7 @@
       this.el = opts.el;
       this.isEnabled = (typeof opts.isEnabled === 'undefined') ? true : opts.isEnabled;
       this.setWidth(opts.width);
+      this.mode = opts.mode || 'offset';
     },
     getFullWidth: function() {
       return this.width;
@@ -61,7 +62,10 @@
       return parseFloat(this.el.style[ionic.CSS.TRANSFORM].replace('translate3d(', '').split(',')[0]);
     },
     setTranslateX: ionic.animationFrameThrottle(function(x) {
-      this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + x + 'px, 0, 0)';
+      if(this.mode == 'drawer') {
+      } else {
+        this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + x + 'px, 0, 0)';
+      }
     })
   });
 

@@ -41,7 +41,8 @@ IonicModule
         var sideMenu = sideMenuCtrl[$scope.side] = new ionic.views.SideMenu({
           width: attr.width,
           el: $element[0],
-          isEnabled: true
+          isEnabled: true,
+          mode: $attr.mode
         });
 
         $scope.$watch($attr.width, function(val) {
