@@ -18,7 +18,7 @@
  * ```
  */
 IonicModule
-.directive('menuClose', ['$ionicViewRenderer', function($ionicViewRenderer) {
+.directive('menuClose', ['$ionicViewSwitcher', function($ionicViewSwitcher) {
   return {
     restrict: 'AC',
     require: '^ionSideMenus',
@@ -26,7 +26,7 @@ IonicModule
       $element.bind('click', function(){
         // lower priority than navAnimation which allows navAnimation
         // to override this directives nextAnimation() call
-        $ionicViewRenderer.nextTransition('none');
+        $ionicViewSwitcher.nextTransition('none');
         sideMenuCtrl.close();
       });
     }

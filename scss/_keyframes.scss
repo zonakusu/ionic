@@ -161,19 +161,6 @@
 }
 
 
-// Fade Out To Partial
-// -------------------------------
-
-@-webkit-keyframes fadeOutToPartial {
-  from { opacity: 1; }
-  to   { opacity: .8; }
-}
-@keyframes fadeOutToPartial {
-  from { opacity: 1; }
-  to   { opacity: .8; }
-}
-
-
 // Fade In
 // -------------------------------
 
@@ -190,13 +177,28 @@
 // Fade In From Partial
 // -------------------------------
 
+$fade-partial-opacity: .9;
+
 @-webkit-keyframes fadeInFromPartial {
-  from { opacity: .8; }
+  from { opacity: $fade-partial-opacity; }
   to   { opacity: 1; }
 }
 @keyframes fadeInFromPartial {
-  from { opacity: .8; }
+  from { opacity: $fade-partial-opacity; }
   to   { opacity: 1; }
+}
+
+
+// Fade Out To Partial
+// -------------------------------
+
+@-webkit-keyframes fadeOutToPartial {
+  from { opacity: 1; }
+  to   { opacity: $fade-partial-opacity; }
+}
+@keyframes fadeOutToPartial {
+  from { opacity: 1; }
+  to   { opacity: $fade-partial-opacity; }
 }
 
 
@@ -229,7 +231,7 @@
 // Add Box Shadow
 // -------------------------------
 
-$view-box-shadow: 0px 2px 12px black;
+$view-box-shadow: 0 4px 20px rgba(0,0,0,.3);
 
 @-webkit-keyframes addBoxShadow {
   from { @include box-shadow( none ); }

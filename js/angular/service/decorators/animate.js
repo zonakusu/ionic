@@ -4,14 +4,14 @@
 IonicModule.config([
   '$provide',
 function($provide) {
-  function $AnimateDecorator($animate) {
+  function $AnimateDecorator($animate, $timeout) {
 
+    var CSS_ANIMATION_SUPER = 'nav-view';
     var CSS_DIRECTIONS = 'nav-forward nav-back nav-enter nav-exit nav-swap'.split(' ');
     var CSS_VIEW_ACTIVE = 'view-active';
     var CSS_VIEW_CACHE = 'view-cache';
     var CSS_VIEW_ENTERING = 'view-entering';
     var CSS_VIEW_LEAVING = 'view-leaving';
-    var CSS_ANIMATION_SUPER = 'nav-view';
     var NG_ANIMATE_PARENT_KEY = '$$ngAnimateKey';
 
     var usedAnimationClasses = [];
@@ -22,13 +22,13 @@ function($provide) {
       var parentElement = enteringElement.parent();
       var shouldAnimate = $animate.shouldAnimate(animationClass, navDirection);
 
-      $animate.stage(shouldAnimate, animationClass, navDirection, parentElement, enteringElement, leavingElement);
+      $animate.stage(shouldAnimate, animationClass, navDirection, parentElement, enteringElement, leavingElement, function(){
 
-      $animate.start(shouldAnimate, enteringElement, leavingElement, function(){
+        $animate.start(shouldAnimate, enteringElement, leavingElement, function(){
 
-        $animate.end(animationClass, parentElement, enteringElement, leavingElement);
+          $animate.end(animationClass, parentElement, enteringElement, leavingElement, callback);
 
-        callback && callback();
+        });
 
       });
 
@@ -40,26 +40,26 @@ function($provide) {
     };
 
 
-    $animate.stage = function(shouldAnimate, animationClass, navDirection, parentElement, enteringElement, leavingElement) {
+    $animate.stage = function(shouldAnimate, animationClass, navDirection, parentElement, enteringElement, leavingElement, callback) {
 
       var x, isExistingAnimationClass;
 
-      for(x=0; x<usedAnimationClasses.length; x++) {
-        if(usedAnimationClasses[x] === animationClass && shouldAnimate) {
+      for (x=0; x<usedAnimationClasses.length; x++) {
+        if (usedAnimationClasses[x] === animationClass && shouldAnimate) {
           isExistingAnimationClass = true;
         } else {
           parentElement.removeClass( usedAnimationClasses[x] );
         }
       }
 
-      for(x=0; x<CSS_DIRECTIONS.length; x++) {
-        if(CSS_DIRECTIONS[x] !== navDirection) {
+      for (x=0; x<CSS_DIRECTIONS.length; x++) {
+        if (CSS_DIRECTIONS[x] !== navDirection) {
           parentElement.removeClass( CSS_DIRECTIONS[x] );
         }
       }
 
-      if( shouldAnimate ) {
-        if(!isExistingAnimationClass) {
+      if ( shouldAnimate ) {
+        if (!isExistingAnimationClass) {
           usedAnimationClasses.push(animationClass);
         }
 
@@ -70,7 +70,7 @@ function($provide) {
         // and not the default parent counter within $animate
         var classParentID = extractElementNode(parentElement).getAttribute('class');
         var parentID = parentElement.data(NG_ANIMATE_PARENT_KEY);
-        if(parentElement !== classParentID) {
+        if (parentElement !== classParentID) {
           parentElement.data(NG_ANIMATE_PARENT_KEY, classParentID);
         }
       }
@@ -80,35 +80,35 @@ function($provide) {
                      .removeClass(CSS_VIEW_CACHE)
                      .removeClass(CSS_ANIMATION_SUPER);
 
-      if(leavingElement) {
+      if (leavingElement) {
           leavingElement.addClass(CSS_VIEW_LEAVING)
                         .removeClass(CSS_VIEW_CACHE)
                         .addClass(CSS_ANIMATION_SUPER);
 
-        if( shouldAnimate ) {
+        if ( shouldAnimate ) {
           leavingElement.addClass('ng-animate');
         }
       }
 
-    };
+      $timeout(callback, 10);
 
+    };
 
 
     $animate.start = function(shouldAnimate, enteringElement, leavingElement, callback) {
 
       function next() {
-        next.callCount++;
-        next.callCount > 1 && callback && callback();
+        ++next.c > 1 && callback();
       }
-      next.callCount = 0;
+      next.c = 0;
 
-      if(enteringElement && shouldAnimate) {
+      if (enteringElement && shouldAnimate) {
         $animate.addClass(enteringElement, CSS_ANIMATION_SUPER, next);
       } else {
         next();
       }
 
-      if(leavingElement && shouldAnimate) {
+      if (leavingElement && shouldAnimate) {
         $animate.removeClass(leavingElement, CSS_ANIMATION_SUPER, next);
       } else {
         next();
@@ -117,33 +117,40 @@ function($provide) {
     };
 
 
-    $animate.end = function(animationClass, parentElement, enteringElement, leavingElement) {
+    $animate.end = function(animationClass, parentElement, enteringElement, leavingElement, callback) {
 
-      if(enteringElement) {
-        enteringElement.addClass(CSS_VIEW_ACTIVE)
-                       .removeClass(CSS_VIEW_CACHE)
-                       .removeClass(CSS_VIEW_ENTERING)
-                       .removeClass(CSS_VIEW_LEAVING)
-                       .addClass(CSS_ANIMATION_SUPER);
-      }
+      ionic.requestAnimationFrame(function(){
 
-      if(leavingElement) {
-        leavingElement.addClass(CSS_VIEW_CACHE)
-                      .removeClass(CSS_VIEW_ACTIVE)
-                      .removeClass(CSS_VIEW_ENTERING)
-                      .removeClass(CSS_VIEW_LEAVING);
-      }
+        if (enteringElement) {
+          enteringElement.addClass(CSS_VIEW_ACTIVE)
+                         .removeClass(CSS_VIEW_CACHE)
+                         .removeClass(CSS_VIEW_ENTERING)
+                         .removeClass(CSS_VIEW_LEAVING)
+                         .addClass(CSS_ANIMATION_SUPER);
+        }
 
-      parentElement.removeClass(animationClass);
+        if (leavingElement) {
+          leavingElement.addClass(CSS_VIEW_CACHE)
+                        .removeClass(CSS_VIEW_ACTIVE)
+                        .removeClass(CSS_VIEW_ENTERING)
+                        .removeClass(CSS_VIEW_LEAVING);
+        }
 
-      for(var x=0; x<CSS_DIRECTIONS.length; x++) {
-        parentElement.removeClass(CSS_DIRECTIONS[x]);
-      }
+        parentElement.removeClass(animationClass);
+
+        for (var x=0; x<CSS_DIRECTIONS.length; x++) {
+          parentElement.removeClass(CSS_DIRECTIONS[x]);
+        }
+
+        callback && callback();
+
+      });
+
     };
 
 
     $animate.useAnimation = function(val) {
-      if(arguments.length) {
+      if (arguments.length) {
         useAnimation = val;
       }
       return useAnimation;
@@ -151,9 +158,9 @@ function($provide) {
 
 
     function extractElementNode(element) {
-      for(var i = 0; i < element.length; i++) {
+      for (var i = 0; i < element.length; i++) {
         var elm = element[i];
-        if(elm.nodeType == 1) return elm;
+        if (elm.nodeType == 1) return elm;
       }
     }
 
@@ -161,5 +168,5 @@ function($provide) {
     return $animate;
   }
 
-  $provide.decorator('$animate', ['$delegate', $AnimateDecorator]);
+  $provide.decorator('$animate', ['$delegate', '$timeout', $AnimateDecorator]);
 }]);

@@ -95,9 +95,9 @@
  */
 IonicModule
 .directive('ionNavView', [
-  '$ionicViewRenderer',
+  '$ionicViewSwitcher',
   '$state',
-function( $ionicViewRenderer, $state) {
+function( $ionicViewSwitcher, $state) {
   // IONIC's fork of Angular UI Router, v0.2.10
   // the navView handles registering views in the history and how to transition between them
 

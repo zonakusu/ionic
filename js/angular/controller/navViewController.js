@@ -4,8 +4,8 @@ IonicModule
   '$element',
   '$attrs',
   '$ionicHistory',
-  '$ionicViewRenderer',
-function($scope, $element, $attrs, $ionicHistory, $ionicViewRenderer) {
+  '$ionicViewSwitcher',
+function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
   var self = this;
   var direction;
   var isPrimary = true;
@@ -75,9 +75,9 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewRenderer) {
 
 
   self.beforeEnter = function(transData) {
-    if(isPrimary) {
+    if (isPrimary) {
       var associatedNavBarCtrl = $element.inheritedData('$ionNavBarController');
-      if(associatedNavBarCtrl) {
+      if (associatedNavBarCtrl) {
         associatedNavBarCtrl.beforeEnter(transData);
       }
     }
@@ -113,12 +113,12 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewRenderer) {
 
     // register the view and figure out where it lives in the various
     // histories and nav stacks along with how views should enter/leave
-    var renderer = $ionicViewRenderer.create($scope, $element, viewLocals, enteringView);
+    var switcher = $ionicViewSwitcher.create($scope, $element, viewLocals, enteringView);
 
     // init the rendering of views for this navView directive
-    renderer.init(function(){
+    switcher.init(function(){
       // compiled, in the dom and linked, now animate
-      renderer.transition( self.direction() );
+      switcher.transition( self.direction() );
     });
 
   };

@@ -4,10 +4,8 @@ IonicModule
   '$element',
   '$attrs',
   '$ionicHistory',
-  '$animate',
-  '$compile',
   '$ionicNavBarDelegate',
-function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavBarDelegate) {
+function($scope, $element, $attrs, $ionicHistory, $ionicNavBarDelegate) {
   //Let the parent know about our controller too so that children of
   //sibling content elements can know about us
   var CSS_NAV_BAR_ACTIVE = 'nav-bar-active';
@@ -113,7 +111,6 @@ function($scope, $element, $attrs, $ionicHistory, $animate, $compile, $ionicNavB
 
   this.enable = function() {
     for (var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
-      //console.log('enable', this.myId(), $ionicNavBarDelegate._instances[x].myId(), $ionicNavBarDelegate._instances[x].myId() === this.myId())
       $ionicNavBarDelegate._instances[x]._enableBar( $ionicNavBarDelegate._instances[x] === this );
     }
   };

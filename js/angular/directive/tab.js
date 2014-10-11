@@ -80,7 +80,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) 
 
       var navViewName;
       var tabChildEle = tabContent.children;
-      if(tabChildEle.length && tabChildEle[0].tagName === 'ION-NAV-VIEW') {
+      if (tabChildEle.length && tabChildEle[0].tagName === 'ION-NAV-VIEW') {
         navViewName = tabChildEle[0].getAttribute('name');
       }
 
@@ -101,7 +101,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) 
 
         tabsCtrl.add($scope);
         $scope.$on('$destroy', function() {
-          if(!$scope.$tabsDestroy) {
+          if (!$scope.$tabsDestroy) {
             // if the containing ionTabs directive is being destroyed
             // then don't bother going through the controllers remove
             // method, since remove will reset the active tab as each tab
@@ -138,7 +138,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) 
 
             // check if the tab is already in the DOM
             // only do this if the tab has child elements
-            if(!isTabContentAttached) {
+            if (!isTabContentAttached) {
               // tab should be selected and is NOT in the DOM
               // create a new scope and append it
               childScope = $scope.$new();
@@ -152,10 +152,10 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) 
             // remove the hide class so the tabs content shows up
             childElement && childElement.removeClass('view-cache');
 
-          } else if(isTabContentAttached && childElement) {
+          } else if (isTabContentAttached && childElement) {
             // this tab should NOT be selected, and it is already in the DOM
 
-            if( $ionicConfig.maxCachedViews > 0 ) {
+            if ( $ionicConfig.maxCachedViews > 0 ) {
               // keep the tabs in the DOM, only css hide it
               childElement.addClass('view-cache');
 
