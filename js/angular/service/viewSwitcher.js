@@ -14,11 +14,10 @@ IonicModule
   '$compile',
   '$controller',
   '$animate',
-  '$ionicHistory',
   '$ionicClickBlock',
   '$ionicConfig',
   '$ionicViewConfig',
-function($timeout, $compile, $controller, $animate, $ionicHistory, $ionicClickBlock, $ionicConfig, $ionicViewConfig) {
+function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConfig, $ionicViewConfig) {
 
   // data keys for jqLite elements
   var DATA_NO_CACHE = '$ionicNoCache';
@@ -109,7 +108,7 @@ function($timeout, $compile, $controller, $animate, $ionicHistory, $ionicClickBl
               // we found an existing element in the DOM that should be entering the view
               enteringEle = viewElements.eq(x);
 
-            } else if (viewElements.eq(x).hasClass('view-active')) {
+            } else if (viewElements.eq(x).hasClass('nav-view-active')) {
               // this element is currently the active one, so it will be the leaving element
               leavingEle = viewElements.eq(x);
             }
@@ -124,7 +123,7 @@ function($timeout, $compile, $controller, $animate, $ionicHistory, $ionicClickBl
             // create it using existing template/scope/locals
             enteringEle = createViewElement(viewLocals);
 
-            enteringEle.addClass('view-entering');
+            enteringEle.addClass('nav-view-entering');
 
             // existing elements in the DOM are looked up by their state name and state id
             enteringEle.data(DATA_ELE_IDENTIFIER, enteringEleIdentifier);
@@ -183,7 +182,7 @@ function($timeout, $compile, $controller, $animate, $ionicHistory, $ionicClickBl
 
           switcher.notify('before', transData);
 
-          $animate.transition( transData.transition, transData.direction, enteringEle, leavingEle, function(){
+          $animate.transition( 'nav-view', transData.transition, transData.direction, enteringEle, leavingEle, function(){
 
             if (transitionId === transitionCounter) {
 

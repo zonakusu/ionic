@@ -142,7 +142,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) 
               // tab should be selected and is NOT in the DOM
               // create a new scope and append it
               childScope = $scope.$new();
-              childElement = jqLite('<div class="tab-content pane view-cache">');
+              childElement = jqLite('<div class="tab-content pane nav-view-cache">');
               childElement.html(tabContent.innerHTML);
               tabsCtrl.$element.append( childElement );
               $compile(childElement)(childScope);
@@ -150,14 +150,14 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) 
             }
 
             // remove the hide class so the tabs content shows up
-            childElement && childElement.removeClass('view-cache');
+            childElement && childElement.removeClass('nav-view-cache');
 
           } else if (isTabContentAttached && childElement) {
             // this tab should NOT be selected, and it is already in the DOM
 
             if ( $ionicConfig.maxCachedViews > 0 ) {
               // keep the tabs in the DOM, only css hide it
-              childElement.addClass('view-cache');
+              childElement.addClass('nav-view-cache');
 
             } else {
               // do not keep tabs in the DOM
@@ -174,7 +174,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) 
         $scope.$watch('$tabSelected', tabSelected);
 
         $scope.$on('$ionicView.afterEnter', function() {
-          childElement && childElement.removeClass('view-cache');
+          childElement && childElement.removeClass('nav-view-cache');
         });
 
       };

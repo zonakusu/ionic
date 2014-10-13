@@ -87,27 +87,24 @@ IonicModule
   '$compile',
   '$ionicNavBarConfig',
 function($ionicHistory, $rootScope, $animate, $compile, $ionicNavBarConfig) {
-
-  var navBarContainer = '<div class="nav-bar-container hide"><div class="buttons left-buttons"></div><div class="title"></div><div class="buttons right-buttons"></div></div>';
-
   return {
     restrict: 'E',
     controller: '$ionicNavBar',
     scope: true,
-    compile: function(tElement, tAttrs) {
+    compile: function(tElement) {
       //We cannot transclude here because it breaks element.data() inheritance on compile
-      tElement.addClass('bar bar-header nav-bar');
+      //tElement.addClass('bar bar-header nav-bar');
+      var orgClassnames = tElement.attr('class') || ''
+      tElement.attr('class', '');
 
-      // add three empty nav bar containers that will be available for nav bar transitions
-      tElement.append( jqLite(navBarContainer+navBarContainer+navBarContainer) );
+      return function($scope, $element, $attr, navBarCtrl) {
 
+        navBarCtrl.init(orgClassnames);
 
-      return { pre: prelink };
-      function prelink($scope, $element, $attr, navBarCtrl) {
-        navBarCtrl._headerBarView = new ionic.views.HeaderBar({
-          el: $element[0],
-          alignTitle: $attr.alignTitle || $ionicNavBarConfig.alignTitle || 'center'
-        });
+        // navBarCtrl._headerBarView = new ionic.views.HeaderBar({
+        //   el: $element[0],
+        //   alignTitle: $attr.alignTitle || $ionicNavBarConfig.alignTitle || 'center'
+        // });
 
         // //defaults
         // $scope.backButtonShown = false;

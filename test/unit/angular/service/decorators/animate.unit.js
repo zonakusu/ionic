@@ -13,37 +13,37 @@ describe('$animate decorator', function() {
   it('should end transition and add/remove correct classnames from the entering element', inject(function($animate) {
     setupStage();
 
-    enteringElement.addClass('view-cache').addClass('view-entering').addClass('view-leaving');
+    enteringElement.addClass('nav-view-cache').addClass('nav-view-entering').addClass('nav-view-leaving');
 
-    $animate.end('ios-transition', parentElement, enteringElement, leavingElement);
-    expect( enteringElement.attr('class') ).toEqual('test-entering view-active nav-view');
+    $animate.end('nav-view', 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( enteringElement.attr('class') ).toEqual('test-entering nav-view-active nav-view');
   }));
 
   it('should end transition and add/remove correct classnames from the leaving element', inject(function($animate) {
     setupStage();
 
-    leavingElement.addClass('view-active').addClass('view-entering').addClass('view-leaving');
+    leavingElement.addClass('nav-view-active').addClass('nav-view-entering').addClass('nav-view-leaving');
 
-    $animate.end('ios-transition', parentElement, enteringElement, leavingElement);
-    expect( leavingElement.attr('class') ).toEqual('test-leaving view-cache');
+    $animate.end('nav-view', 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( leavingElement.attr('class') ).toEqual('test-leaving nav-view-cache');
   }));
 
   it('should stage transition and add/remove correct classnames to the entering element', inject(function($animate) {
     setupStage();
 
-    enteringElement.removeClass('view-entering').addClass('view-cache').addClass('nav-view');
+    enteringElement.removeClass('nav-view-entering').addClass('nav-view-cache').addClass('nav-view');
 
-    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
-    expect( enteringElement.attr('class') ).toEqual('test-entering view-entering');
+    $animate.stage(true, 'nav-view', 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( enteringElement.attr('class') ).toEqual('test-entering nav-view-entering');
   }));
 
   it('should stage transition and add/remove correct classnames to the leaving element', inject(function($animate) {
     setupStage();
 
-    leavingElement.addClass('view-cache').addClass('nav-view').removeClass('view-leaving');
+    leavingElement.addClass('nav-view-cache').addClass('nav-view').removeClass('nav-view-leaving');
 
-    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
-    expect( leavingElement.attr('class') ).toEqual('test-leaving nav-view view-leaving ng-animate');
+    $animate.stage(true, 'nav-view', 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    expect( leavingElement.attr('class') ).toEqual('test-leaving nav-view nav-view-leaving ng-animate');
   }));
 
   it('should stage transition and not freak without a leaving element', inject(function($animate) {
@@ -51,23 +51,23 @@ describe('$animate decorator', function() {
     enteringElement = angular.element('<div class="test-entering">');
     leavingElement = null;
 
-    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    $animate.stage(true, 'nav-view', 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
     expect( parentElement.hasClass('ios-transition') ).toEqual(true);
   }));
 
   it('should stage transition and add correct animate class and remove the others', inject(function($animate) {
     setupStage();
 
-    $animate.stage(true, 'larry-transition', 'forward', parentElement, enteringElement, leavingElement);
+    $animate.stage(true, 'nav-view', 'larry-transition', 'forward', parentElement, enteringElement, leavingElement);
     expect( parentElement.attr('class') ).toEqual('test-parent larry-transition nav-forward');
 
-    $animate.stage(true, 'curly-transition', 'forward', parentElement, enteringElement, leavingElement);
+    $animate.stage(true, 'nav-view', 'curly-transition', 'forward', parentElement, enteringElement, leavingElement);
     expect( parentElement.attr('class') ).toEqual('test-parent curly-transition nav-forward');
 
-    $animate.stage(true, 'moe-transition', 'back', parentElement, enteringElement, leavingElement);
+    $animate.stage(true, 'nav-view', 'moe-transition', 'back', parentElement, enteringElement, leavingElement);
     expect( parentElement.attr('class') ).toEqual('test-parent moe-transition nav-back');
 
-    $animate.stage(true, 'shemp-transition', 'exit', parentElement, enteringElement, leavingElement);
+    $animate.stage(true, 'nav-view', 'shemp-transition', 'exit', parentElement, enteringElement, leavingElement);
     expect( parentElement.attr('class') ).toEqual('test-parent shemp-transition nav-exit');
   }));
 
@@ -75,21 +75,21 @@ describe('$animate decorator', function() {
     setupStage();
 
     parentElement.addClass('nav-enter').addClass('nav-exit').addClass('nav-forward').addClass('nav-swap');
-    $animate.stage(true, 'ios-transition', 'back', parentElement, enteringElement, leavingElement);
+    $animate.stage(true, 'nav-view', 'ios-transition', 'back', parentElement, enteringElement, leavingElement);
     expect( parentElement.attr('class') ).toEqual('test-parent ios-transition nav-back');
 
     parentElement.addClass('nav-enter').addClass('nav-exit').addClass('nav-back').addClass('nav-swap');
-    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    $animate.stage(true, 'nav-view', 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
     expect( parentElement.attr('class') ).toEqual('test-parent ios-transition nav-forward');
 
     parentElement.addClass('nav-enter').addClass('nav-exit').addClass('nav-back').addClass('nav-forward');
-    $animate.stage(true, 'ios-transition', 'swap', parentElement, enteringElement, leavingElement);
+    $animate.stage(true, 'nav-view', 'ios-transition', 'swap', parentElement, enteringElement, leavingElement);
     expect( parentElement.attr('class') ).toEqual('test-parent ios-transition nav-swap');
   }));
 
   it('should custom $$ngAnimateKey on parent', inject(function($animate) {
     setupStage();
-    $animate.stage(true, 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
+    $animate.stage(true, 'nav-view', 'ios-transition', 'forward', parentElement, enteringElement, leavingElement);
     expect( parentElement.data('$$ngAnimateKey') ).toEqual('test-parent ios-transition nav-forward');
   }));
 

@@ -42,12 +42,9 @@ IonicModule
       return function link($scope, $element, $attr, ctrls) {
         var navViewCtrl = $element.inheritedData('$ionNavViewController');
         var modalCtrl = ctrls[0];
-        var navBarCtrl = $element.inheritedData('$ionNavBarController');
 
         // don't bother if inside a modal or there's no parent navView
-        if (!navBarCtrl || !navViewCtrl || modalCtrl) return;
-
-
+        if (!navViewCtrl || modalCtrl) return;
 
         $scope.$on('$ionicView.beforeEnter', function(ev, transData) {
           if (!transData.notified) {
@@ -65,7 +62,7 @@ IonicModule
 
 
         $scope.$on('$ionicView.afterEnter', function() {
-          $element.removeClass('view-cache');
+          $element.removeClass('nav-view-cache');
         });
 
         // var hideBackAttr = angular.isDefined($attr.hideBackButton) ?
@@ -82,7 +79,7 @@ IonicModule
 
         $scope.$watch(hideNavAttr, function(value) {
           // should the nav bar be hidden for this view or not?
-          navBarCtrl.showBar(!value);
+          navViewCtrl.showBar(!value);
         });
 
       };

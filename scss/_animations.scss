@@ -11,12 +11,12 @@ $ios-transition-container-bg-color:         #000 !default;
 .ios-transition.nav-forward {
   background-color: $ios-transition-container-bg-color;
 
-  .view-entering {
+  .nav-view-entering {
     // where the entering view will be immediately before the transition
     @include translate3d(98%, 0, 0);
   }
 
-  .view-entering.nav-view {
+  .nav-view-entering.nav-view {
     // where the entering view will be immediately after the transition
     @include translate3d(0, 0, 0);
   }
@@ -42,12 +42,12 @@ $ios-transition-container-bg-color:         #000 !default;
 .ios-transition.nav-back {
   background-color: $ios-transition-container-bg-color;
 
-  .view-entering {
+  .nav-view-entering {
     // where the entering view will be immediately before the transition
     @include translate3d(-33%, 0, 0);
   }
 
-  .view-entering.nav-view {
+  .nav-view-entering.nav-view {
     // where the entering view will be immediately after the transition
     @include translate3d(0, 0, 0);
   }
@@ -73,8 +73,8 @@ $ios-transition-container-bg-color:         #000 !default;
 .ios-transition.nav-enter,
 .ios-transition.nav-exit {
 
-  .view-entering,
-  .view-leaving {
+  .nav-view-entering,
+  .nav-view-leaving {
     @include translate3d(0, 0, 0);
   }
 
@@ -105,33 +105,43 @@ $android-transition-view-duration:              300ms !default;
 $android-transition-view-timing-function:       cubic-bezier(0.4, 0.6, 0.2, 1) !default;
 $android-view-slide-start-y:                    20%;
 
-
 .android-transition.nav-forward {
 
-  .view-entering {
+  .nav-view-entering,
+  .nav-bar-entering {
     // where the entering view will be immediately before the transition
     @include translate3d(0, $android-view-slide-start-y, 0);
   }
 
-  .view-entering.nav-view {
+  .nav-view-entering.nav-view,
+  .nav-bar-entering.nav-bar {
     // where the entering view will be immediately after the transition
     @include translate3d(0, 0, 0);
   }
 
-  .nav-view-add {
+  .nav-view-add,
+  .nav-bar-add {
     // set the animation for the entering view
     @include animation-name( androidViewSlideIn, fadeIn );
     @include animation-duration( $android-transition-view-duration );
     @include animation-timing-function( $android-transition-view-timing-function );
+  }
+  .nav-view-add {
     z-index: $z-index-view-above;
   }
+  .nav-bar-add {
+    z-index: $z-index-bar-above;
+  }
 
-  .nav-view-remove {
+  .nav-view-remove,
+  .nav-bar-remove {
     // set the animation for the leaving view
     @include translate3d(0, 0, 0);
     @include animation-name( fadeOutToPartial );
     @include animation-duration( $android-transition-view-duration );
     @include animation-timing-function( $android-transition-view-timing-function );
+  }
+  .nav-view-remove {
     z-index: $z-index-view-below;
   }
 
@@ -139,20 +149,34 @@ $android-view-slide-start-y:                    20%;
 
 .android-transition.nav-back {
 
-  .view-entering,
-  .view-entering.nav-view {
+  .nav-view-entering,
+  .nav-view-entering.nav-view,
+  .nav-bar-entering,
+  .nav-bar-entering.nav-bar {
     // where the entering view will be immediately before the transition
     // where the entering view will be immediately after the transition
-    @include translate3d(0, 0, 0);;
+    @include translate3d(0, 0, 0);
+  }
+
+  .nav-view-entering,
+  .nav-view-entering.nav-view {
     z-index: $z-index-view-below;
   }
 
-  .nav-view-remove {
+  .nav-view-remove,
+  .nav-bar-remove {
     // set the animation for the leaving view
     @include animation-name( androidViewSlideOut, fadeOut );
     @include animation-duration( $android-transition-view-duration );
     @include animation-timing-function( $android-transition-view-timing-function );
+  }
+
+  .nav-view-remove {
     z-index: $z-index-view-above;
+  }
+
+  .nav-bar-remove {
+    z-index: $z-index-bar-above;
   }
 
 }
@@ -184,8 +208,8 @@ $android-view-slide-start-y:                    20%;
 .android-transition.nav-enter,
 .android-transition.nav-exit {
 
-  .view-entering,
-  .view-leaving {
+  .nav-view-entering,
+  .nav-view-leaving {
     @include translate3d(0, 0, 0);
   }
 
@@ -214,14 +238,18 @@ $android-view-slide-start-y:                    20%;
 // These prevent flickers as elements are added and removed,
 // holds their correct opacity between setting final states
 
-.view-entering, // entering: before animate
-.view-active.view-leaving // leaving: after animate
+.nav-view-entering, // entering: before animate
+.nav-view-active.nav-view-leaving, // leaving: after animate
+.nav-bar-entering,
+.nav-bar-active.nav-bar-leaving
 {
   opacity: 0;
 }
 
-.view-entering.nav-view, // entering: during and after animate
-.view-active.view-leaving.ng-animate // leaving: before and during animate
+.nav-view-entering.nav-view, // entering: during and after animate
+.nav-view-active.nav-view-leaving.ng-animate, // leaving: before and during animate
+.nav-bar-entering.nav-bar,
+.nav-bar-active.nav-bar-leaving.ng-animate
 {
   opacity: 1;
 }
@@ -229,19 +257,23 @@ $android-view-slide-start-y:                    20%;
 
 
 
-// View Transition Defaults (no animation)
+// Transition Defaults (no animation)
 // -------------------------------
 
-.nav-view-add {
+.nav-view-add,
+.nav-bar-add {
   @include animation-name( fadeIn );
 }
 
-.nav-view-remove {
+.nav-view-remove,
+.nav-bar-remove {
   @include animation-name( fadeOut );
 }
 
 .nav-view-add,
-.nav-view-remove {
+.nav-view-remove,
+.nav-bar-add,
+.nav-bar-remove {
   opacity: 1;
   @include animation-duration( 0 );
   @include animation-fill-mode( forwards );
@@ -251,4 +283,3 @@ $android-view-slide-start-y:                    20%;
 .ng-animate .pane {
   position: absolute;
 }
-

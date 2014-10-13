@@ -5,117 +5,52 @@ IonicModule
   '$attrs',
   '$ionicHistory',
   '$ionicNavBarDelegate',
-function($scope, $element, $attrs, $ionicHistory, $ionicNavBarDelegate) {
-  //Let the parent know about our controller too so that children of
-  //sibling content elements can know about us
+  '$animate',
+function($scope, $element, $attrs, $ionicHistory, $ionicNavBarDelegate, $animate) {
   var CSS_NAV_BAR_ACTIVE = 'nav-bar-active';
   var CSS_NAV_BAR_ENTERING = 'nav-bar-entering';
   var CSS_NAV_BAR_LEAVING = 'nav-bar-leaving';
   var CSS_HIDE = 'hide';
-  var DATA_IS_ACTIVE = '$isActive';
-  var DATA_IS_USED = '$isUsed';
-  var DATA_TITLE = '$title';
+  var DATA_NAV_BAR_CTRL = '$ionNavBarController';
 
-  $element.parent().data('$ionNavBarController', this);
+  var self = this;
+  var backButtonElement, defaultPrimaryBtnsEle, defaultSecondaryBtnsEle;
+  var navBarContainers;
+  var title;
+
+  $element.parent().data(DATA_NAV_BAR_CTRL, self);
 
   var deregisterInstance = $ionicNavBarDelegate._registerInstance(this, $attrs.delegateHandle);
 
-  $scope.$on('$destroy', function(){
-    $element.parent().removeData('$ionNavBarController');
-    this._rightButtons = null;
-    this._leftButtons = null;
-    deregisterInstance();
-  });
 
-  this.beforeEnter = function(viewData) {
-    this.enable();
+  self.init = function(classNames) {
+    navBarContainers = [ self.createNavBar(classNames), self.createNavBar(classNames) ];
+  };
 
-    var navBarElements = getNavBarElements();
-    var enteringEle;
-    var leavingEle;
-    var x, l = navBarElements.length;
+  self.beforeEnter = function(viewData) {
+    if ( self.shouldUpdate(viewData) ) {
+      self.enable();
+      var enteringContainer = getOffScreenNavBar();
+      self.title(viewData.title, enteringContainer);
+      self.transition(enteringContainer, getOnScreenNavBar(), viewData);
+    }
+  };
 
-    // find the active element that should leave
-    for (x=0; x<l; x++) {
-      if ( navBarElements.eq(x).data(DATA_IS_ACTIVE) ) {
-        leavingEle = navBarElements.eq(x);
-        leavingEle.data(DATA_IS_USED, true);
-        leavingEle.data(DATA_IS_ACTIVE, false);
+  self.shouldUpdate = function(viewData) {
+    return !!viewData;
+  };
+
+  self.transition = function(enteringContainer, leavingContainer, viewData) {
+
+    $animate.transition( 'nav-bar', viewData.transition, viewData.direction, enteringContainer.element(), leavingContainer && leavingContainer.element(), function(){
+      for (var x=0; x<navBarContainers.length; x++) {
+        navBarContainers[x].isActive = false;
       }
-    }
-
-    // find an available element that's not being used
-    for (x=0; x<l; x++) {
-      if ( !navBarElements.eq(x).data(DATA_IS_USED) ) {
-        enteringEle = navBarElements.eq(x);
-        enteringEle.data(DATA_IS_USED, true);
-        break;
-      }
-    }
-
-    if (enteringEle) {
-      this.renderActive(enteringEle, viewData);
-    }
-
-    this.transition(enteringEle, leavingEle, viewData);
+      enteringContainer.isActive = true;
+    });
   };
 
-  this.renderActive = function(navBarEle, viewData) {
-    setTitleElement(viewData.title, navBarEle);
-
-    var backButtonEle = getBackButtonElement();
-    if (backButtonEle) {
-      if (viewData.showBack) {
-        backButtonEle.removeClass('hide');
-      } else {
-        backButtonEle.addClass('hide');
-      }
-    }
-
-    if (this._leftButtons) {
-      setButtonsElement(this._leftButtons, 'left', navBarEle);
-    }
-
-    if (this._rightButtons) {
-      setButtonsElement(this._rightButtons, 'right', navBarEle);
-    }
-
-  };
-
-  this.transition = function(enteringEle, leavingEle, viewData) {
-    if (enteringEle) {
-      enteringEle.data(DATA_IS_ACTIVE, true);
-      enteringEle.removeClass(CSS_HIDE);
-    }
-
-    var navBarElements = getNavBarElements();
-    var ele;
-    for (var x=0, l=navBarElements.length; x<l; x++) {
-      ele = navBarElements.eq(x);
-      ele.data(DATA_IS_USED, false);
-      if ( !ele.data(DATA_IS_ACTIVE) ) {
-        ele.addClass(CSS_HIDE);
-      }
-    }
-
-  };
-
-  this._enableBar = function(enable) {
-    $scope.isInvisible = !enable;
-    if (enable) {
-      $element.removeClass('hide');
-    } else {
-      $element.addClass('hide');
-    }
-  };
-
-  this.enable = function() {
-    for (var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
-      $ionicNavBarDelegate._instances[x]._enableBar( $ionicNavBarDelegate._instances[x] === this );
-    }
-  };
-
-  this.showBar = function(show) {
+  self.showBar = function(show) {
     if (arguments.length) {
       $scope.isInvisible = !show;
       $scope.$parent.$hasHeader = !!show;
@@ -123,89 +58,141 @@ function($scope, $element, $attrs, $ionicHistory, $ionicNavBarDelegate) {
     return !$scope.isInvisible;
   };
 
-  function getNavBarElements() {
-    return jqLite( $element[0].querySelectorAll('.nav-bar-container') );
-  }
-
-  function getBackButtonElement() {
-    var ele = $element[0].querySelector('.back-button');
-    if (ele) {
-      return jqLite(ele);
+  self.title = function(val, navBarContainer) {
+    if (arguments.length) {
+      title = val || '';
+      navBarContainer = navBarContainer || getOnScreenNavBar();
+      navBarContainer.title(title);
     }
-  }
+    return title;
+  };
 
-  function getActiveElement() {
-    var navBarElements = getNavBarElements();
-    var x, l=navBarElements.length;
-    for (x=0; x<l; x++) {
-      if (navBarElements.eq(x).data(DATA_IS_ACTIVE)) {
-        return navBarElements.eq(x);
-      }
-    }
-    if (l) {
-      navBarElements.eq(x).data(DATA_IS_ACTIVE, true);
-      return navBarElements.eq(0);
-    }
-  }
+  self.setBackButton = function(viewData, navBarEle) {
+    var containerBackButton = navBarEle.querySelector('.back-button');
 
-  function setTitleElement(title, navBarEle) {
-    $scope.oldTitle = $scope.title;
-    $scope.title = title = title || '';
+    if(viewData.showBack) {
 
-    if (navBarEle) {
-      var titleEle = navBarEle[0].querySelector('.title');
-      if (titleEle) {
-        titleEle = jqLite(titleEle);
-        if (titleEle.data(DATA_TITLE) !== title) {
-          // only make an update if there is a title change
-          titleEle.html(title);
-          titleEle.data(DATA_TITLE, title);
+      if (!containerBackButton) {
+        var backButtonEle = getBackButtonElement();
+        if (backButtonEle) {
+          jqLite( navBarEle ).prepend( jqLite( backButtonEle ) );
         }
       }
+    } else if(containerBackButton) {
+      containerBackButton.classList.remove(CSS_HIDE);
     }
-  }
-
-  function setButtonsElement(buttons, side, navBarEle) {
-    if (navBarEle) {
-      var navBarButtonEle = navBarEle[0].querySelector('.' + side + '-buttons');
-      if (navBarButtonEle) {
-        jqLite(navBarButtonEle).append( buttons );
-      }
-    }
-  }
-
-  this.setTitle = function(title) {
-    setTitleElement(title, getActiveElement());
   };
 
-  this.getTitle = function() {
-    return $scope.title || '';
-  };
-
-  this.getPreviousTitle = function() {
-    return $scope.oldTitle || '';
-  };
-
-  this.showBackButton = function(show) {
+  self.showBackButton = function(show) {
     if (arguments.length) {
       $scope.backButtonShown = !!show;
     }
     return !!($scope.hasBackButton && $scope.backButtonShown);
   };
 
-  this.back = function() {
+  self.back = function() {
     var backView = $ionicHistory.backView();
     backView && backView.go();
     return false;
   };
 
-  this.registerButtons = function(buttons, side) {
-    if (side === 'right') {
-      this._rightButtons = buttons;
+  self.registerButtons = function(buttons, side) {
+    if (side === 'secondary' || side === 'right') {
+      defaultSecondaryBtnsEle = buttons;
     } else {
-      this._leftButtons = buttons;
+      defaultPrimaryBtnsEle = buttons;
     }
   };
+
+  self.enable = function() {
+    // set primary to show first
+    self.isPrimary(true);
+
+    // set non primary to hide second
+    for (var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
+      if($ionicNavBarDelegate._instances[x] !== self) $ionicNavBarDelegate._instances[x].isPrimary(false);
+    }
+  };
+
+  self.isPrimary = function(enable) {
+    if (enable) {
+      $element.removeClass(CSS_HIDE);
+    } else {
+      $element.addClass(CSS_HIDE);
+    }
+  };
+
+  self.createNavBar = function(classNames) {
+    var containerEle = jqLite( '<div class="nav-bar-container nav-bar-cache">' );
+
+    var navBarEle = jqLite( '<div class="bar bar-header ' + classNames + '">' );
+
+    var primaryBtnsEle = jqLite( '<div class="buttons primary-buttons left-buttons">' );
+    if (defaultPrimaryBtnsEle) {
+      primaryBtnsEle.append( defaultPrimaryBtnsEle.clone() );
+    }
+
+    var secondaryBtnsEle = jqLite( '<div class="buttons secondary-buttons right-buttons">' );
+    if (defaultSecondaryBtnsEle) {
+      secondaryBtnsEle.append( defaultSecondaryBtnsEle.clone() );
+    }
+
+    var titleEle = jqLite( '<div class="title">' );
+    var title;
+
+    navBarEle.append(primaryBtnsEle)
+             .append(titleEle)
+             .append(secondaryBtnsEle);
+
+    containerEle.append(navBarEle);
+
+    $element.append(containerEle);
+
+    return {
+      isActive: false,
+      title: function(val) {
+        if(val !== title) {
+          titleEle.html(val);
+          title = val;
+        }
+      },
+      element: function() {
+        return containerEle;
+      },
+      destroy: function() {
+        containerEle = navBarEle = primaryBtnsEle = secondaryBtnsEle = titleEle = null;
+      }
+    };
+  };
+
+  function getOnScreenNavBar() {
+    for (var x=0; x<navBarContainers.length; x++) {
+      if (navBarContainers[x].isActive) return navBarContainers[x];
+    }
+  }
+
+  function getOffScreenNavBar() {
+    for (var x=0; x<navBarContainers.length; x++) {
+      if (!navBarContainers[x].isActive) return navBarContainers[x];
+    }
+    return navBarContainers[0];
+  }
+
+  function getBackButtonElement() {
+    if (!backButtonElement) {
+      backButtonElement = $element[0].querySelector('.back-button');
+    }
+    return backButtonElement;
+  }
+
+  $scope.$on('$destroy', function(){
+    $element.parent().removeData(DATA_NAV_BAR_CTRL);
+    for (var x=0; x<navBarContainers.length; x++) {
+      navBarContainers[x].destroy();
+    }
+    navBarContainers = null;
+    deregisterInstance();
+  });
 
 }]);
 

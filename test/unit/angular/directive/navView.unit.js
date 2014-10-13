@@ -275,11 +275,11 @@ describe('Ionic nav-view', function() {
   //   var orgElement = elem.find('div').find('ion-nav-view').find('ion-nav-view').find('span');
 
   //   expect(orgElement.text()).toBe(content);
-  //   expect(orgElement.hasClass('view-cache')).toBe(true);
+  //   expect(orgElement.hasClass('nav-view-cache')).toBe(true);
 
   //   var newElement = elem.find('div').find('ion-nav-view').find('ion-nav-view').find('div');
   //   expect(newElement.text()).toBe(hNavViewState.views.inner.template);
-  //   expect(newElement.hasClass('view-cache')).toBe(false);
+  //   expect(newElement.hasClass('nav-view-cache')).toBe(false);
 
   //   // going to the parent state which makes the inner view empty
   //   $state.go(gNavViewState);
@@ -308,7 +308,7 @@ describe('Ionic nav-view', function() {
     $timeout.flush();
 
 
-    expect(elem[0].querySelector('.view-active').innerText).toBe(jState.template);
+    expect(elem[0].querySelector('.nav-view-active').innerText).toBe(jState.template);
 
     // transition back to the state with empty subview and the initial view
     $state.go(iState);
@@ -317,7 +317,7 @@ describe('Ionic nav-view', function() {
 
 
     // verify if the initial view is correct
-    expect(elem[0].querySelectorAll('.view-active li').length).toBe(scope.items.length);
+    expect(elem[0].querySelectorAll('.nav-view-active li').length).toBe(scope.items.length);
 
     expect(elem.find('li').length).toBe(scope.items.length);
 
@@ -372,7 +372,7 @@ describe('Ionic nav-view', function() {
     $timeout.flush();
     var divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(1);
-    expect(divs.eq(0).hasClass('view-active')).toBe(true);
+    expect(divs.eq(0).hasClass('nav-view-active')).toBe(true);
     expect(divs.eq(0).text()).toBe('page1');
 
     $state.go(page2State);
@@ -381,12 +381,12 @@ describe('Ionic nav-view', function() {
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(2);
 
-    expect(divs.eq(0).hasClass('view-active')).toBe(false);
-    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
+    expect(divs.eq(0).hasClass('nav-view-active')).toBe(false);
+    expect(divs.eq(0).hasClass('nav-view-cache')).toBe(true);
     expect(divs.eq(0).text()).toBe('page1');
 
-    expect(divs.eq(1).hasClass('view-active')).toBe(true);
-    expect(divs.eq(1).hasClass('view-cache')).toBe(false);
+    expect(divs.eq(1).hasClass('nav-view-active')).toBe(true);
+    expect(divs.eq(1).hasClass('nav-view-cache')).toBe(false);
     expect(divs.eq(1).text()).toBe('page2');
 
     $state.go(page3State);
@@ -395,16 +395,16 @@ describe('Ionic nav-view', function() {
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(3);
 
-    expect(divs.eq(0).hasClass('view-active')).toBe(false);
-    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
+    expect(divs.eq(0).hasClass('nav-view-active')).toBe(false);
+    expect(divs.eq(0).hasClass('nav-view-cache')).toBe(true);
     expect(divs.eq(0).text()).toBe('page1');
 
-    expect(divs.eq(1).hasClass('view-active')).toBe(false);
-    expect(divs.eq(1).hasClass('view-cache')).toBe(true);
+    expect(divs.eq(1).hasClass('nav-view-active')).toBe(false);
+    expect(divs.eq(1).hasClass('nav-view-cache')).toBe(true);
     expect(divs.eq(1).text()).toBe('page2');
 
-    expect(divs.eq(2).hasClass('view-active')).toBe(true);
-    expect(divs.eq(2).hasClass('view-cache')).toBe(false);
+    expect(divs.eq(2).hasClass('nav-view-active')).toBe(true);
+    expect(divs.eq(2).hasClass('nav-view-cache')).toBe(false);
     expect(divs.eq(2).text()).toBe('page3');
 
     $state.go(page4State);
@@ -413,20 +413,20 @@ describe('Ionic nav-view', function() {
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(4);
 
-    expect(divs.eq(0).hasClass('view-active')).toBe(false);
-    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
+    expect(divs.eq(0).hasClass('nav-view-active')).toBe(false);
+    expect(divs.eq(0).hasClass('nav-view-cache')).toBe(true);
     expect(divs.eq(0).text()).toBe('page1');
 
-    expect(divs.eq(1).hasClass('view-active')).toBe(false);
-    expect(divs.eq(1).hasClass('view-cache')).toBe(true);
+    expect(divs.eq(1).hasClass('nav-view-active')).toBe(false);
+    expect(divs.eq(1).hasClass('nav-view-cache')).toBe(true);
     expect(divs.eq(1).text()).toBe('page2');
 
-    expect(divs.eq(2).hasClass('view-active')).toBe(false);
-    expect(divs.eq(2).hasClass('view-cache')).toBe(true);
+    expect(divs.eq(2).hasClass('nav-view-active')).toBe(false);
+    expect(divs.eq(2).hasClass('nav-view-cache')).toBe(true);
     expect(divs.eq(2).text()).toBe('page3');
 
-    expect(divs.eq(3).hasClass('view-active')).toBe(true);
-    expect(divs.eq(3).hasClass('view-cache')).toBe(false);
+    expect(divs.eq(3).hasClass('nav-view-active')).toBe(true);
+    expect(divs.eq(3).hasClass('nav-view-cache')).toBe(false);
     expect(divs.eq(3).text()).toBe('page4');
   }));
 
@@ -451,34 +451,34 @@ describe('Ionic nav-view', function() {
 
     var divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(4);
-    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
-    expect(divs.eq(1).hasClass('view-cache')).toBe(true);
-    expect(divs.eq(2).hasClass('view-cache')).toBe(true);
-    expect(divs.eq(3).hasClass('view-active')).toBe(true);
+    expect(divs.eq(0).hasClass('nav-view-cache')).toBe(true);
+    expect(divs.eq(1).hasClass('nav-view-cache')).toBe(true);
+    expect(divs.eq(2).hasClass('nav-view-cache')).toBe(true);
+    expect(divs.eq(3).hasClass('nav-view-active')).toBe(true);
 
     $state.go(page3State);
     $q.flush();
     $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(3);
-    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
-    expect(divs.eq(1).hasClass('view-cache')).toBe(true);
-    expect(divs.eq(2).hasClass('view-active')).toBe(true);
+    expect(divs.eq(0).hasClass('nav-view-cache')).toBe(true);
+    expect(divs.eq(1).hasClass('nav-view-cache')).toBe(true);
+    expect(divs.eq(2).hasClass('nav-view-active')).toBe(true);
 
     $state.go(page2State);
     $q.flush();
     $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(2);
-    expect(divs.eq(0).hasClass('view-cache')).toBe(true);
-    expect(divs.eq(1).hasClass('view-active')).toBe(true);
+    expect(divs.eq(0).hasClass('nav-view-cache')).toBe(true);
+    expect(divs.eq(1).hasClass('nav-view-active')).toBe(true);
 
     $state.go(page1State);
     $q.flush();
     $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(1);
-    expect(divs.eq(0).hasClass('view-active')).toBe(true);
+    expect(divs.eq(0).hasClass('nav-view-active')).toBe(true);
   }));
 
   it('should not cache ion-nav-views that were forward when moving back', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {

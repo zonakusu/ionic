@@ -76,10 +76,18 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
 
   self.beforeEnter = function(transData) {
     if (isPrimary) {
-      var associatedNavBarCtrl = $element.inheritedData('$ionNavBarController');
+      var associatedNavBarCtrl = getAssociatedNavBarCtrl();
       if (associatedNavBarCtrl) {
         associatedNavBarCtrl.beforeEnter(transData);
       }
+    }
+  };
+
+
+  self.showBar = function(val) {
+    var associatedNavBarCtrl = getAssociatedNavBarCtrl();
+    if (associatedNavBarCtrl) {
+      return associatedNavBarCtrl.showBar(val);
     }
   };
 
@@ -122,5 +130,9 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
     });
 
   };
+
+  function getAssociatedNavBarCtrl() {
+    return $element.inheritedData('$ionNavBarController');
+  }
 
 }]);
