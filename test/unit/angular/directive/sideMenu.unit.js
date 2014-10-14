@@ -249,19 +249,16 @@ describe('Ionic Side Menu Directive', function () {
 
 describe('menuToggle directive', function() {
   beforeEach(module('ionic'));
-  it('should error without a side menu', inject(function($compile, $rootScope) {
-    expect(function() {
-      $compile('<div menu-toggle>')($rootScope.$new());
-    }).toThrow();
-  }));
-  var toggleLeftSpy, toggleRightSpy;
+  var toggleLeftSpy, toggleRightSpy, toggleSpy;
   function setup(side) {
     var el = angular.element('<div menu-toggle="' + (side||'') + '">');
     toggleLeftSpy = jasmine.createSpy('toggleLeft');
     toggleRightSpy = jasmine.createSpy('toggleRight');
+    toggleSpy = jasmine.createSpy('toggle');
     el.data('$ionSideMenusController', {
       toggleLeft: toggleLeftSpy,
-      toggleRight: toggleRightSpy
+      toggleRight: toggleRightSpy,
+      toggle: toggleSpy
     });
     inject(function($compile, $rootScope) {
       $compile(el)($rootScope.$new());
@@ -271,37 +268,26 @@ describe('menuToggle directive', function() {
   }
   it('should toggle left on click by default', function() {
     var el = setup();
-    expect(toggleLeftSpy).not.toHaveBeenCalled();
-    expect(toggleRightSpy).not.toHaveBeenCalled();
+    expect(toggleSpy).not.toHaveBeenCalled();
     el.triggerHandler('click');
-    expect(toggleLeftSpy).toHaveBeenCalled();
-    expect(toggleRightSpy).not.toHaveBeenCalled();
+    expect(toggleSpy).toHaveBeenCalled();
   });
   it('should toggle left on click with attr', function() {
     var el = setup('left');
-    expect(toggleLeftSpy).not.toHaveBeenCalled();
-    expect(toggleRightSpy).not.toHaveBeenCalled();
+    expect(toggleSpy).not.toHaveBeenCalled();
     el.triggerHandler('click');
-    expect(toggleLeftSpy).toHaveBeenCalled();
-    expect(toggleRightSpy).not.toHaveBeenCalled();
+    expect(toggleSpy).toHaveBeenCalled();
   });
   it('should toggle right on click with attr', function() {
     var el = setup('right');
-    expect(toggleLeftSpy).not.toHaveBeenCalled();
-    expect(toggleRightSpy).not.toHaveBeenCalled();
+    expect(toggleSpy).not.toHaveBeenCalled();
     el.triggerHandler('click');
-    expect(toggleLeftSpy).not.toHaveBeenCalled();
-    expect(toggleRightSpy).toHaveBeenCalled();
+    expect(toggleSpy).toHaveBeenCalled();
   });
 });
 
 describe('menuClose directive', function() {
   beforeEach(module('ionic'));
-  it('should error without a side menu', inject(function($compile, $rootScope) {
-    expect(function() {
-      $compile('<div menu-close>')($rootScope.$new());
-    }).toThrow();
-  }));
   it('should close on click', inject(function($compile, $rootScope) {
     var el = angular.element('<div menu-close>');
     var closeSpy = jasmine.createSpy('sideMenuClose');

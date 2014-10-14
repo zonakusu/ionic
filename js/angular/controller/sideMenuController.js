@@ -82,6 +82,14 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody, $io
     }
   };
 
+  self.toggle = function(side) {
+    if (side == 'right') {
+      self.toggleRight();
+    } else {
+      self.toggleLeft();
+    }
+  };
+
   /**
    * Close all menus.
    */

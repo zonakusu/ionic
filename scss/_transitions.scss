@@ -239,17 +239,13 @@ $android-view-slide-start-y:                    20%;
 // holds their correct opacity between setting final states
 
 .nav-view-entering, // entering: before animate
-.nav-view-active.nav-view-leaving, // leaving: after animate
-.nav-bar-entering,
-.nav-bar-active.nav-bar-leaving
+.nav-view-active.nav-view-leaving // leaving: after animate
 {
   opacity: 0;
 }
 
 .nav-view-entering.nav-view, // entering: during and after animate
-.nav-view-active.nav-view-leaving.ng-animate, // leaving: before and during animate
-.nav-bar-entering.nav-bar,
-.nav-bar-active.nav-bar-leaving.ng-animate
+.nav-view-active.nav-view-leaving.ng-animate // leaving: before and during animate
 {
   opacity: 1;
 }

@@ -21,13 +21,13 @@ IonicModule
 .directive('menuClose', ['$ionicViewSwitcher', function($ionicViewSwitcher) {
   return {
     restrict: 'AC',
-    require: '^ionSideMenus',
-    link: function($scope, $element, $attr, sideMenuCtrl) {
+    link: function($scope, $element, $attr) {
       $element.bind('click', function(){
         // lower priority than navAnimation which allows navAnimation
         // to override this directives nextAnimation() call
         $ionicViewSwitcher.nextTransition('none');
-        sideMenuCtrl.close();
+        var sideMenuCtrl = $element.inheritedData('$ionSideMenusController');
+        sideMenuCtrl && sideMenuCtrl.close();
       });
     }
   };

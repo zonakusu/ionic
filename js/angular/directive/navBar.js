@@ -81,12 +81,8 @@ IonicModule.constant('$ionicNavBarConfig', {
  */
 IonicModule
 .directive('ionNavBar', [
-  '$ionicHistory',
-  '$rootScope',
-  '$animate',
-  '$compile',
   '$ionicNavBarConfig',
-function($ionicHistory, $rootScope, $animate, $compile, $ionicNavBarConfig) {
+function($ionicNavBarConfig) {
   return {
     restrict: 'E',
     controller: '$ionicNavBar',

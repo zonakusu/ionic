@@ -18,9 +18,9 @@
  * </ion-nav-bar>
  * <ion-nav-view>
  *   <ion-view>
- *     <ion-nav-buttons side="left">
+ *     <ion-nav-buttons side="primary">
  *       <button class="button" ng-click="doSomething()">
- *         I'm a button on the left of the navbar!
+ *         I'm a button on the primary of the navbar!
  *       </button>
  *     </ion-nav-buttons>
  *     <ion-content>
@@ -31,36 +31,22 @@
  * ```
  *
  * @param {string} side The side to place the buttons on in the parent
- * {@link ionic.directive:ionNavBar}. Available: 'left' or 'right'.
+ * {@link ionic.directive:ionNavBar}. Available: 'primary' or 'secondary'.
  */
 IonicModule
-.directive('ionNavButtons', ['$compile', function($compile) {
+.directive('ionNavButtons', function() {
   return {
     require: '^ionNavBar',
     restrict: 'E',
     compile: function($element, $attrs) {
-      var content = $element.contents().remove();
+      var content = $element.html();
+      $element.empty().addClass('hide');
 
-      // The original element is just a completely empty <ion-nav-buttons> element.
-      // make it invisible just to be sure it doesn't change any layout
-      $element.addClass('hide');
-
-      return function($scope, $element, $attrs, navBarCtrl) {
-
-        //Put all of our inside buttons into their own span,
-        //so we can remove them all when this element dies -
-        //even if the buttons have changed through an ng-repeat or the like,
-        //we just remove their div parent and they are gone.
-        var buttons = jqLite('<span>').append(content);
-
-        //Compile buttons inside content so they have access to everything
-        //something inside content does (eg parent ionicScroll)
-        $element.append(buttons);
-        $compile(buttons)($scope);
-
-        navBarCtrl.registerButtons(buttons, $attrs.side);
-
+      return {
+        pre: function($scope, $element, $attrs, navBarCtrl) {
+          navBarCtrl.registerButtons(content, $attrs.side);
+        }
       };
     }
   };
-}]);
+});
