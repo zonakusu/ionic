@@ -155,7 +155,7 @@ function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) 
           } else if (isTabContentAttached && childElement) {
             // this tab should NOT be selected, and it is already in the DOM
 
-            if ( $ionicConfig.maxCachedViews > 0 ) {
+            if ( $ionicConfig.views.maxCache() > 0 ) {
               // keep the tabs in the DOM, only css hide it
               childElement.addClass('nav-view-cache');
 

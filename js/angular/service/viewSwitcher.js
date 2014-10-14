@@ -4,11 +4,6 @@
  */
 
 IonicModule
-
-.constant('$ionicViewConfig', {
-  transition: 'ios-transition'
-})
-
 .factory('$ionicViewSwitcher',[
   '$timeout',
   '$compile',
@@ -16,8 +11,7 @@ IonicModule
   '$animate',
   '$ionicClickBlock',
   '$ionicConfig',
-  '$ionicViewConfig',
-function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConfig, $ionicViewConfig) {
+function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConfig) {
 
   // data keys for jqLite elements
   var DATA_NO_CACHE = '$ionicNoCache';
@@ -218,7 +212,7 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
           var activeStateId = enteringEle.data(DATA_ELE_IDENTIFIER);
 
           // check if any views should be removed
-          if ( transData.direction == 'back' && !$ionicConfig.cacheForwardViews && leavingEle ) {
+          if ( transData.direction == 'back' && !$ionicConfig.views.forwardCache() && leavingEle ) {
             // if they just navigated back we can destroy the forward view
             // do not remove forward views if cacheForwardViews config is true
             removableEle = leavingEle;
@@ -227,7 +221,7 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
             // remove if the leaving element has DATA_NO_CACHE===false
             removableEle = leavingEle;
 
-          } else if ( (viewElementsLength - 1) > $ionicConfig.maxCachedViews ) {
+          } else if ( (viewElementsLength - 1) > $ionicConfig.views.maxCache() ) {
             // check to see if we have more cached views than we should
             // the total number of child elements has exceeded how many to keep in the DOM
             var oldestAccess = Date.now();

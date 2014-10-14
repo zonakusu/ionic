@@ -484,7 +484,7 @@ describe('Ionic nav-view', function() {
   it('should not cache ion-nav-views that were forward when moving back', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
-    $ionicConfig.maxCachedViews = 2;
+    $ionicConfig.views.maxCache(2);
 
     $state.go(page1State);
     $q.flush();
@@ -525,7 +525,7 @@ describe('Ionic nav-view', function() {
   it('should cache ion-nav-views that were forward when moving back with $ionicConfig.cacheForwardViews=true', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
-    $ionicConfig.cacheForwardViews = true;
+    $ionicConfig.views.forwardCache(true);
 
     $state.go(page1State);
     $q.flush();
@@ -614,7 +614,7 @@ describe('Ionic nav-view', function() {
   it('should remove the oldest accessed view (not the oldest, but oldest accessed)', inject(function ($state, $q, $timeout, $compile, $ionicConfig) {
     elem.append($compile('<div><ion-nav-view></ion-nav-view></div>')(scope));
 
-    $ionicConfig.maxCachedViews = 3;
+    $ionicConfig.views.maxCache(3);
 
     $state.go(page1State);
     $q.flush();

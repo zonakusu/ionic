@@ -1,11 +1,4 @@
 
-IonicModule.constant('$ionicNavBarConfig', {
-  alignTitle: 'center',
-  alignButtons: 'left-right',
-  backButtonIcon: 'ion-ios7-arrow-back',
-  transition: 'ios-nav-bar'
-});
-
 /**
  * @ngdoc directive
  * @name ionNavBar
@@ -81,9 +74,7 @@ IonicModule.constant('$ionicNavBarConfig', {
  * ```
  */
 IonicModule
-.directive('ionNavBar', [
-  '$ionicNavBarConfig',
-function($ionicNavBarConfig) {
+.directive('ionNavBar', function() {
   return {
     restrict: 'E',
     controller: '$ionicNavBar',
@@ -125,5 +116,5 @@ function($ionicNavBarConfig) {
       };
     }
   };
-}]);
+});
 

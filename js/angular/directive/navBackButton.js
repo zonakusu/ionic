@@ -62,9 +62,8 @@
  */
 IonicModule
 .directive('ionNavBackButton', [
-  '$ionicNavBarConfig',
   '$ionicNgClick',
-function($ionicNavBarConfig, $ionicNgClick) {
+function($ionicNgClick) {
 
   return {
     restrict: 'E',

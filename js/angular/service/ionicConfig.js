@@ -10,22 +10,78 @@
  * var myApp = angular.module('reallyCoolApp', ['ionic']);
  *
  * myApp.config(function($ionicConfigProvider) {
- *   $ionicConfigProvider.prefetchTemplates(false);
+ *   $ionicConfigProvider.templates.prefetch(false);
  * });
  * ```
  */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#views.transition
+ * @description Animation style when transitioning between views. Default `platform`.
+ *
+ * @param {string} transition Which style of view transitioning to use.
+ *
+ * * `platform`: Dynamically choose the correct transition style depending on
+ *               the platform the app is running from. If the platform is
+ *               not `ios` or `android` then it will default to `ios-transition`.
+ * * `ios-transition`: iOS style transition.
+ * * `android-transition`: Android style transition.
+ * * `none`: Do not preform animated transitions.
+ *
+ * @returns {string} View animation.
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#views.maxCache
+ * @description Maximum number of view elements to cache in the DOM. When the max number is
+ * exceeded, the `viewRemovePolicy` determines which view to remove. Views which stay in the
+ * DOM essentially caches the view's scope, current state and scroll position. When the
+ * maximum cached is `0`, then after each view transition, the view's element will
+ * be removed from the DOM, and the next time the same view is shown it will have to
+ * re-compile, attach to the DOM, and link the element again.
+ * @param {number} maxNumber Maximum number of views to retain. Default `15`.
+ * @returns {number} How many views Ionic will hold onto until the a view is removed.
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#views.forwardCache
+ * @description When navigating between views, by default, views that were recently visited
+ * are cached, and the same data and DOM elements are referenced when navigating back. However,
+ * when navigating back in the history, the "forward" view is removed so its not cached. If
+ * you navigate forward to the same view again it'll create a new DOM element, re-compiled and
+ * linked. Basically any forward views are reset each time. Set this config to `true` to have
+ * forward views are cached and not reset on each load.
+ * @param {boolean} value `false`.
+ * @returns {boolean}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#templates.prefetch
+ * @description Set whether Ionic should prefetch all templateUrls defined in
+ * $stateProvider.state. If set to false, the user will have to wait
+ * for a template to be fetched the first time when navigating to a new page. Default `true`.
+ * @param {boolean} shouldPrefetch Whether Ionic should prefetch templateUrls defined in
+ * `$stateProvider.state()`.
+ * @returns {boolean} Whether Ionic will prefetch templateUrls defined in $stateProvider.state.
+ */
+
 IonicModule
 .provider('$ionicConfig', function() {
 
-  // container of all ionic configs
-  // The angular world should use $ionicConfig
   var provider = this;
+  provider.platform = {};
   var PLATFORM = 'platform';
-  var config = {
+  var configMethods = { platform: {} };
+
+  var configProperties = {
     views: {
       transition: PLATFORM,
-      maxCache: 15,
-      forwardCache: false
+      maxCache: PLATFORM,
+      forwardCache: PLATFORM
     },
     navBar: {
       alignTitle: PLATFORM,
@@ -33,122 +89,122 @@ IonicModule
       backButtonIcon: PLATFORM,
       transition: PLATFORM
     },
+    menus: {
+      transition: PLATFORM
+    },
+    templates: {
+      prefetch: PLATFORM
+    },
+    platform: {}
+  };
+  createConfig(configProperties, configMethods, provider, '');
+
+
+
+  // Default
+  // -------------------------
+  setPlatformConfig('default', {
+    views: {
+      transition: 'ios-transition',
+      maxCache: 15,
+      forwardCache: false
+    },
+    navBar: {
+      alignTitle: 'center',
+      alignButtons: 'left-right',
+      backButtonIcon: 'ion-ios7-arrow-back',
+      transition: 'ios-nav-bar'
+    },
+    menus: {
+      transition: 'push-menu'
+    },
     templates: {
       prefetch: true
     }
-  };
-  var exposedConfig = {};
+  });
 
 
-  /**
-   * @ngdoc method
-   * @name $ionicConfigProvider#maxCachedViews
-   * @description Maximum number of view elements to cache in the DOM. When the max number is
-   * exceeded, the `viewRemovePolicy` determines which view to remove. Views which stay in the
-   * DOM essentially caches the view's scope, current state and scroll position. When the
-   * maximum cached is `0`, then after each view transition, the view's element will
-   * be removed from the DOM, and the next time the same view is shown it will have to
-   * re-compile, attach to the DOM, and link the element again.
-   * @param {number} maxNumber Maximum number of views to retain. Default `15`.
-   * @returns {number} How many views Ionic will hold onto until the a view is removed.
-   */
 
-  /**
-   * @ngdoc method
-   * @name $ionicConfigProvider#cacheForwardViews
-   * @description When navigating between views, by default, views that were recently visited
-   * are cached, and the same data and DOM elements are referenced when navigating back. However,
-   * when navigating back in the history, the "forward" view is removed so its not cached. If
-   * you navigate forward to the same view again it'll create a new DOM element, re-compiled and
-   * linked. Basically any forward views are reset each time. Set this config to `true` to have
-   * forward views are cached and not reset on each load.
-   * @param {boolean} value `false`.
-   * @returns {boolean}
-   */
-
-  /**
-   * @ngdoc method
-   * @name $ionicConfigProvider#viewTransition
-   * @description Animation style when transitioning between views. Default `platform`.
-   *
-   * @param {string} transition Which style of view transitioning to use.
-   *
-   * * `platform`: Dynamically choose the correct transition style depending on
-   *               the platform the app is running from. If the platform is
-   *               not `ios` or `android` then it will default to `ios-transition`.
-   * * `ios-transition`: iOS style transition.
-   * * `android-transition`: Android style transition.
-   * * `none`: Do not preform animated transitions.
-   *
-   * @returns {string} View animation.
-   */
-
-  /**
-   * @ngdoc method
-   * @name $ionicConfigProvider#prefetchTemplates
-   * @description Set whether Ionic should prefetch all templateUrls defined in
-   * $stateProvider.state. If set to false, the user will have to wait
-   * for a template to be fetched the first time when navigating to a new page. Default `true`.
-   * @param {boolean} shouldPrefetch Whether Ionic should prefetch templateUrls defined in
-   * `$stateProvider.state()`.
-   * @returns {boolean} Whether Ionic will prefetch templateUrls defined in $stateProvider.state.
-   */
+  // iOS
+  // -------------------------
+  setPlatformConfig('ios', {
+    navBar: {
+      backButtonIcon: 'ion-ios7-arrow-back',
+    }
+  });
 
 
-  config.platform = {
 
-    ios: {
-      views: {
-        transition: 'ios-transition'
-      },
-      navBar: {
-        alignTitle: 'center',
-        alignButtons: 'left-right',
-        backButtonIcon: 'ion-ios7-arrow-back',
-        transition: 'ios-nav-bar'
-      }
+  // Android
+  // -------------------------
+  setPlatformConfig('android', {
+    views: {
+      transition: 'android-transition'
     },
+    navBar: {
+      alignTitle: 'left',
+      alignButtons: 'right',
+      backButtonIcon: 'ion-android-arrow-back',
+      transition: 'android-nav-bar'
+    },
+    menus: {
+      transition: 'drawer-menu'
+    }
+  });
 
-    android: {
-      views: {
-        transition: 'android-transition'
-      },
-      navBar: {
-        alignTitle: 'left',
-        alignButtons: 'right',
-        backButtonIcon: 'ion-android-arrow-back',
-        transition: 'android-nav-bar'
+
+
+
+  function setPlatformConfig(platformName, platformConfigs) {
+    configProperties.platform[platformName] = platformConfigs;
+    configMethods.platform[platformName] = provider.platform[platformName] = {};
+
+    addConfig(configProperties, configProperties.platform[platformName]);
+
+    createConfig(configProperties.platform[platformName], configMethods.platform[platformName], provider.platform[platformName], '');
+  }
+
+  function addConfig(configObj, platformObj) {
+    for (var n in configObj) {
+      if (n != PLATFORM && configObj.hasOwnProperty(n)) {
+        if ( angular.isObject(configObj[n]) ) {
+          if (!isDefined(platformObj[n])) {
+            platformObj[n] = {};
+          }
+          addConfig(configObj[n], platformObj[n]);
+
+        } else if( !isDefined(platformObj[n]) ) {
+          platformObj[n] = null;
+        }
       }
     }
-
-  };
-
-  config.platform.default = 'ios';
+  }
 
 
   // private: create methods for each config to get/set
-  function createConfig(configObj, exposedConfigObj, providerObj, platformPath) {
+  function createConfig(configObj, configMethodsObj, providerObj, platformPath) {
     forEach(configObj, function(value, namespace){
 
       if (angular.isObject(configObj[namespace])) {
         // recursively drill down the config object so we can create a method for each one
         providerObj[namespace] = {};
-        exposedConfigObj[namespace] = {};
-        createConfig(configObj[namespace], exposedConfigObj[namespace], providerObj[namespace], platformPath + '.' + namespace);
+        configMethodsObj[namespace] = {};
+        createConfig(configObj[namespace], configMethodsObj[namespace], providerObj[namespace], platformPath + '.' + namespace);
 
       } else {
         // create a method for both the provider and config methods that will be exposed
-        providerObj[namespace] = exposedConfigObj[namespace] = function(newValue) {
+        providerObj[namespace] = configMethodsObj[namespace] = function(newValue) {
           if (arguments.length) {
             configObj[namespace] = newValue;
           }
           if (configObj[namespace] == PLATFORM) {
             // if the config is set to 'platform', then get this config's platform value
-            var platformConfig = stringObj(config.platform, ionic.Platform.platform() + platformPath + '.' + namespace);
+            var platformConfig = stringObj(configProperties.platform, ionic.Platform.platform() + platformPath + '.' + namespace);
             if (platformConfig) {
               return platformConfig;
             }
-            return stringObj(config.platform, config.platform.default + platformPath + '.' + namespace);
+            // didnt find a specific platform config, now try the default
+            return stringObj(configProperties.platform, 'default' + platformPath + '.' + namespace);
           }
           return configObj[namespace];
         };
@@ -156,12 +212,11 @@ IonicModule
 
     });
   }
-  createConfig(config, exposedConfig, provider, '');
 
   function stringObj(obj, str) {
     str = str.split(".");
     for (var i = 0; i < str.length; i++) {
-      if ( isDefined(obj[str[i]]) ) {
+      if ( obj && isDefined(obj[str[i]]) ) {
         obj = obj[str[i]];
       } else {
         return null;
@@ -170,11 +225,8 @@ IonicModule
     return obj;
   }
 
+  provider.setPlatformConfig = setPlatformConfig;
 
-  config.platform.setConfig = function(platformName, platformConfig) {
-    config.platform[platformName] = platformConfig;
-    createConfig(config, exposedConfig, provider, '');
-  };
 
   // private: Service definition for internal Ionic use
   /**
@@ -184,6 +236,6 @@ IonicModule
    * @private
    */
   provider.$get = function() {
-    return exposedConfig;
+    return configMethods;
   };
 });

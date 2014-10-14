@@ -4,7 +4,7 @@ describe('Ionic View Switcher', function() {
   beforeEach(module('ionic'));
 
   beforeEach(inject(function($ionicConfig){
-    $ionicConfig.viewTransition = 'platform';
+    $ionicConfig.views.transition('platform');
   }));
 
   it('should get fallback transition', inject(function($ionicViewSwitcher) {
@@ -12,8 +12,8 @@ describe('Ionic View Switcher', function() {
     expect(d.transition).toEqual('ios-transition');
   }));
 
-  it('should get transition from $ionicConfig.viewTransition', inject(function($ionicViewSwitcher, $ionicConfig) {
-    $ionicConfig.viewTransition = 'mambo-5';
+  it('should get transition from $ionicConfig.views.transition()', inject(function($ionicViewSwitcher, $ionicConfig) {
+    $ionicConfig.views.transition('mambo-5');
     var d = $ionicViewSwitcher.getTransitionData();
     expect(d.transition).toEqual('mambo-5');
   }));

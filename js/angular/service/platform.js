@@ -5,69 +5,6 @@ var PLATFORM_BACK_BUTTON_PRIORITY_ACTION_SHEET = 300;
 var PLATFORM_BACK_BUTTON_PRIORITY_POPUP = 400;
 var PLATFORM_BACK_BUTTON_PRIORITY_LOADING = 500;
 
-function componentConfig(defaults) {
-  defaults.$get = function() { return defaults; };
-  return defaults;
-}
-
-IonicModule
-.constant('$ionicPlatformDefaults', {
-  'ios': {
-    '$ionicViewConfig': {
-      transition: 'ios-transition'
-    },
-    '$ionicNavBarConfig': {
-      alignTitle: 'center',
-      alignButtons: 'left-right',
-      backButtonIcon: 'ion-ios7-arrow-back',
-      transition: 'ios-nav-bar'
-    },
-    '$ionicTabsConfig': {
-      type: '',
-      position: ''
-    }
-  },
-  'android': {
-    '$ionicViewConfig': {
-      transition: 'android-transition'
-    },
-    '$ionicNavBarConfig': {
-      alignTitle: 'left',
-      alignButtons: 'right',
-      backButtonIcon: 'ion-android-arrow-back',
-      transition: 'android-nav-bar'
-    },
-    '$ionicTabsConfig': {
-      type: 'tabs-striped',
-      position: ''
-    }
-  }
-});
-
-
-IonicModule.config([
-  '$ionicPlatformDefaults',
-  '$injector',
-
-function($ionicPlatformDefaults, $injector) {
-  var platform = ionic.Platform.platform();
-
-  var applyConfig = function(platformDefaults) {
-    forEach(platformDefaults, function(defaults, constantName) {
-      extend($injector.get(constantName), defaults);
-    });
-  };
-
-  switch(platform) {
-    case 'ios':
-      applyConfig($ionicPlatformDefaults.ios);
-      break;
-    case 'android':
-      applyConfig($ionicPlatformDefaults.android);
-      break;
-  }
-}]);
-
 /**
  * @ngdoc service
  * @name $ionicPlatform
