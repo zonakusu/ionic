@@ -4,7 +4,7 @@
 IonicModule.config([
   '$provide',
 function($provide) {
-  function $AnimateDecorator($animate, $timeout) {
+  function $AnimateDecorator($animate, $q, $timeout) {
 
     var CSS_DIRECTIONS = 'nav-forward nav-back nav-enter nav-exit nav-swap'.split(' ');
     var NG_ANIMATE_PARENT_KEY = '$$ngAnimateKey';
@@ -13,20 +13,24 @@ function($provide) {
     var useAnimation = true;
 
 
-    $animate.transition = function(animation, transition, direction, enteringElement, leavingElement, callback) {
+    $animate.transition = function(animation, transition, direction, enteringElement, leavingElement) {
+      var deferred = $q.defer();
       var parentElement = enteringElement.parent();
       var shouldAnimate = $animate.shouldAnimate(transition, direction);
 
       $animate.stage(shouldAnimate, animation, transition, direction, parentElement, enteringElement, leavingElement, function(){
 
-        $animate.start(shouldAnimate, animation, transition, direction, enteringElement, leavingElement, function(){
+        $animate.start(shouldAnimate, animation, transition, direction, enteringElement, leavingElement).then(function(){
 
-          $animate.end(animation, transition, direction, parentElement, enteringElement, leavingElement, callback);
+          $animate.end(animation, transition, direction, parentElement, enteringElement, leavingElement).then(function(){
+            deferred.resolve();
+          });
 
         });
 
       });
 
+      return deferred.promise;
     };
 
 
@@ -90,29 +94,32 @@ function($provide) {
     };
 
 
-    $animate.start = function(shouldAnimate, animation, transition, direction, enteringElement, leavingElement, callback) {
-
-      function next() {
-        ++next.c > 1 && callback();
-      }
-      next.c = 0;
+    $animate.start = function(shouldAnimate, animation, transition, direction, enteringElement, leavingElement) {
+      var enteringDeferred = $q.defer();
+      var leavingDeferred = $q.defer();
 
       if (enteringElement && shouldAnimate) {
-        $animate.addClass(enteringElement, animation, next);
+        $animate.addClass(enteringElement, animation).then(function(){
+          enteringDeferred.resolve();
+        });
       } else {
-        next();
+        enteringDeferred.resolve();
       }
 
       if (leavingElement && shouldAnimate) {
-        $animate.removeClass(leavingElement, animation, next);
+        $animate.removeClass(leavingElement, animation).then(function(){
+          leavingDeferred.resolve();
+        });
       } else {
-        next();
+        leavingDeferred.resolve();
       }
 
+      return $q.all([enteringDeferred.promise, leavingDeferred.promise]);
     };
 
 
     $animate.end = function(animation, transition, direction, parentElement, enteringElement, leavingElement, callback) {
+      var deferred = $q.defer();
 
       ionic.requestAnimationFrame(function(){
 
@@ -137,10 +144,11 @@ function($provide) {
           parentElement.removeClass(CSS_DIRECTIONS[x]);
         }
 
-        callback && callback();
+        deferred.resolve();
 
       });
 
+      return deferred.promise;
     };
 
 
@@ -163,5 +171,5 @@ function($provide) {
     return $animate;
   }
 
-  $provide.decorator('$animate', ['$delegate', '$timeout', $AnimateDecorator]);
+  $provide.decorator('$animate', ['$delegate', '$q', '$timeout', $AnimateDecorator]);
 }]);

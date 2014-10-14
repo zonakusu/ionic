@@ -42,12 +42,13 @@ function($scope, $element, $attrs, $ionicHistory, $ionicNavBarDelegate, $animate
 
   self.transition = function(enteringContainer, leavingContainer, viewData) {
 
-    $animate.transition( 'nav-bar', viewData.transition, viewData.direction, enteringContainer.element(), leavingContainer && leavingContainer.element(), function(){
+    $animate.transition( 'nav-bar', viewData.transition, viewData.direction, enteringContainer.element(), leavingContainer && leavingContainer.element()).then(function(){
       for (var x=0; x<navBarContainers.length; x++) {
         navBarContainers[x].isActive = false;
       }
       enteringContainer.isActive = true;
     });
+
   };
 
   self.showBar = function(show) {

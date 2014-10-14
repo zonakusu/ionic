@@ -182,8 +182,7 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
 
           switcher.notify('before', transData);
 
-          $animate.transition( 'nav-view', transData.transition, transData.direction, enteringEle, leavingEle, function(){
-
+          $animate.transition( 'nav-view', transData.transition, transData.direction, enteringEle, leavingEle).then(function(){
             if (transitionId === transitionCounter) {
 
               switcher.notify('after', transData);
@@ -197,6 +196,7 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
             // clean up any references that could cause memory issues
             nextTransition = nextDirection = enteringView = enteringEle = leavingEle = null;
           });
+
         },
 
         notify: function(step, transData) {
