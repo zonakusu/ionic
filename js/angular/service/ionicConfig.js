@@ -19,7 +19,25 @@ IonicModule
 
   // container of all ionic configs
   // The angular world should use $ionicConfig
-  var config = ionic.config = {};
+  var provider = this;
+  var PLATFORM = 'platform';
+  var config = {
+    views: {
+      transition: PLATFORM,
+      maxCache: 15,
+      forwardCache: false
+    },
+    navBar: {
+      alignTitle: PLATFORM,
+      alignButtons: PLATFORM,
+      backButtonIcon: PLATFORM,
+      transition: PLATFORM
+    },
+    templates: {
+      prefetch: true
+    }
+  };
+  var exposedConfig = {};
 
 
   /**
@@ -34,8 +52,6 @@ IonicModule
    * @param {number} maxNumber Maximum number of views to retain. Default `15`.
    * @returns {number} How many views Ionic will hold onto until the a view is removed.
    */
-  config.maxCachedViews = 15;
-
 
   /**
    * @ngdoc method
@@ -49,7 +65,6 @@ IonicModule
    * @param {boolean} value `false`.
    * @returns {boolean}
    */
-  config.cacheForwardViews = false;
 
   /**
    * @ngdoc method
@@ -67,7 +82,6 @@ IonicModule
    *
    * @returns {string} View animation.
    */
-  config.viewTransition = 'platform';
 
   /**
    * @ngdoc method
@@ -79,20 +93,88 @@ IonicModule
    * `$stateProvider.state()`.
    * @returns {boolean} Whether Ionic will prefetch templateUrls defined in $stateProvider.state.
    */
-  config.prefetchTemplates = true;
 
+
+  config.platform = {
+
+    ios: {
+      views: {
+        transition: 'ios-transition'
+      },
+      navBar: {
+        alignTitle: 'center',
+        alignButtons: 'left-right',
+        backButtonIcon: 'ion-ios7-arrow-back',
+        transition: 'ios-nav-bar'
+      }
+    },
+
+    android: {
+      views: {
+        transition: 'android-transition'
+      },
+      navBar: {
+        alignTitle: 'left',
+        alignButtons: 'right',
+        backButtonIcon: 'ion-android-arrow-back',
+        transition: 'android-nav-bar'
+      }
+    }
+
+  };
+
+  config.platform.default = 'ios';
 
 
   // private: create methods for each config to get/set
-  var provider = this;
-  forEach(config, function(defaultValue, configMethod) {
-    provider[configMethod] = function(newValue) {
-      if (arguments.length) {
-        config[configMethod] = newValue;
+  function createConfig(configObj, exposedConfigObj, providerObj, platformPath) {
+    forEach(configObj, function(value, namespace){
+
+      if (angular.isObject(configObj[namespace])) {
+        // recursively drill down the config object so we can create a method for each one
+        providerObj[namespace] = {};
+        exposedConfigObj[namespace] = {};
+        createConfig(configObj[namespace], exposedConfigObj[namespace], providerObj[namespace], platformPath + '.' + namespace);
+
+      } else {
+        // create a method for both the provider and config methods that will be exposed
+        providerObj[namespace] = exposedConfigObj[namespace] = function(newValue) {
+          if (arguments.length) {
+            configObj[namespace] = newValue;
+          }
+          if (configObj[namespace] == PLATFORM) {
+            // if the config is set to 'platform', then get this config's platform value
+            var platformConfig = stringObj(config.platform, ionic.Platform.platform() + platformPath + '.' + namespace);
+            if (platformConfig) {
+              return platformConfig;
+            }
+            return stringObj(config.platform, config.platform.default + platformPath + '.' + namespace);
+          }
+          return configObj[namespace];
+        };
       }
-      return config[configMethod];
-    };
-  });
+
+    });
+  }
+  createConfig(config, exposedConfig, provider, '');
+
+  function stringObj(obj, str) {
+    str = str.split(".");
+    for (var i = 0; i < str.length; i++) {
+      if ( isDefined(obj[str[i]]) ) {
+        obj = obj[str[i]];
+      } else {
+        return null;
+      }
+    }
+    return obj;
+  }
+
+
+  config.platform.setConfig = function(platformName, platformConfig) {
+    config.platform[platformName] = platformConfig;
+    createConfig(config, exposedConfig, provider, '');
+  };
 
   // private: Service definition for internal Ionic use
   /**
@@ -101,7 +183,7 @@ IonicModule
    * @module ionic
    * @private
    */
-  this.$get = function() {
-    return config;
+  provider.$get = function() {
+    return exposedConfig;
   };
 });

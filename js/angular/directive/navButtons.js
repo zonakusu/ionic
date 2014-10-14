@@ -38,9 +38,9 @@ IonicModule
   return {
     require: '^ionNavBar',
     restrict: 'E',
-    compile: function($element, $attrs) {
-      var content = $element.html();
-      $element.empty().addClass('hide');
+    compile: function(tElement) {
+      var content = tElement.html();
+      tElement.empty().addClass('hide');
 
       return {
         pre: function($scope, $element, $attrs, navBarCtrl) {

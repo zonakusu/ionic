@@ -18,7 +18,9 @@ IonicModule
     },
     '$ionicNavBarConfig': {
       alignTitle: 'center',
-      backButtonIcon: 'ion-ios7-arrow-back'
+      alignButtons: 'left-right',
+      backButtonIcon: 'ion-ios7-arrow-back',
+      transition: 'ios-nav-bar'
     },
     '$ionicTabsConfig': {
       type: '',
@@ -30,8 +32,10 @@ IonicModule
       transition: 'android-transition'
     },
     '$ionicNavBarConfig': {
-      alignTitle: 'center',
-      backButtonIcon: 'ion-ios7-arrow-back'
+      alignTitle: 'left',
+      alignButtons: 'right',
+      backButtonIcon: 'ion-android-arrow-back',
+      transition: 'android-nav-bar'
     },
     '$ionicTabsConfig': {
       type: 'tabs-striped',
@@ -43,7 +47,6 @@ IonicModule
 
 IonicModule.config([
   '$ionicPlatformDefaults',
-
   '$injector',
 
 function($ionicPlatformDefaults, $injector) {

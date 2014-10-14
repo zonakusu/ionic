@@ -69,23 +69,26 @@ function($ionicNavBarConfig, $ionicNgClick) {
   return {
     restrict: 'E',
     require: '^ionNavBar',
-    compile: function(tElement, tAttrs) {
-      tElement.addClass('button back-button hide');
+    compile: function(tElement) {
+      var content = tElement.addClass('button back-button hide').html();
+      tElement.empty().attr('class', 'hide');
 
       var hasIconChild = !!(tElement.html() || '').match(/class=.*?ion-/);
 
-      return function($scope, $element, $attr, navBarCtrl) {
+      return {
+        pre: function($scope, $element, $attr, navBarCtrl) {
 
-        // Add a default back button icon based on the nav config, unless one is set
-        if (!hasIconChild && $element[0].className.indexOf('ion-') === -1) {
-          $element.addClass($ionicNavBarConfig.backButtonIcon);
+          // // Add a default back button icon based on the nav config, unless one is set
+          // if (!hasIconChild && $element[0].className.indexOf('ion-') === -1) {
+          //   $element.addClass($ionicNavBarConfig.backButtonIcon);
+          // }
+
+          // //Default to ngClick going back, but don't override a custom one
+          // if (!isDefined($attr.ngClick)) {
+          //   $ionicNgClick($scope, $element, navBarCtrl.back);
+          // }
+          navBarCtrl.registerBackButton(content);
         }
-
-        //Default to ngClick going back, but don't override a custom one
-        if (!isDefined($attr.ngClick)) {
-          $ionicNgClick($scope, $element, navBarCtrl.back);
-        }
-
       };
     }
   };

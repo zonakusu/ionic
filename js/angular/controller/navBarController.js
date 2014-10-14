@@ -15,8 +15,8 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
   var DATA_NAV_BAR_CTRL = '$ionNavBarController';
 
   var self = this;
-  var primaryBtnsHtml, secondaryBtnsHtml;
-  var title, navBarContainers = [];
+  var primaryBtnsHtml, secondaryBtnsHtml, backBtnHtml;
+  var title, previousTitle, navBarContainers = [];
 
   $element.parent().data(DATA_NAV_BAR_CTRL, self);
 
@@ -61,11 +61,16 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
 
   self.title = function(val, navBarContainer) {
     if (arguments.length) {
+      previousTitle = title;
       title = val || '';
       navBarContainer = navBarContainer || getOnScreenNavBar();
       navBarContainer && navBarContainer.title(title);
     }
     return title;
+  };
+
+  self.getPreviousTitle = function() {
+    return previousTitle;
   };
 
   self.showBackButton = function(show) {
@@ -87,6 +92,10 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
     } else {
       primaryBtnsHtml = btnsHtml;
     }
+  };
+
+  self.registerBackButton = function(btnHtml) {
+    backBtnHtml = btnHtml;
   };
 
   self.enable = function() {

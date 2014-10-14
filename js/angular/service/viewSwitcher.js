@@ -68,7 +68,7 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
     enteringView = enteringView || {};
 
     return {
-      transition: nextTransition || enteringEle && enteringEle.attr('view-transition') || state.viewTransition || $ionicConfig.viewTransition === 'platform' && $ionicViewConfig.transition || $ionicConfig.viewTransition,
+      transition: nextTransition || enteringEle && enteringEle.attr('view-transition') || state.viewTransition || $ionicConfig.views.transition(),
       direction: nextDirection || enteringEle && enteringEle.attr('view-direction') || state.viewDirection || direction || 'none',
       viewId: enteringView.viewId,
       stateId: enteringView.stateId,

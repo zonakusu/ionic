@@ -1,8 +1,9 @@
 
 IonicModule.constant('$ionicNavBarConfig', {
-  transition: 'nav-title-slide-ios7',
   alignTitle: 'center',
-  backButtonIcon: 'ion-ios7-arrow-back'
+  alignButtons: 'left-right',
+  backButtonIcon: 'ion-ios7-arrow-back',
+  transition: 'ios-nav-bar'
 });
 
 /**
