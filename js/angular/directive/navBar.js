@@ -94,7 +94,7 @@ function($ionicHistory, $rootScope, $animate, $compile, $ionicNavBarConfig) {
     compile: function(tElement) {
       //We cannot transclude here because it breaks element.data() inheritance on compile
       //tElement.addClass('bar bar-header nav-bar');
-      var orgClassnames = tElement.attr('class') || ''
+      var orgClassnames = tElement.attr('class') || '';
       tElement.attr('class', '');
 
       return function($scope, $element, $attr, navBarCtrl) {
@@ -125,7 +125,7 @@ function($ionicHistory, $rootScope, $animate, $compile, $ionicNavBarConfig) {
         //   $element.addClass(className);
         // });
 
-      }
+      };
     }
   };
 }]);
