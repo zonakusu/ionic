@@ -62,3 +62,7 @@
 .menu-animated {
   @include transition-transform($menu-animation-speed ease);
 }
+
+.drawer-animated {
+  @include transition-transform($menu-animation-speed ease);
+}

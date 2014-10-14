@@ -15,6 +15,8 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
   var MODE_OFFSET = 0;
   var MODE_DRAWER = 1;
 
+  var edgeThreshold = 50;
+
   self.initialize = function(options) {
     self.mode = $attrs.mode === 'drawer' ? MODE_DRAWER : MODE_OFFSET;
     console.log('SIDE MENU MODE', self.mode);
@@ -96,7 +98,11 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
    * @return {float} The amount the side menu is open, either positive or negative for left (positive), or right (negative)
    */
   self.getOpenAmount = function() {
-    return self.content && self.content.getTranslateX() || 0;
+    if(self.mode == MODE_DRAWER) {
+      return Math.abs(self.left.getTranslateX()) || 0;
+    } else {
+      return self.content && self.content.getTranslateX() || 0;
+    }
   };
 
   /**
@@ -133,7 +139,8 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
     var p = percentage / 100;
 
     if(self.left && percentage >= 0) {
-      self.openAmount(self.left.width * p);
+      console.log('OPENING AMOUNT', self.left.width * p);
+      self.openAmount(-self.left.width + (self.left.width * p));
     } else if(self.right && percentage < 0) {
       var maxRight = self.right.width;
       self.openAmount(self.right.width * p);
@@ -154,7 +161,6 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
     var maxRight = self.right && self.right.width || 0;
 
     if(this.mode === MODE_DRAWER) {
-      console.log('Dragging amount', amount);
       if(self.left && self.left.isEnabled) {
         if(!isNaN(amount) && amount < 0) {
           self.left.bringUpTop();
@@ -227,49 +233,62 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
     // what the drag velocity is
     var ratio = self.getOpenRatio();
 
-    if(ratio === 0) {
-      // Just to be safe
-      self.openPercentage(0);
-      return;
-    }
+    if(self.mode == MODE_DRAWER) {
+      self.left.enableAnimation();
+      ratio = Math.max(0, 1 - ratio);
+      console.log('Current ratio', ratio);
+      if(ratio > 0.5) {
+        self.openPercentage(100);
+      } else {
+        self.openPercentage(0);
+      }
+    } else {
+      console.log('Current ratio', ratio);
 
-    var velocityThreshold = 0.3;
-    var velocityX = e.gesture.velocityX;
-    var direction = e.gesture.direction;
+      if(ratio === 0) {
+        // Just to be safe
+        self.openPercentage(0);
+        return;
+      }
 
-    // Going right, less than half, too slow (snap back)
-    if(ratio > 0 && ratio < 0.5 && direction == 'right' && velocityX < velocityThreshold) {
-      self.openPercentage(0);
-    }
+      var velocityThreshold = 0.3;
+      var velocityX = e.gesture.velocityX;
+      var direction = e.gesture.direction;
 
-    // Going left, more than half, too slow (snap back)
-    else if(ratio > 0.5 && direction == 'left' && velocityX < velocityThreshold) {
-      self.openPercentage(100);
-    }
+      // Going right, less than half, too slow (snap back)
+      if(ratio > 0 && ratio < 0.5 && direction == 'right' && velocityX < velocityThreshold) {
+        self.openPercentage(0);
+      }
 
-    // Going left, less than half, too slow (snap back)
-    else if(ratio < 0 && ratio > -0.5 && direction == 'left' && velocityX < velocityThreshold) {
-      self.openPercentage(0);
-    }
+      // Going left, more than half, too slow (snap back)
+      else if(ratio > 0.5 && direction == 'left' && velocityX < velocityThreshold) {
+        self.openPercentage(100);
+      }
 
-    // Going right, more than half, too slow (snap back)
-    else if(ratio < 0.5 && direction == 'right' && velocityX < velocityThreshold) {
-      self.openPercentage(-100);
-    }
+      // Going left, less than half, too slow (snap back)
+      else if(ratio < 0 && ratio > -0.5 && direction == 'left' && velocityX < velocityThreshold) {
+        self.openPercentage(0);
+      }
 
-    // Going right, more than half, or quickly (snap open)
-    else if(direction == 'right' && ratio >= 0 && (ratio >= 0.5 || velocityX > velocityThreshold)) {
-      self.openPercentage(100);
-    }
+      // Going right, more than half, too slow (snap back)
+      else if(ratio < 0.5 && direction == 'right' && velocityX < velocityThreshold) {
+        self.openPercentage(-100);
+      }
 
-    // Going left, more than half, or quickly (span open)
-    else if(direction == 'left' && ratio <= 0 && (ratio <= -0.5 || velocityX > velocityThreshold)) {
-      self.openPercentage(-100);
-    }
+      // Going right, more than half, or quickly (snap open)
+      else if(direction == 'right' && ratio >= 0 && (ratio >= 0.5 || velocityX > velocityThreshold)) {
+        self.openPercentage(100);
+      }
 
-    // Snap back for safety
-    else {
-      self.openPercentage(0);
+      // Going left, more than half, or quickly (span open)
+      else if(direction == 'left' && ratio <= 0 && (ratio <= -0.5 || velocityX > velocityThreshold)) {
+        self.openPercentage(-100);
+      }
+
+      // Snap back for safety
+      else {
+        self.openPercentage(0);
+      }
     }
   };
 
@@ -322,22 +341,35 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
     }
 
     // Calculate difference from the tap points
-    if(!isDragging && Math.abs(lastX - startX) > self.dragThresholdX) {
-      // if the difference is greater than threshold, start dragging using the current
-      // point as the starting point
-      startX = lastX;
+    if(self.mode == MODE_DRAWER) {
+      console.log(lastX);
+      if(!isDragging && lastX < edgeThreshold) {
+        // if the difference is greater than threshold, start dragging using the current
+        // point as the starting point
+        startX = lastX;
 
-      isDragging = true;
-      // Initialize dragging
-      self.content.disableAnimation();
-      offsetX = self.getOpenAmount();
+        isDragging = true;
+        // Initialize dragging
+        self.content.disableAnimation();
+        offsetX = self.getOpenAmount();
 
-      if(self.mode == MODE_DRAWER) {
+        self.left.disableAnimation();
         if(self.left && self.left.isEnabled) {
           offsetX = -self.left.width;
           console.log(offsetX);
           self.left.setTranslateX(-self.left.width);
         }
+      }
+    } else {
+      if(!isDragging && Math.abs(lastX - startX) > self.dragThresholdX) {
+        // if the difference is greater than threshold, start dragging using the current
+        // point as the starting point
+        startX = lastX;
+
+        isDragging = true;
+        // Initialize dragging
+        self.content.disableAnimation();
+        offsetX = self.getOpenAmount();
       }
     }
 

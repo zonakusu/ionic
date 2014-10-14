@@ -16,8 +16,16 @@
     setTranslateX: function(amt) {
       //var xTransform = content.offsetX + amount;
       this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + amt + 'px,0,0)';
+      this.translateX = amt;
     },
     getTranslateX: function(amt) {
+      return this.translateX;
+    },
+    enableAnimation: function() {
+      this.el.classList.add('drawer-animated');
+    },
+    disableAnimation: function() {
+      this.el.classList.remove('drawer-animated');
     },
     getFullWidth: function() {
       return this.width;
