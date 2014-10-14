@@ -12,7 +12,12 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
 
   self.$scope = $scope;
 
+  var MODE_OFFSET = 0;
+  var MODE_DRAWER = 1;
+
   self.initialize = function(options) {
+    self.mode = $attrs.mode === 'drawer' ? MODE_DRAWER : MODE_OFFSET;
+    console.log('SIDE MENU MODE', self.mode);
     self.left = options.left;
     self.right = options.right;
     self.setContent(options.content);
@@ -148,47 +153,61 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
     var maxLeft = self.left && self.left.width || 0;
     var maxRight = self.right && self.right.width || 0;
 
-    // Check if we can move to that side, depending if the left/right panel is enabled
-    if(!(self.left && self.left.isEnabled) && amount > 0) {
-      self.content.setTranslateX(0);
-      return;
-    }
+    if(this.mode === MODE_DRAWER) {
+      console.log('Dragging amount', amount);
+      if(self.left && self.left.isEnabled) {
+        if(!isNaN(amount) && amount < 0) {
+          self.left.bringUpTop();
+          self.left.setTranslateX(amount);
+        } else if(amount >= 0) {
 
-    if(!(self.right && self.right.isEnabled) && amount < 0) {
-      self.content.setTranslateX(0);
-      return;
-    }
-
-    if(leftShowing && amount > maxLeft) {
-      self.content.setTranslateX(maxLeft);
-      return;
-    }
-
-    if(rightShowing && amount < -maxRight) {
-      self.content.setTranslateX(-maxRight);
-      return;
-    }
-
-    self.content.setTranslateX(amount);
-
-    if(amount >= 0) {
-      leftShowing = true;
-      rightShowing = false;
-
-      if(amount > 0) {
-        // Push the z-index of the right menu down
-        self.right && self.right.pushDown && self.right.pushDown();
-        // Bring the z-index of the left menu up
-        self.left && self.left.bringUp && self.left.bringUp();
+          self.left.setTranslateX(0);
+        }
       }
     } else {
-      rightShowing = true;
-      leftShowing = false;
 
-      // Bring the z-index of the right menu up
-      self.right && self.right.bringUp && self.right.bringUp();
-      // Push the z-index of the left menu down
-      self.left && self.left.pushDown && self.left.pushDown();
+      // Check if we can move to that side, depending if the left/right panel is enabled
+      if(!(self.left && self.left.isEnabled) && amount > 0) {
+        self.content.setTranslateX(0);
+        return;
+      }
+
+      if(!(self.right && self.right.isEnabled) && amount < 0) {
+        self.content.setTranslateX(0);
+        return;
+      }
+
+      if(leftShowing && amount > maxLeft) {
+        self.content.setTranslateX(maxLeft);
+        return;
+      }
+
+      if(rightShowing && amount < -maxRight) {
+        self.content.setTranslateX(-maxRight);
+        return;
+      }
+
+      self.content.setTranslateX(amount);
+
+      if(amount >= 0) {
+        leftShowing = true;
+        rightShowing = false;
+
+        if(amount > 0) {
+          // Push the z-index of the right menu down
+          self.right && self.right.pushDown && self.right.pushDown();
+          // Bring the z-index of the left menu up
+          self.left && self.left.bringUp && self.left.bringUp();
+        }
+      } else {
+        rightShowing = true;
+        leftShowing = false;
+
+        // Bring the z-index of the right menu up
+        self.right && self.right.bringUp && self.right.bringUp();
+        // Push the z-index of the left menu down
+        self.left && self.left.pushDown && self.left.pushDown();
+      }
     }
   };
 
@@ -312,6 +331,14 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody) {
       // Initialize dragging
       self.content.disableAnimation();
       offsetX = self.getOpenAmount();
+
+      if(self.mode == MODE_DRAWER) {
+        if(self.left && self.left.isEnabled) {
+          offsetX = -self.left.width;
+          console.log(offsetX);
+          self.left.setTranslateX(-self.left.width);
+        }
+      }
     }
 
     if(isDragging) {

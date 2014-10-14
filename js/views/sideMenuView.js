@@ -13,6 +13,12 @@
       this.setWidth(opts.width);
       this.mode = opts.mode || 'offset';
     },
+    setTranslateX: function(amt) {
+      //var xTransform = content.offsetX + amount;
+      this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + amt + 'px,0,0)';
+    },
+    getTranslateX: function(amt) {
+    },
     getFullWidth: function() {
       return this.width;
     },
@@ -22,6 +28,9 @@
     },
     setIsEnabled: function(isEnabled) {
       this.isEnabled = isEnabled;
+    },
+    bringUpTop: function() {
+      this.el.style.zIndex = '100';
     },
     bringUp: function() {
       if(this.el.style.zIndex !== '0') {
@@ -63,6 +72,7 @@
     },
     setTranslateX: ionic.animationFrameThrottle(function(x) {
       if(this.mode == 'drawer') {
+        console.log('Not opening', x);
       } else {
         this.el.style[ionic.CSS.TRANSFORM] = 'translate3d(' + x + 'px, 0, 0)';
       }
