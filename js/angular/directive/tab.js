@@ -1,7 +1,3 @@
-IonicModule.constant('$ionicTabConfig', {
-  type: ''
-});
-
 /**
  * @ngdoc directive
  * @name ionTab
@@ -39,13 +35,10 @@ IonicModule.constant('$ionicTabConfig', {
  */
 IonicModule
 .directive('ionTab', [
-  '$rootScope',
+  '$compile',
   '$ionicConfig',
   '$ionicBind',
-  '$compile',
-  '$state',
-  '$ionicHistory',
-function($rootScope, $ionicConfig, $ionicBind, $compile, $state, $ionicHistory) {
+function($compile, $ionicConfig, $ionicBind) {
 
   //Returns ' key="value"' if value exists
   function attrStr(k,v) {

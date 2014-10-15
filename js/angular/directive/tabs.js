@@ -1,8 +1,3 @@
-IonicModule.constant('$ionicTabsConfig', {
-  position: '',
-  type: ''
-});
-
 /**
  * @ngdoc directive
  * @name ionTabs
@@ -50,22 +45,22 @@ IonicModule.constant('$ionicTabsConfig', {
 
 IonicModule
 .directive('ionTabs', [
-  '$ionicHistory',
   '$ionicTabsDelegate',
-  '$ionicTabsConfig',
-function($ionicHistory, $ionicTabsDelegate, $ionicTabsConfig) {
+  '$ionicConfig',
+function($ionicTabsDelegate, $ionicConfig) {
   return {
     restrict: 'E',
     scope: true,
     controller: '$ionicTabs',
-    compile: function(element, attr) {
+    compile: function(tElement) {
       //We cannot use regular transclude here because it breaks element.data()
       //inheritance on compile
       var innerElement = jqLite('<div class="tab-nav tabs">');
-      innerElement.append(element.contents());
-      element.append(innerElement);
-      element.addClass($ionicTabsConfig.position);
-      element.addClass($ionicTabsConfig.type);
+      innerElement.append(tElement.contents());
+
+      tElement.append(innerElement)
+              .addClass( $ionicConfig.tabs.position() )
+              .addClass( $ionicConfig.tabs.type() );
 
       return { pre: prelink, post: postLink };
       function prelink($scope, $element, $attr, tabsCtrl) {
@@ -91,7 +86,7 @@ function($ionicHistory, $ionicTabsDelegate, $ionicTabsConfig) {
           // loading of tab views when each will eventually all go away anyway
           $scope.$tabsDestroy = true;
           deregisterInstance();
-          tabsCtrl.$tabsElement = tabsCtrl.$element = tabsCtrl.$scope = null;
+          tabsCtrl.$tabsElement = tabsCtrl.$element = tabsCtrl.$scope = innerElement = null;
           delete $scope.$hasTabs;
           delete $scope.$hasTabsTop;
         });

@@ -543,6 +543,16 @@ describe('tabs', function() {
       return element;
     }
 
+    it('should set tabs css from $ionicConfig', inject(function($rootScope, $compile, $ionicConfig){
+      $ionicConfig.tabs.type('tabs-striped');
+      $ionicConfig.tabs.position('tabs-top');
+      var scope = $rootScope.$new();
+      var element = angular.element('<ion-tabs></ion-tabs>');
+      element = $compile(element)(scope);
+      expect(element.hasClass('tabs-striped')).toBe(true);
+      expect(element.hasClass('tabs-top')).toBe(true);
+    }));
+
     it('should remove title attribute', function() {
       var el = setup('title="something"');
       expect(el[0].hasAttribute('title')).toBe(false);

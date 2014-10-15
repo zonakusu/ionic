@@ -75,7 +75,6 @@ IonicModule
   var provider = this;
   provider.platform = {};
   var PLATFORM = 'platform';
-  var configMethods = { platform: {} };
 
   var configProperties = {
     views: {
@@ -92,12 +91,16 @@ IonicModule
     menus: {
       transition: PLATFORM
     },
+    tabs: {
+      position: PLATFORM,
+      type: PLATFORM
+    },
     templates: {
       prefetch: PLATFORM
     },
     platform: {}
   };
-  createConfig(configProperties, configMethods, provider, '');
+  createConfig(configProperties, provider, '');
 
 
 
@@ -117,6 +120,10 @@ IonicModule
     },
     menus: {
       transition: 'push-menu'
+    },
+    tabs: {
+      position: '',
+      type: ''
     },
     templates: {
       prefetch: true
@@ -147,6 +154,9 @@ IonicModule
       backButtonIcon: 'ion-android-arrow-back',
       transition: 'android-nav-bar'
     },
+    tabs: {
+      type: 'tabs-striped'
+    },
     menus: {
       transition: 'drawer-menu'
     }
@@ -157,11 +167,11 @@ IonicModule
 
   function setPlatformConfig(platformName, platformConfigs) {
     configProperties.platform[platformName] = platformConfigs;
-    configMethods.platform[platformName] = provider.platform[platformName] = {};
+    provider.platform[platformName] = {};
 
     addConfig(configProperties, configProperties.platform[platformName]);
 
-    createConfig(configProperties.platform[platformName], configMethods.platform[platformName], provider.platform[platformName], '');
+    createConfig(configProperties.platform[platformName], provider.platform[platformName], '');
   }
 
   function addConfig(configObj, platformObj) {
@@ -182,18 +192,17 @@ IonicModule
 
 
   // private: create methods for each config to get/set
-  function createConfig(configObj, configMethodsObj, providerObj, platformPath) {
+  function createConfig(configObj, providerObj, platformPath) {
     forEach(configObj, function(value, namespace){
 
       if (angular.isObject(configObj[namespace])) {
         // recursively drill down the config object so we can create a method for each one
         providerObj[namespace] = {};
-        configMethodsObj[namespace] = {};
-        createConfig(configObj[namespace], configMethodsObj[namespace], providerObj[namespace], platformPath + '.' + namespace);
+        createConfig(configObj[namespace], providerObj[namespace], platformPath + '.' + namespace);
 
       } else {
         // create a method for both the provider and config methods that will be exposed
-        providerObj[namespace] = configMethodsObj[namespace] = function(newValue) {
+        providerObj[namespace] = function(newValue) {
           if (arguments.length) {
             configObj[namespace] = newValue;
           }
@@ -236,6 +245,6 @@ IonicModule
    * @private
    */
   provider.$get = function() {
-    return configMethods;
+    return provider;
   };
 });
