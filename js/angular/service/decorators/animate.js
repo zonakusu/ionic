@@ -89,8 +89,7 @@ function($provide) {
         }
       }
 
-      $timeout(callback, 10);
-
+      $timeout(callback, 8);
     };
 
 

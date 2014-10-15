@@ -269,7 +269,8 @@ $android-view-slide-start-y:                    20%;
 .nav-view-add,
 .nav-view-remove,
 .nav-bar-add,
-.nav-bar-remove {
+.nav-bar-remove,
+.nav-swap .nav-view-entering {
   opacity: 1;
   @include animation-duration( 0 );
   @include animation-fill-mode( forwards );

@@ -41,7 +41,7 @@
  * maximum cached is `0`, then after each view transition, the view's element will
  * be removed from the DOM, and the next time the same view is shown it will have to
  * re-compile, attach to the DOM, and link the element again.
- * @param {number} maxNumber Maximum number of views to retain. Default `15`.
+ * @param {number} maxNumber Maximum number of views to retain. Default `10`.
  * @returns {number} How many views Ionic will hold onto until the a view is removed.
  */
 
@@ -83,9 +83,11 @@ IonicModule
       forwardCache: PLATFORM
     },
     navBar: {
-      alignTitle: PLATFORM,
-      alignButtons: PLATFORM,
+      titleAlign: PLATFORM,
+      primaryButtonsAlign: PLATFORM,
+      secondaryButtonsAlign: PLATFORM,
       backButtonIcon: PLATFORM,
+      backButtonAlign: PLATFORM,
       transition: PLATFORM
     },
     menus: {
@@ -109,13 +111,15 @@ IonicModule
   setPlatformConfig('default', {
     views: {
       transition: 'ios-transition',
-      maxCache: 15,
+      maxCache: 10,
       forwardCache: false
     },
     navBar: {
-      alignTitle: 'center',
-      alignButtons: 'left-right',
-      backButtonIcon: 'ion-ios7-arrow-back',
+      titleAlign: 'center',
+      primaryButtonsAlign: 'left',
+      secondaryButtonsAlign: 'right',
+      backButtonIcon: 'ion-chevron-left',
+      backButtonAlign: 'left',
       transition: 'ios-nav-bar'
     },
     menus: {
@@ -149,8 +153,9 @@ IonicModule
       transition: 'android-transition'
     },
     navBar: {
-      alignTitle: 'left',
-      alignButtons: 'right',
+      titleAlign: 'left',
+      primaryButtonsAlign: 'right',
+      secondaryButtonsAlign: 'right',
       backButtonIcon: 'ion-android-arrow-back',
       transition: 'android-nav-bar'
     },
