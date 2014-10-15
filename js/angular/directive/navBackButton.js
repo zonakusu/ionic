@@ -66,14 +66,11 @@ IonicModule
     restrict: 'E',
     require: '^ionNavBar',
     compile: function(tElement, tAttrs) {
-      var content = tElement.html();
-      var className = tAttrs.class;
-      //var hasIconChild = !!(tElement.html() || '').match(/class=.*?ion-/);
+      var btnHtml = tElement[0].outerHTML;
       tElement.remove();
-
       return {
         pre: function($scope, $element, $attr, navBarCtrl) {
-          navBarCtrl.registerBackButton(content, className);
+          navBarCtrl.registerBackButton(btnHtml);
         }
       };
     }

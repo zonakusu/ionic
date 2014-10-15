@@ -8,7 +8,7 @@
  * @description
  * As a user navigates throughout your app, Ionic is able to keep track of their
  * navigation history. By knowing their history, transitions between views
- * correctly slide either left or right, or no transition at all. An additional
+ * correctly enter and exit using the platform's transition style. An additional
  * benefit to Ionic's navigation system is its ability to manage multiple
  * histories.
  *
@@ -31,18 +31,6 @@
  * To do this, in our markup we use ionNavView top level directive. To display a header bar we use
  * the {@link ionic.directive:ionNavBar} directive that updates as we navigate through the
  * navigation stack.
- *
- * You can use any [animation class](/docs/components#animations) on the navView's `animation` attribute
- * to have its pages animate.
- *
- * Recommended for page transitions: 'slide-left-right', 'slide-left-right-ios7', 'slide-in-up'.
- *
- * ```html
- * <ion-nav-bar></ion-nav-bar>
- * <ion-nav-view animation="slide-left-right">
- *   <!-- Center content -->
- * </ion-nav-view>
- * ```
  *
  * Next, we need to setup our states that will be rendered.
  *
@@ -95,20 +83,17 @@
  */
 IonicModule
 .directive('ionNavView', [
-  '$ionicViewSwitcher',
   '$state',
-function( $ionicViewSwitcher, $state) {
+function( $state) {
   // IONIC's fork of Angular UI Router, v0.2.10
   // the navView handles registering views in the history and how to transition between them
-
-  var directive = {
+  return {
     restrict: 'E',
     terminal: true,
     priority: 2000,
     transclude: true,
-    controller: '$ionicNavView',
-    require: 'ionNavView',
-    compile: function (tElement, attr, transclude) {
+    controller: '$ionNavView',
+    compile: function (tElement, tAttrs, transclude) {
 
       // a nav view element is a container for numerous views
       tElement.addClass('view-container');
@@ -155,6 +140,5 @@ function( $ionicViewSwitcher, $state) {
       };
     }
   };
-  return directive;
 }]);
 

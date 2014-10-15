@@ -1,5 +1,5 @@
 IonicModule
-.controller('$ionicNavView', [
+.controller('$ionNavView', [
   '$scope',
   '$element',
   '$attrs',
@@ -35,7 +35,6 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
 
     // begin rendering
     self.render(registerData.viewId, viewLocals, registerData);
-
   };
 
 
@@ -77,18 +76,20 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
   self.beforeEnter = function(transData) {
     if (isPrimary) {
       var associatedNavBarCtrl = getAssociatedNavBarCtrl();
-      if (associatedNavBarCtrl) {
-        associatedNavBarCtrl.beforeEnter(transData);
-      }
+      associatedNavBarCtrl && associatedNavBarCtrl.beforeEnter(transData);
     }
   };
 
 
   self.showBar = function(val) {
     var associatedNavBarCtrl = getAssociatedNavBarCtrl();
-    if (associatedNavBarCtrl) {
-      return associatedNavBarCtrl.showBar(val);
-    }
+    associatedNavBarCtrl && associatedNavBarCtrl.showBar(val);
+  };
+
+
+  self.showBackButton = function(val) {
+    var associatedNavBarCtrl = getAssociatedNavBarCtrl();
+    associatedNavBarCtrl && associatedNavBarCtrl.showBackButton(val);
   };
 
 
@@ -130,6 +131,7 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
     });
 
   };
+
 
   function getAssociatedNavBarCtrl() {
     return $element.inheritedData('$ionNavBarController');

@@ -87,7 +87,6 @@ IonicModule
       primaryButtonsAlign: PLATFORM,
       secondaryButtonsAlign: PLATFORM,
       backButtonIcon: PLATFORM,
-      backButtonAlign: PLATFORM,
       transition: PLATFORM
     },
     menus: {
@@ -119,7 +118,6 @@ IonicModule
       primaryButtonsAlign: 'left',
       secondaryButtonsAlign: 'right',
       backButtonIcon: 'ion-chevron-left',
-      backButtonAlign: 'left',
       transition: 'ios-nav-bar'
     },
     menus: {

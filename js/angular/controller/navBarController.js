@@ -1,5 +1,5 @@
 IonicModule
-.controller('$ionicNavBar', [
+.controller('$ionNavBar', [
   '$scope',
   '$element',
   '$attrs',
@@ -8,6 +8,7 @@ IonicModule
   '$ionicHistory',
   '$ionicNavBarDelegate',
 function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavBarDelegate) {
+
   var CSS_NAV_BAR_ACTIVE = 'nav-bar-active';
   var CSS_NAV_BAR_ENTERING = 'nav-bar-entering';
   var CSS_NAV_BAR_LEAVING = 'nav-bar-leaving';
@@ -15,9 +16,12 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
   var DATA_NAV_BAR_CTRL = '$ionNavBarController';
 
   var self = this;
-  var primaryBtnsHtml, secondaryBtnsHtml, backBtnHtml;
-  var backBtnCSS = '';
-  var title, previousTitle, navBarContainers = [];
+  var navBarContainers = [];
+  var primaryBtnsHtml, secondaryBtnsHtml;
+  var backBtnTemplateEle;
+  var hasBackBtnText = false;
+  var title, previousTitle;
+  var isShown;
 
   $element.parent().data(DATA_NAV_BAR_CTRL, self);
 
@@ -25,8 +29,96 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
 
 
   self.init = function() {
-    navBarContainers = [ self.createNavBar(), self.createNavBar() ];
+    for (var x=0; x<2; x++) {
+      navBarContainers.push( self.createNavBarBlock(backBtnTemplateEle, primaryBtnsHtml, secondaryBtnsHtml) );
+    }
   };
+
+
+  self.registerButtons = function(btnsHtml, side) {
+    if (side === 'secondary' || side === 'right') {
+      secondaryBtnsHtml = btnsHtml;
+    } else {
+      primaryBtnsHtml = btnsHtml;
+    }
+  };
+
+
+  self.registerBackButton = function(btnHtml) {
+    btnHtml = btnHtml.replace(/ion-nav-back-button/gi, 'div');
+    backBtnTemplateEle = jqLite(btnHtml);
+    backBtnTemplateEle.addClass('button back-button back-button-hide');
+
+    if (!backBtnTemplateEle.attr('ng-click')) {
+      backBtnTemplateEle.attr('ng-click', '$goBack()');
+    }
+
+    hasBackBtnText = !!backBtnTemplateEle[0].querySelector('.button-text');
+
+    return backBtnTemplateEle;
+  };
+
+
+  self.createNavBarBlock = function(backBtnTemplateEle, primaryBtnsHtml, secondaryBtnsHtml) {
+    var containerEle = jqLite( '<div class="nav-bar-block nav-bar-cache">' );
+    var titleEle = jqLite( '<div class="title">' );
+    var backBtnEle, primaryBtnsEle, secondaryBtnsEle;
+    var titleHtml = '';
+    var isBackSown;
+
+    var navBarEle = jqLite( '<div class="bar bar-header ' + ($attrs.class || '') + '">' );
+
+    if (backBtnTemplateEle) {
+      backBtnEle = backBtnTemplateEle.clone();
+      navBarEle.append(backBtnEle);
+    }
+
+    navBarEle.append(titleEle);
+
+    if (primaryBtnsHtml) {
+      primaryBtnsEle = jqLite( '<div class="buttons primary-buttons left-buttons">' );
+      primaryBtnsEle.html(primaryBtnsHtml);
+      navBarEle.append(primaryBtnsEle);
+    }
+
+    if (secondaryBtnsHtml) {
+      secondaryBtnsEle = jqLite( '<div class="buttons secondary-buttons right-buttons">' );
+      secondaryBtnsEle.html(secondaryBtnsHtml);
+      navBarEle.append(secondaryBtnsEle);
+    }
+
+    containerEle.append(navBarEle);
+
+    $element.append( $compile(containerEle)($scope) );
+
+    return {
+      isActive: false,
+      showBack: function(show) {
+        if (backBtnEle) {
+          if (show && !isBackSown) {
+            backBtnEle.removeClass('back-button-hide');
+            isBackSown = true;
+          } else if (!show && isBackSown) {
+            backBtnEle.addClass('back-button-hide');
+            isBackSown = false;
+          }
+        }
+      },
+      title: function(val) {
+        if (val !== titleHtml) {
+          titleEle.html(val);
+          titleHtml = val;
+        }
+      },
+      element: function() {
+        return containerEle;
+      },
+      destroy: function() {
+        containerEle = navBarEle = backBtnEle = primaryBtnsEle = secondaryBtnsEle = titleEle = null;
+      }
+    };
+  };
+
 
   self.beforeEnter = function(viewData) {
     if ( self.shouldUpdate(viewData) ) {
@@ -38,9 +130,11 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
     }
   };
 
+
   self.shouldUpdate = function(viewData) {
     return !!viewData;
   };
+
 
   self.transition = function(enteringContainer, leavingContainer, viewData) {
 
@@ -53,13 +147,23 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
 
   };
 
+
   self.showBar = function(show) {
-    if (arguments.length) {
-      $scope.isInvisible = !show;
-      $scope.$parent.$hasHeader = !!show;
+    if (show && !isShown) {
+      $element.removeClass(CSS_HIDE);
+    } else if (!show && isShown) {
+      $element.addClass(CSS_HIDE);
     }
-    return !$scope.isInvisible;
+    $scope.$parent.$hasHeader = !!show;
+    isShown = show;
   };
+
+
+  self.showBackButton = function(show, navBarContainer) {
+    navBarContainer = navBarContainer || getOnScreenNavBar();
+    navBarContainer && navBarContainer.showBack(show);
+  };
+
 
   self.title = function(val, navBarContainer) {
     if (arguments.length) {
@@ -71,109 +175,22 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
     return title;
   };
 
+
   self.getPreviousTitle = function() {
     return previousTitle;
   };
 
-  self.showBackButton = function(show, navBarContainer) {
-    navBarContainer = navBarContainer || getOnScreenNavBar();
-    navBarContainer && navBarContainer.showBack(show);
-  };
-
-  self.registerButtons = function(btnsHtml, side) {
-    if (side === 'secondary' || side === 'right') {
-      secondaryBtnsHtml = btnsHtml;
-    } else {
-      primaryBtnsHtml = btnsHtml;
-    }
-  };
-
-  self.registerBackButton = function(btnHtml, btnCSS) {
-    backBtnHtml = btnHtml || '';
-    backBtnCSS = btnCSS || '';
-  };
 
   self.enable = function() {
     // set primary to show first
-    self.isPrimary(true);
+    self.showBar(true);
 
     // set non primary to hide second
     for (var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
-      if($ionicNavBarDelegate._instances[x] !== self) $ionicNavBarDelegate._instances[x].isPrimary(false);
+      if ($ionicNavBarDelegate._instances[x] !== self) $ionicNavBarDelegate._instances[x].showBar(false);
     }
   };
 
-  self.isPrimary = function(enable) {
-    if (enable) {
-      $element.removeClass(CSS_HIDE);
-    } else {
-      $element.addClass(CSS_HIDE);
-    }
-  };
-
-  $scope.goBack = function() {
-    var backView = $ionicHistory.backView();
-    backView && backView.go();
-  };
-
-  self.createNavBar = function() {
-    var containerEle = jqLite( '<div class="nav-bar-container nav-bar-cache">' );
-
-    var navBarEle = jqLite( '<div class="bar bar-header ' + ($attrs.class || '') + '">' );
-
-    var backBtnEle = jqLite( '<div ng-click="goBack()" class="button back-button back-button-hide ' + backBtnCSS + '">' );
-    if (backBtnHtml) {
-      backBtnEle.html(backBtnHtml);
-    }
-
-    var primaryBtnsEle = jqLite( '<div class="buttons primary-buttons left-buttons">' );
-    if (primaryBtnsHtml) {
-      primaryBtnsEle.html(primaryBtnsHtml);
-    }
-
-    var secondaryBtnsEle = jqLite( '<div class="buttons secondary-buttons right-buttons">' );
-    if (secondaryBtnsHtml) {
-      secondaryBtnsEle.html(secondaryBtnsHtml);
-    }
-
-    var titleEle = jqLite( '<div class="title">' );
-    var title;
-    var backShown;
-
-    navBarEle.append(backBtnEle)
-             .append(primaryBtnsEle)
-             .append(titleEle)
-             .append(secondaryBtnsEle);
-
-    containerEle.append(navBarEle);
-
-    $element.append( $compile(containerEle)($scope) );
-
-    return {
-      isActive: false,
-      showBack: function(show) {
-        if(show && !backShown) {
-          backBtnEle.removeClass('back-button-hide');
-          backShown = true;
-        } else if (!show && backShown) {
-          backBtnEle.addClass('back-button-hide');
-          backShown = false;
-        }
-      },
-      title: function(val) {
-        if(val !== title) {
-          titleEle.html(val);
-          title = val;
-        }
-      },
-      element: function() {
-        return containerEle;
-      },
-      destroy: function() {
-        containerEle = navBarEle = backBtnEle = primaryBtnsEle = secondaryBtnsEle = titleEle = null;
-      }
-    };
-  };
 
   function getOnScreenNavBar() {
     for (var x=0; x<navBarContainers.length; x++) {
@@ -181,12 +198,20 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
     }
   }
 
+
   function getOffScreenNavBar() {
     for (var x=0; x<navBarContainers.length; x++) {
       if (!navBarContainers[x].isActive) return navBarContainers[x];
     }
     return navBarContainers[0];
   }
+
+
+  $scope.$goBack = self.back = function() {
+    var backView = $ionicHistory.backView();
+    backView && backView.go();
+  };
+
 
   $scope.$on('$destroy', function(){
     $element.parent().removeData(DATA_NAV_BAR_CTRL);
