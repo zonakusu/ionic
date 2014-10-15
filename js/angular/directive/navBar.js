@@ -64,9 +64,9 @@
  *     <ion-nav-back-button>
  *       Back
  *     </ion-nav-back-button>
- *     <div class="buttons right-buttons">
+ *     <div class="buttons primary-buttons">
  *       <button class="button">
- *         Right Button
+            Button
  *       </button>
  *     </div>
  *   </ion-nav-bar>
@@ -81,37 +81,14 @@ IonicModule
     scope: true,
     compile: function(tElement) {
       //We cannot transclude here because it breaks element.data() inheritance on compile
-      //tElement.addClass('bar bar-header nav-bar');
-      var orgClassnames = tElement.attr('class') || '';
       tElement.attr('class', '');
 
       return function($scope, $element, $attr, navBarCtrl) {
-
-        navBarCtrl.init(orgClassnames);
-
-        // navBarCtrl._headerBarView = new ionic.views.HeaderBar({
-        //   el: $element[0],
-        //   alignTitle: $attr.alignTitle || $ionicNavBarConfig.alignTitle || 'center'
-        // });
-
-        // //defaults
-        // $scope.backButtonShown = false;
-        // $scope.shouldAnimate = true;
-        // $scope.isReverse = false;
-        // $scope.isInvisible = true;
+        navBarCtrl.init();
 
         $scope.$on('$destroy', function() {
           $scope.$parent.$hasHeader = false;
         });
-
-        // $scope.$watch(function() {
-        //   return ($scope.isReverse ? ' reverse' : '') +
-        //     ($scope.isInvisible ? ' invisible' : '') +
-        //     (!$scope.shouldAnimate ? ' no-animation' : '');
-        // }, function(className, oldClassName) {
-        //   $element.removeClass(oldClassName);
-        //   $element.addClass(className);
-        // });
 
       };
     }

@@ -49,7 +49,7 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
     return locals && locals.$$state && locals.$$state.self || {};
   }
 
-  function getTransitionData(viewLocals, enteringEle, direction, enteringView) {
+  function getTransitionData(viewLocals, enteringEle, direction, enteringView, showBack) {
     // Priority
     // 1) attribute directive
     // 2) entering element's attribute
@@ -67,7 +67,8 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
       viewId: enteringView.viewId,
       stateId: enteringView.stateId,
       stateName: enteringView.stateName,
-      stateParams: enteringView.stateParams
+      stateParams: enteringView.stateParams,
+      showBack: !!showBack
     };
   }
 
@@ -171,8 +172,8 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
 
         },
 
-        transition: function(direction) {
-          var transData = getTransitionData(viewLocals, enteringEle, direction, enteringView);
+        transition: function(direction, showBack) {
+          var transData = getTransitionData(viewLocals, enteringEle, direction, enteringView, showBack);
 
           switcher.notify('before', transData);
 

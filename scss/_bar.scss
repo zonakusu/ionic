@@ -364,3 +364,8 @@
 .nav-bar-cache {
   @include translate3d(-9999px, 0, 0);
 }
+
+.button.back-button-hide {
+  display: none;
+}
+

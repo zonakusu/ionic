@@ -40,7 +40,7 @@ IonicModule
     restrict: 'E',
     compile: function(tElement) {
       var content = tElement.html();
-      tElement.empty().addClass('hide');
+      tElement.remove();
 
       return {
         pre: function($scope, $element, $attrs, navBarCtrl) {

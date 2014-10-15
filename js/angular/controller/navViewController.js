@@ -34,7 +34,7 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
     self.update(registerData);
 
     // begin rendering
-    self.render(registerData.viewId, viewLocals);
+    self.render(registerData.viewId, viewLocals, registerData);
 
   };
 
@@ -116,7 +116,7 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
   };
 
 
-  self.render = function(viewId, viewLocals) {
+  self.render = function(viewId, viewLocals, registerData) {
     var enteringView = $ionicHistory.getViewById(viewId) || {};
 
     // register the view and figure out where it lives in the various
@@ -126,7 +126,7 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
     // init the rendering of views for this navView directive
     switcher.init(function(){
       // compiled, in the dom and linked, now animate
-      switcher.transition( self.direction() );
+      switcher.transition( self.direction(), registerData.showBack );
     });
 
   };
