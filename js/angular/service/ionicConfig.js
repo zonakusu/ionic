@@ -83,9 +83,9 @@ IonicModule
       forwardCache: PLATFORM
     },
     navBar: {
-      titleAlign: PLATFORM,
-      primaryButtonsAlign: PLATFORM,
-      secondaryButtonsAlign: PLATFORM,
+      alignTitle: PLATFORM,
+      alignPrimaryButtons: PLATFORM,
+      alignSecondaryButtons: PLATFORM,
       backButtonIcon: PLATFORM,
       transition: PLATFORM
     },
@@ -114,9 +114,9 @@ IonicModule
       forwardCache: false
     },
     navBar: {
-      titleAlign: 'center',
-      primaryButtonsAlign: 'left',
-      secondaryButtonsAlign: 'right',
+      alignTitle: 'center',
+      alignPrimaryButtons: 'left',
+      alignSecondaryButtons: 'right',
       backButtonIcon: 'ion-chevron-left',
       transition: 'ios-nav-bar'
     },
@@ -151,9 +151,9 @@ IonicModule
       transition: 'android-transition'
     },
     navBar: {
-      titleAlign: 'left',
-      primaryButtonsAlign: 'right',
-      secondaryButtonsAlign: 'right',
+      alignTitle: 'left',
+      alignPrimaryButtons: 'right',
+      alignSecondaryButtons: 'right',
       backButtonIcon: 'ion-android-arrow-back',
       transition: 'android-nav-bar'
     },

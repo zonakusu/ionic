@@ -61,16 +61,27 @@
  * ```
  */
 IonicModule
-.directive('ionNavBackButton', function($ionicNgClick) {
+.directive('ionNavBackButton', function() {
   return {
     restrict: 'E',
     require: '^ionNavBar',
-    compile: function(tElement, tAttrs) {
-      var btnHtml = tElement[0].outerHTML;
+    compile: function(tElement, tAttrs, asdf) {
+
+      // clone the back button, but as a <div>
+      var divEle = jqLite( '<button>' );
+      for (var n in tAttrs) {
+        if (isString(tAttrs[n])) {
+          divEle.attr(n, tAttrs[n]);
+        }
+      }
+      divEle.addClass('button back-button');
+      divEle.html( tElement.html() );
+      var btnHtml = divEle[0].outerHTML;
+
       tElement.remove();
       return {
         pre: function($scope, $element, $attr, navBarCtrl) {
-          navBarCtrl.registerBackButton(btnHtml);
+          navBarCtrl.registerNavElement(btnHtml, 'backButton');
         }
       };
     }

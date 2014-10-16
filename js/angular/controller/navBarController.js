@@ -9,17 +9,16 @@ IonicModule
   '$ionicNavBarDelegate',
 function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavBarDelegate) {
 
-  var CSS_NAV_BAR_ACTIVE = 'nav-bar-active';
-  var CSS_NAV_BAR_ENTERING = 'nav-bar-entering';
-  var CSS_NAV_BAR_LEAVING = 'nav-bar-leaving';
   var CSS_HIDE = 'hide';
+  var CSS_BACK_BUTTON_HIDE = 'back-button-hide';
   var DATA_NAV_BAR_CTRL = '$ionNavBarController';
+  var PRIMARY_BUTTONS = 'primaryButtons';
+  var SECONDARY_BUTTONS = 'secondaryButtons';
+  var BACK_BUTTON = 'backButton';
 
   var self = this;
-  var navBarContainers = [];
-  var primaryBtnsHtml, secondaryBtnsHtml;
-  var backBtnTemplateEle;
-  var hasBackBtnText = false;
+  var headerBars = [];
+  var navElementHtml = {};
   var title, previousTitle;
   var isShown;
 
@@ -29,120 +28,149 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
 
 
   self.init = function() {
+    // create two nav bar blocks which will trade out which one is shown
     for (var x=0; x<2; x++) {
-      navBarContainers.push( self.createNavBarBlock(backBtnTemplateEle, primaryBtnsHtml, secondaryBtnsHtml) );
+      headerBars.push( self.createHeaderBar( $attrs.class ) );
     }
   };
 
 
-  self.registerButtons = function(btnsHtml, side) {
-    if (side === 'secondary' || side === 'right') {
-      secondaryBtnsHtml = btnsHtml;
-    } else {
-      primaryBtnsHtml = btnsHtml;
-    }
-  };
-
-
-  self.registerBackButton = function(btnHtml) {
-    btnHtml = btnHtml.replace(/ion-nav-back-button/gi, 'div');
-    backBtnTemplateEle = jqLite(btnHtml);
-    backBtnTemplateEle.addClass('button back-button back-button-hide');
-
-    if (!backBtnTemplateEle.attr('ng-click')) {
-      backBtnTemplateEle.attr('ng-click', '$goBack()');
-    }
-
-    hasBackBtnText = !!backBtnTemplateEle[0].querySelector('.button-text');
-
-    return backBtnTemplateEle;
-  };
-
-
-  self.createNavBarBlock = function(backBtnTemplateEle, primaryBtnsHtml, secondaryBtnsHtml) {
+  self.createHeaderBar = function(navBarClass) {
+    var isBackShown;
     var containerEle = jqLite( '<div class="nav-bar-block nav-bar-cache">' );
-    var titleEle = jqLite( '<div class="title">' );
-    var backBtnEle, primaryBtnsEle, secondaryBtnsEle;
-    var titleHtml = '';
-    var isBackSown;
+    var headerBarEle = jqLite( '<ion-header-bar class="nav-bar">' ).addClass(navBarClass).addClass(CSS_BACK_BUTTON_HIDE);
+    var titleEle = jqLite('<div class="title">');
+    var navEle = {};
+    var lastViewBtnsEle = {};
 
-    var navBarEle = jqLite( '<div class="bar bar-header ' + ($attrs.class || '') + '">' );
+    navEle[BACK_BUTTON] = self.createBackButtonElement(headerBarEle);
+    navEle[PRIMARY_BUTTONS] = self.createNavElement(headerBarEle, PRIMARY_BUTTONS);
+    headerBarEle.append(titleEle);
+    navEle[SECONDARY_BUTTONS] = self.createNavElement(headerBarEle, SECONDARY_BUTTONS);
 
-    if (backBtnTemplateEle) {
-      backBtnEle = backBtnTemplateEle.clone();
-      navBarEle.append(backBtnEle);
-    }
-
-    navBarEle.append(titleEle);
-
-    if (primaryBtnsHtml) {
-      primaryBtnsEle = jqLite( '<div class="buttons primary-buttons left-buttons">' );
-      primaryBtnsEle.html(primaryBtnsHtml);
-      navBarEle.append(primaryBtnsEle);
-    }
-
-    if (secondaryBtnsHtml) {
-      secondaryBtnsEle = jqLite( '<div class="buttons secondary-buttons right-buttons">' );
-      secondaryBtnsEle.html(secondaryBtnsHtml);
-      navBarEle.append(secondaryBtnsEle);
-    }
-
-    containerEle.append(navBarEle);
+    containerEle.append(headerBarEle);
 
     $element.append( $compile(containerEle)($scope) );
 
-    return {
+    var headerBarCtrl = headerBarEle.data('$ionHeaderBarController');
+
+    var headerBarInstance = {
       isActive: false,
-      showBack: function(show) {
-        if (backBtnEle) {
-          if (show && !isBackSown) {
-            backBtnEle.removeClass('back-button-hide');
-            isBackSown = true;
-          } else if (!show && isBackSown) {
-            backBtnEle.addClass('back-button-hide');
-            isBackSown = false;
+      showBack: function(shouldShow) {
+        if(shouldShow && !isBackShown) {
+          headerBarEle.removeClass(CSS_BACK_BUTTON_HIDE);
+        } else if (!shouldShow && isBackShown) {
+          headerBarEle.addClass(CSS_BACK_BUTTON_HIDE);
+        }
+        isBackShown = shouldShow;
+      },
+      title: function(newTitle) {
+        headerBarCtrl.title(newTitle);
+      },
+      setViewButtons: function(viewBtnsEle, side) {
+        // first make sure any exiting view buttons have been removed
+        headerBarInstance.removeViewButtons(side);
+
+        if (viewBtnsEle) {
+          // there's a view button for this side
+          if (side == SECONDARY_BUTTONS) {
+            // secondary buttons go immediate after the title element
+            titleEle.after(viewBtnsEle);
+
+          } else if (navEle[BACK_BUTTON]) {
+            // primary buttons should go after the back button
+            navEle[BACK_BUTTON].after(viewBtnsEle);
+
+          } else {
+            // primary buttons should be the first child element if no back button
+            headerBarEle.prepend(viewBtnsEle);
           }
+
+          // make sure the default button on this side is hidden
+          if (navEle[side]) {
+            navEle[side].addClass(CSS_HIDE);
+          }
+          lastViewBtnsEle[side] = viewBtnsEle;
+
+        } else if (navEle[side]) {
+          // there's a default button for this side and no view button
+          navEle[side].removeClass(CSS_HIDE);
         }
       },
-      title: function(val) {
-        if (val !== titleHtml) {
-          titleEle.html(val);
-          titleHtml = val;
+      removeViewButtons: function(side) {
+        if (lastViewBtnsEle[side]) {
+          lastViewBtnsEle[side].remove();
+          lastViewBtnsEle[side] = null;
         }
       },
-      element: function() {
+      render: function(callback) {
+        ionic.requestAnimationFrame(function(){
+          callback && callback();
+        });
+      },
+      containerEle: function() {
         return containerEle;
       },
+      headerBarEle: function() {
+        return headerBarEle;
+      },
       destroy: function() {
-        containerEle = navBarEle = backBtnEle = primaryBtnsEle = secondaryBtnsEle = titleEle = null;
+        containerEle = headerBarEle = titleEle = navEle[PRIMARY_BUTTONS] = navEle[SECONDARY_BUTTONS] = navEle[BACK_BUTTON] = viewBtnsEle[PRIMARY_BUTTONS] = viewBtnsEle[SECONDARY_BUTTONS] = null;
       }
     };
+    return headerBarInstance;
   };
 
 
-  self.beforeEnter = function(viewData) {
-    if ( self.shouldUpdate(viewData) ) {
-      self.enable();
-      var enteringContainer = getOffScreenNavBar();
-      self.title(viewData.title, enteringContainer);
-      self.showBackButton(viewData.showBack, enteringContainer);
-      self.transition(enteringContainer, getOnScreenNavBar(), viewData);
-    }
+  self.registerNavElement = function(html, type) {
+    navElementHtml[type] = html;
   };
 
 
-  self.shouldUpdate = function(viewData) {
-    return !!viewData;
+  self.updateNavBar = function(viewData) {
+    self.enable();
+    var enteringHeaderBar = getOffScreenHeaderBar();
+
+    // update the entering header bar's title
+    self.title(viewData.title, enteringHeaderBar);
+
+    // update if the entering header should show the back button or not
+    self.showBackButton(viewData.showBack, enteringHeaderBar);
+
+    // update the buttons, depending if the view has their own or not
+    enteringHeaderBar.setViewButtons(viewData.primaryButtons, PRIMARY_BUTTONS);
+    enteringHeaderBar.setViewButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
+
+    // render/place the elements in the correct locations
+    enteringHeaderBar.render(function(){
+
+      // begin transition of entering and leaving header bars
+      self.transition(enteringHeaderBar, getOnScreenHeaderBar(), viewData.transition, viewData.direction);
+
+    });
+
   };
 
 
-  self.transition = function(enteringContainer, leavingContainer, viewData) {
+  self.transition = function(enteringHeaderBar, leavingHeaderBar, transition, direction) {
 
-    $animate.transition( 'nav-bar', viewData.transition, viewData.direction, enteringContainer.element(), leavingContainer && leavingContainer.element()).then(function(){
-      for (var x=0; x<navBarContainers.length; x++) {
-        navBarContainers[x].isActive = false;
+    // start transitioning the entering/leaving header-bars
+    $animate.transition( 'nav-bar', transition, direction, enteringHeaderBar.containerEle(), leavingHeaderBar && leavingHeaderBar.containerEle()).then(function(){
+
+      // transition done, reset header-bar is the active one
+      for (var x=0; x<headerBars.length; x++) {
+        headerBars[x].isActive = false;
       }
-      enteringContainer.isActive = true;
+      enteringHeaderBar.isActive = true;
+
+      if (leavingHeaderBar) {
+        // the header bar that left no longer needs to have it's view buttons
+        ionic.requestAnimationFrame(function(){
+          leavingHeaderBar.removeViewButtons(PRIMARY_BUTTONS);
+          leavingHeaderBar.removeViewButtons(SECONDARY_BUTTONS);
+        });
+      }
+
     });
 
   };
@@ -159,18 +187,18 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
   };
 
 
-  self.showBackButton = function(show, navBarContainer) {
-    navBarContainer = navBarContainer || getOnScreenNavBar();
-    navBarContainer && navBarContainer.showBack(show);
+  self.showBackButton = function(show, headerBar) {
+    headerBar = headerBar || getOnScreenHeaderBar();
+    headerBar && headerBar.showBack(show);
   };
 
 
-  self.title = function(val, navBarContainer) {
+  self.title = function(val, headerBar) {
     if (arguments.length) {
       previousTitle = title;
       title = val || '';
-      navBarContainer = navBarContainer || getOnScreenNavBar();
-      navBarContainer && navBarContainer.title(title);
+      headerBar = headerBar || getOnScreenHeaderBar();
+      headerBar && headerBar.title(title);
     }
     return title;
   };
@@ -192,18 +220,38 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
   };
 
 
-  function getOnScreenNavBar() {
-    for (var x=0; x<navBarContainers.length; x++) {
-      if (navBarContainers[x].isActive) return navBarContainers[x];
+  self.createBackButtonElement = function(headerBarEle) {
+    if ( navElementHtml[BACK_BUTTON] ) {
+      var ele = self.createNavElement(headerBarEle, BACK_BUTTON);
+      if (!ele.attr('ng-click')) {
+        ele.attr('ng-click', '$goBack()');
+      }
+      return ele;
+    }
+  };
+
+
+  self.createNavElement = function(headerBarEle, type) {
+    if ( navElementHtml[type] ) {
+      var ele = jqLite(navElementHtml[type]);
+      headerBarEle.append(ele);
+      return ele;
+    }
+  };
+
+
+  function getOnScreenHeaderBar() {
+    for (var x=0; x<headerBars.length; x++) {
+      if (headerBars[x].isActive) return headerBars[x];
     }
   }
 
 
-  function getOffScreenNavBar() {
-    for (var x=0; x<navBarContainers.length; x++) {
-      if (!navBarContainers[x].isActive) return navBarContainers[x];
+  function getOffScreenHeaderBar() {
+    for (var x=0; x<headerBars.length; x++) {
+      if (!headerBars[x].isActive) return headerBars[x];
     }
-    return navBarContainers[0];
+    return headerBars[0];
   }
 
 
@@ -215,10 +263,10 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
 
   $scope.$on('$destroy', function(){
     $element.parent().removeData(DATA_NAV_BAR_CTRL);
-    for (var x=0; x<navBarContainers.length; x++) {
-      navBarContainers[x].destroy();
+    for (var x=0; x<headerBars.length; x++) {
+      headerBars[x].destroy();
     }
-    navBarContainers = null;
+    headerBars = null;
     deregisterInstance();
   });
 

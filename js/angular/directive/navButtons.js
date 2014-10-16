@@ -9,8 +9,13 @@
  * Use ionNavButtons to set the buttons on your {@link ionic.directive:ionNavBar}
  * from within an {@link ionic.directive:ionView}.
  *
- * Any buttons you declare will be placed onto the navbar's corresponding side,
- * and then destroyed when the user leaves their parent view.
+ * Any buttons you declare will be placed onto the navbar's corresponding side. Primary
+ * buttons generally map to the left side of the header, and secondary buttons are
+ * generally on the right side. However, their exact locations are platform specific.
+ * For example, in iOS the primary buttons are on the far left of the header, and
+ * secondary buttons are on the far right, with the header title centered between them.
+ * For Android however, both groups of buttons are on the far right of the header,
+ * with the header title aligned left.
  *
  * @usage
  * ```html
@@ -38,13 +43,37 @@ IonicModule
   return {
     require: '^ionNavBar',
     restrict: 'E',
-    compile: function(tElement) {
-      var content = tElement.html();
-      tElement.remove();
+    compile: function(tElement, tAttrs) {
+      var btnsEle = jqLite('<div class="buttons">');
+      var navElementType = 'primaryButtons';
 
+      if (tAttrs.side == 'primary' || tAttrs.side == 'left') {
+        btnsEle.addClass('primary-buttons');
+
+      } else if (tAttrs.side == 'secondary' || tAttrs.side == 'right') {
+        btnsEle.addClass('secondary-buttons');
+        navElementType = 'secondaryButtons';
+      }
+
+      var spanEle = jqLite('<span>');
+      spanEle.html( tElement.html() );
+      btnsEle.append(spanEle);
+      var btnsHtml = btnsEle[0].outerHTML;
+      btnsEle = spanEle = null;
+
+      tElement.remove();
       return {
         pre: function($scope, $element, $attrs, navBarCtrl) {
-          navBarCtrl.registerButtons(content, $attrs.side);
+
+          // if the parent is an ion-view, then these are ion-nav-buttons for JUST this ion-view
+          var parentViewCtrl = $element.parent().data('$ionViewController');
+          if (parentViewCtrl) {
+            parentViewCtrl.registerNavElement(btnsHtml, navElementType);
+            return;
+          }
+
+          // these are buttons for all views that do not have their own ion-nav-buttons
+          navBarCtrl.registerNavElement(btnsHtml, navElementType);
         }
       };
     }

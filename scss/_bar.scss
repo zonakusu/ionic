@@ -227,14 +227,16 @@
   }
 
   .button-bar + .button,
-  .button + .button-bar {
+  .button + .button-bar,
+  .back-button + .buttons,
+  .buttons + .back-button {
     margin-left: 5px;
   }
 
   // Android 4.4 messes with the display property
   .buttons,
-  .buttons.left-buttons,
-  .buttons.right-buttons {
+  .buttons.primary-buttons,
+  .buttons.secondary-buttons {
     display: inherit;
   }
   .buttons span {
@@ -347,7 +349,7 @@
   display: block;
 }
 
-.nav-bar-container {
+.nav-bar-block {
   position: absolute;
   top: 0;
   right: 0;
@@ -365,7 +367,11 @@
   @include translate3d(-9999px, 0, 0);
 }
 
-.button.back-button-hide {
+.back-button-hide .back-button {
+  display: none;
+}
+
+.bar .buttons.hide {
   display: none;
 }
 

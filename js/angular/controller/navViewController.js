@@ -8,11 +8,11 @@ IonicModule
 function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
   var self = this;
   var direction;
-  var isPrimary = true;
-  var navViewName;
+  var isPrimary = false;
+
 
   self.init = function() {
-    navViewName = $attrs.name || '';
+    var navViewName = $attrs.name || '';
 
     // Find the details of the parent view directive (if any) and use it
     // to derive our own qualified view name, then hang our own details
@@ -29,11 +29,13 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
 
 
   self.register = function(viewLocals) {
+    // register that a view is coming in and get info on how it should transition
     var registerData = $ionicHistory.register($scope, viewLocals);
 
+    // update which direction
     self.update(registerData);
 
-    // begin rendering
+    // begin rendering and transitioning
     self.render(registerData.viewId, viewLocals, registerData);
   };
 
@@ -65,18 +67,34 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
           // because it's parent will
           direction = 'none';
         }
-
       }
-
     }
+  };
+
+
+  self.render = function(viewId, viewLocals, registerData) {
+    var enteringView = $ionicHistory.getViewById(viewId) || {};
+
+    // register the view and figure out where it lives in the various
+    // histories and nav stacks, along with how views should enter/leave
+    var switcher = $ionicViewSwitcher.create($scope, $element, viewLocals, enteringView);
+
+    // init the rendering of views for this navView directive
+    switcher.init(function(){
+      // the view is now compiled, in the dom and linked, now lets transition the views.
+      // this uses a callback incase THIS nav-view has a nested nav-view, and after the NESTED
+      // nav-view links, the NESTED nav-view would update which direction THIS nav-view should use
+      switcher.transition( self.direction(), registerData.showBack );
+    });
 
   };
 
 
   self.beforeEnter = function(transData) {
     if (isPrimary) {
+      // only update this nav-view's nav-bar if this is the primary nav-view
       var associatedNavBarCtrl = getAssociatedNavBarCtrl();
-      associatedNavBarCtrl && associatedNavBarCtrl.beforeEnter(transData);
+      associatedNavBarCtrl && associatedNavBarCtrl.updateNavBar(transData);
     }
   };
 
@@ -106,30 +124,6 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
       direction = val;
     }
     return direction;
-  };
-
-
-  self.hasNestedNavView = function(val) {
-    if (arguments.length) {
-      hasNestedNavView = val;
-    }
-    return hasNestedNavView;
-  };
-
-
-  self.render = function(viewId, viewLocals, registerData) {
-    var enteringView = $ionicHistory.getViewById(viewId) || {};
-
-    // register the view and figure out where it lives in the various
-    // histories and nav stacks along with how views should enter/leave
-    var switcher = $ionicViewSwitcher.create($scope, $element, viewLocals, enteringView);
-
-    // init the rendering of views for this navView directive
-    switcher.init(function(){
-      // compiled, in the dom and linked, now animate
-      switcher.transition( self.direction(), registerData.showBack );
-    });
-
   };
 
 
