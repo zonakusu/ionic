@@ -1,17 +1,17 @@
-xdescribe('ionNavBackButton directive', function() {
+describe('ionNavBackButton directive', function() {
   beforeEach(module('ionic'));
+  var navBackButtonEle, buttonIconEle;
 
   function setup(attr, content) {
-    var el;
     inject(function($compile, $rootScope) {
-      el = angular.element('<ion-nav-back-button '+(attr||'')+'>'+(content||'')+'</ion-nav-back-button>');
-      el.data('$ionNavBarController', {
-        back: jasmine.createSpy('back'),
+      navBackButtonEle = angular.element('<ion-nav-back-button '+(attr||'')+'>'+(content||'')+'</ion-nav-back-button>');
+      navBackButtonEle.data('$ionNavBarController', {
+        registerNavElement: jasmine.createSpy('registerNavElement'),
       });
-      el = $compile(el)($rootScope.$new());
+      navBackButtonEle = $compile(navBackButtonEle)($rootScope.$new());
       $rootScope.$apply();
+      buttonIconEle = navBackButtonEle.find('i');
     });
-    return el;
   }
 
   it('should error without a parent ionNavBar', inject(function($compile, $rootScope) {
@@ -20,96 +20,70 @@ xdescribe('ionNavBackButton directive', function() {
     }).toThrow();
   }));
 
-  it('should have class', function() {
-    var el = setup();
-    expect(el.hasClass('button back-button')).toBe(true);
+  it('should hide and empty its original self', function() {
+    setup();
+    expect(navBackButtonEle.hasClass('hide')).toBe(true);
+    expect(navBackButtonEle.html()).toBe('');
   });
 
-  it('should hide based on historyChange', inject(function($rootScope) {
-    ionic.animationFrameThrottle = function(cb) { return cb; };
-    var el = setup();
-    el.scope().backButtonShown = true;
-    expect(el.hasClass('ng-hide')).toBe(true);
-    $rootScope.$broadcast('$viewHistory.historyChange', {showBack:true});
-    el.scope().$apply();
-    expect(el.hasClass('ng-hide')).toBe(false);
-    $rootScope.$broadcast('$viewHistory.historyChange', {showBack:false});
-    el.scope().$apply();
-    expect(el.hasClass('ng-hide')).toBe(true);
+  it('should registerNavElement', inject(function($compile, $rootScope, $ionicConfig) {
+    $ionicConfig.navBar.backButtonIcon('none');
+    setup();
+    expect( navBackButtonEle.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
+      '<button class="button back-button"></button>', 'backButton'
+    );
   }));
 
-  it('should hide based on backButtonShown', inject(function($rootScope) {
-    ionic.animationFrameThrottle = function(cb) { return cb; };
-    var el = setup();
-    expect(el.hasClass('ng-hide')).toBe(true);
-    $rootScope.$broadcast('$viewHistory.historyChange', {showBack:true});
-    el.scope().$apply('backButtonShown = true');
-    expect(el.hasClass('ng-hide')).toBe(false);
-    el.scope().$apply('backButtonShown = false');
-    expect(el.hasClass('ng-hide')).toBe(true);
-    $rootScope.$broadcast('$viewHistory.historyChange', {showBack:false});
-    el.scope().$apply('backButtonShown = true');
-    expect(el.hasClass('ng-hide')).toBe(true);
-    $rootScope.$broadcast('$viewHistory.historyChange', {showBack:true});
-    el.scope().$apply('backButtonShown = true');
-    expect(el.hasClass('ng-hide')).toBe(false);
+  it('should registerNavElement with attributes', inject(function($compile, $rootScope, $ionicConfig) {
+    $ionicConfig.navBar.backButtonIcon('none');
+    setup('ng-click="myClick()" class="my-class" id="yup"');
+    expect( navBackButtonEle.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
+      '<button ngclick="myClick()" class="my-class button back-button" id="yup"></button>', 'backButton'
+    );
   }));
 
-  it('should transclude content', function() {
-    var el = setup('', '<b>content</b> {{1+2}}');
-    expect(el.text().trim()).toBe('content 3');
-    expect(el.children().eq(0)[0].tagName.toLowerCase()).toBe('b');
-  });
+  it('should registerNavElement with content', inject(function($compile, $rootScope, $ionicConfig) {
+    $ionicConfig.navBar.backButtonIcon('none');
+    setup('', 'Back');
+    expect( navBackButtonEle.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
+      '<button class="button back-button">Back</button>', 'backButton'
+    );
+  }));
 
-  it('should go back on click by default', function() {
-    var el = setup();
-    expect(el.controller('ionNavBar').back).not.toHaveBeenCalled();
-    el.triggerHandler('click');
-    expect(el.controller('ionNavBar').back).toHaveBeenCalled();
-  });
+  it('should not set a default nested back button icon if ion- classname exists', inject(function($ionicConfig) {
+    $ionicConfig.navBar.backButtonIcon('none');
+    setup('class="ion-navicon"');
+    expect(buttonIconEle.length).toBe(0);
+  }));
 
-  it('should do ngClick expression if defined', function() {
-    var el = setup('ng-click="doSomething()"');
-    el.scope().$navBack = jasmine.createSpy('$navBack');
-    el.scope().doSomething = jasmine.createSpy('doSomething');
-    el.triggerHandler('click');
-    expect(el.scope().$navBack).not.toHaveBeenCalled();
-    expect(el.scope().doSomething).toHaveBeenCalled();
-  });
+  it('should not set default nested back button icon if "ion-" child exists', inject(function($ionicConfig) {
+    setup('', '<i class="ion-superstar"></i>');
+    expect( navBackButtonEle.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
+      '<button class="button back-button"><i class="ion-superstar"></i></button>', 'backButton'
+    );
+  }));
 
+  it('should not set default nested back button icon if "icon" child exists', inject(function($ionicConfig) {
+    setup('', '<i class="icon"></i>');
+    expect( navBackButtonEle.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
+      '<button class="button back-button"><i class="icon"></i></button>', 'backButton'
+    );
+  }));
 
-  describe('platforms', function() {
-    describe('iOS', function() {
-      beforeEach(function($provide) {
-        TestUtil.setPlatform('ios');
-      });
+  it('should set default back button icon from $ionicConfig, but no inner text', inject(function($ionicConfig) {
+    $ionicConfig.navBar.backButtonIcon('ion-ios7-arrow-back');
+    setup();
+    expect( navBackButtonEle.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
+      '<button class="button back-button"><i class="icon ion-ios7-arrow-back"></i></button>', 'backButton'
+    );
+  }));
 
-      it('should not set default back button icon if icon classname exists', function() {
-        var el = setup('class="ion-navicon"');
-        expect(el.hasClass('ion-ios7-arrow-back')).toBe(false);
-      });
+  it('should set default back button icon from $ionicConfig, but with inner text', inject(function($ionicConfig) {
+    $ionicConfig.navBar.backButtonIcon('ion-ios7-arrow-back');
+    setup('', 'Back');
+    expect( navBackButtonEle.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
+      '<button class="button back-button"><i class="icon ion-ios7-arrow-back"></i> Back</button>', 'backButton'
+    );
+  }));
 
-      it('should not set default back button icon if icon child exists', function() {
-        var el = setup('', '<i class="ion-superstar"></i>');
-        expect(el.hasClass('ion-ios7-arrow-back')).toBe(false);
-      });
-
-      it('Should set default back button icon from ionicNavBarConfig ', inject(function($ionicNavBarConfig) {
-        var el = setup();
-        expect(el.hasClass('ion-ios7-arrow-back')).toBe(true);
-      }));
-    });
-
-    // Android defaults disabled for now
-    // describe('android', function() {
-    //   beforeEach(function($provide) {
-    //     TestUtil.setPlatform('android');
-    //   });
-
-    //   it('Should set default back button icon from ionicNavBarConfig ', inject(function($ionicNavBarConfig) {
-    //     var el = setup();
-    //     expect(el.hasClass('ion-android-arrow-back')).toBe(true);
-    //   }));
-    // });
-  });
 });

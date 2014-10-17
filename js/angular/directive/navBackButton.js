@@ -41,31 +41,13 @@
  *   };
  * }
  * ```
- *
- * Displaying the previous title on the back button, again using
- * {@link ionic.service:$ionicNavBarDelegate}.
- *
- * ```html
- * <ion-nav-bar ng-controller="MyCtrl">
- *   <ion-nav-back-button class="button-icon">
- *     <i class="icon ion-arrow-left-c"></i>{% raw %}{{getPreviousTitle() || 'Back'}}{% endraw %}
- *   </ion-nav-back-button>
- * </ion-nav-bar>
- * ```
- * ```js
- * function MyCtrl($scope, $ionicNavBarDelegate) {
- *   $scope.getPreviousTitle = function() {
- *     return $ionicNavBarDelegate.getPreviousTitle();
- *   };
- * }
- * ```
  */
 IonicModule
-.directive('ionNavBackButton', function() {
+.directive('ionNavBackButton', ['$ionicConfig', function($ionicConfig) {
   return {
     restrict: 'E',
     require: '^ionNavBar',
-    compile: function(tElement, tAttrs, asdf) {
+    compile: function(tElement, tAttrs) {
 
       // clone the back button, but as a <div>
       var divEle = jqLite( '<button>' );
@@ -75,15 +57,25 @@ IonicModule
         }
       }
       divEle.addClass('button back-button');
-      divEle.html( tElement.html() );
-      var btnHtml = divEle[0].outerHTML;
+      var btnContent = tElement.html() || '';
+      tElement.attr('class', 'hide');
+      tElement.empty();
 
-      tElement.remove();
+      divEle.html( btnContent );
+
+      var hasIconChild = /class=.*?ion-|class=.*?icon/.test( btnContent );
+      if (!hasIconChild) {
+        var defaultIcon = $ionicConfig.navBar.backButtonIcon();
+        if (defaultIcon && defaultIcon !== 'none') {
+          divEle.prepend('<i class="icon ' + defaultIcon + '"></i>' + (btnContent ? ' ' : ''));
+        }
+      }
+
       return {
         pre: function($scope, $element, $attr, navBarCtrl) {
-          navBarCtrl.registerNavElement(btnHtml, 'backButton');
+          navBarCtrl.registerNavElement(divEle[0].outerHTML, 'backButton');
         }
       };
     }
   };
-});
+}]);

@@ -45,14 +45,14 @@ IonicModule
     restrict: 'E',
     compile: function(tElement, tAttrs) {
       var btnsEle = jqLite('<div class="buttons">');
-      var navElementType = 'primaryButtons';
+      var navElementType;
 
-      if (tAttrs.side == 'primary' || tAttrs.side == 'left') {
-        btnsEle.addClass('primary-buttons');
-
-      } else if (tAttrs.side == 'secondary' || tAttrs.side == 'right') {
+      if (tAttrs.side == 'secondary' || tAttrs.side == 'right') {
         btnsEle.addClass('secondary-buttons');
         navElementType = 'secondaryButtons';
+      } else {
+        btnsEle.addClass('primary-buttons');
+        navElementType = 'primaryButtons';
       }
 
       var spanEle = jqLite('<span>');
@@ -61,7 +61,9 @@ IonicModule
       var btnsHtml = btnsEle[0].outerHTML;
       btnsEle = spanEle = null;
 
-      tElement.remove();
+      tElement.attr('class', 'hide');
+      tElement.empty();
+
       return {
         pre: function($scope, $element, $attrs, navBarCtrl) {
 
