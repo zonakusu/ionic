@@ -78,19 +78,21 @@ describe('$ionNavBar controller', function() {
     ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
 
     var headerBar = ctrl.createHeaderBar();
-    expect(headerBar.headerBarEle().children().eq(0).hasClass('primary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(0).children().eq(0).hasClass('primary-buttons')).toBe(true);
     expect(headerBar.headerBarEle().children().eq(1).hasClass('title')).toBe(true);
   });
 
   it('should createHeaderBar, back button and primary buttons', function() {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<button>Back</button>', 'backButton');
+    ctrl.registerNavElement('<div class="back-button">', 'backButton');
     ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
 
     var headerBar = ctrl.createHeaderBar();
-    expect(headerBar.headerBarEle().children().eq(0).text()).toBe('Back');
-    expect(headerBar.headerBarEle().children().eq(1).hasClass('primary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('back-button')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(0).hasClass('primary-buttons')).toBe(true);
     expect(headerBar.headerBarEle().children().eq(2).hasClass('title')).toBe(true);
   });
 
@@ -101,34 +103,178 @@ describe('$ionNavBar controller', function() {
 
     var headerBar = ctrl.createHeaderBar();
     expect(headerBar.headerBarEle().children().eq(0).hasClass('title')).toBe(true);
-    expect(headerBar.headerBarEle().children().eq(1).hasClass('secondary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(0).hasClass('secondary-buttons')).toBe(true);
   });
 
   it('should createHeaderBar, back button add secondary buttons', function() {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<button>Back</button>', 'backButton');
+    ctrl.registerNavElement('<div class="back-button">', 'backButton');
     ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
 
     var headerBar = ctrl.createHeaderBar();
-    expect(headerBar.headerBarEle().children().eq(0).text()).toBe('Back');
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('back-button')).toBe(true);
     expect(headerBar.headerBarEle().children().eq(1).hasClass('title')).toBe(true);
-    expect(headerBar.headerBarEle().children().eq(2).hasClass('secondary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(2).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(2).children().eq(0).hasClass('secondary-buttons')).toBe(true);
   });
 
   it('should createHeaderBar, back button, primary buttons, and secondary buttons', function() {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<button>Back</button>', 'backButton');
+    ctrl.registerNavElement('<div class="back-button">', 'backButton');
     ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
     ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
 
     var headerBar = ctrl.createHeaderBar();
-    expect(headerBar.headerBarEle().children().eq(0).text()).toBe('Back');
-    expect(headerBar.headerBarEle().children().eq(1).hasClass('primary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('back-button')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(0).hasClass('primary-buttons')).toBe(true);
     expect(headerBar.headerBarEle().children().eq(2).hasClass('title')).toBe(true);
-    expect(headerBar.headerBarEle().children().eq(3).hasClass('secondary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(3).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(3).children().eq(0).hasClass('secondary-buttons')).toBe(true);
   });
+
+  it('should createHeaderBar, primary btns right from config', inject(function($ionicConfig) {
+    var ctrl = makeNavBarCtrl();
+
+    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
+
+    $ionicConfig.navBar.positionPrimaryButtons('right')
+
+    var headerBar = ctrl.createHeaderBar();
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('title')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(0).hasClass('primary-buttons')).toBe(true);
+  }));
+
+  it('should createHeaderBar, secondary btns right from config', inject(function($ionicConfig) {
+    var ctrl = makeNavBarCtrl();
+
+    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+
+    $ionicConfig.navBar.positionPrimaryButtons('right')
+
+    var headerBar = ctrl.createHeaderBar();
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('title')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(0).hasClass('secondary-buttons')).toBe(true);
+  }));
+
+  it('should createHeaderBar, primary btns right, secondary btns right, from config', inject(function($ionicConfig) {
+    var ctrl = makeNavBarCtrl();
+
+    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
+    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+
+    $ionicConfig.navBar.positionPrimaryButtons('right');
+    $ionicConfig.navBar.positionSecondaryButtons('right');
+
+    var headerBar = ctrl.createHeaderBar();
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('title')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(0).hasClass('primary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(1).hasClass('secondary-buttons')).toBe(true);
+  }));
+
+  it('should createHeaderBar, primary btns right, secondary btns left, from config', inject(function($ionicConfig) {
+    var ctrl = makeNavBarCtrl();
+
+    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
+    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+
+    $ionicConfig.navBar.positionPrimaryButtons('right');
+    $ionicConfig.navBar.positionSecondaryButtons('left');
+
+    var headerBar = ctrl.createHeaderBar();
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(0).children().eq(0).hasClass('secondary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('title')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(2).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(2).children().eq(0).hasClass('primary-buttons')).toBe(true);
+  }));
+
+  it('should createHeaderBar, back button, primary btns right, secondary btns right, from config', inject(function($ionicConfig) {
+    var ctrl = makeNavBarCtrl();
+
+    ctrl.registerNavElement('<div class="back-button">', 'backButton');
+    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
+    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+
+    $ionicConfig.navBar.positionPrimaryButtons('left');
+    $ionicConfig.navBar.positionSecondaryButtons('right');
+
+    var headerBar = ctrl.createHeaderBar();
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('back-button')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(0).hasClass('primary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(2).hasClass('title')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(3).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(3).children().eq(0).hasClass('secondary-buttons')).toBe(true);
+  }));
+
+  it('should createHeaderBar, secondary btns left, from config', inject(function($ionicConfig) {
+    var ctrl = makeNavBarCtrl();
+
+    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+
+    $ionicConfig.navBar.positionSecondaryButtons('left');
+
+    var headerBar = ctrl.createHeaderBar();
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(0).children().eq(0).hasClass('secondary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('title')).toBe(true);
+  }));
+
+  it('should createHeaderBar, primary btns left, secondary btns left, from config', inject(function($ionicConfig) {
+    var ctrl = makeNavBarCtrl();
+
+    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
+    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+
+    $ionicConfig.navBar.positionPrimaryButtons('left');
+    $ionicConfig.navBar.positionSecondaryButtons('left');
+
+    var headerBar = ctrl.createHeaderBar();
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(0).children().eq(0).hasClass('primary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(0).children().eq(1).hasClass('secondary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('title')).toBe(true);
+  }));
+
+  it('should createHeaderBar, primary btns left, secondary btns left, from config', inject(function($ionicConfig) {
+    var ctrl = makeNavBarCtrl();
+
+    ctrl.registerNavElement('<div class="back-button">', 'backButton');
+    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+
+    $ionicConfig.navBar.positionSecondaryButtons('left');
+
+    var headerBar = ctrl.createHeaderBar();
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('back-button')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(0).hasClass('secondary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(2).hasClass('title')).toBe(true);
+  }));
+
+  it('should createHeaderBar, back button, primary btns left, secondary btns left, from config', inject(function($ionicConfig) {
+    var ctrl = makeNavBarCtrl();
+
+    ctrl.registerNavElement('<div class="back-button">', 'backButton');
+    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
+    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+
+    $ionicConfig.navBar.positionPrimaryButtons('left');
+    $ionicConfig.navBar.positionSecondaryButtons('left');
+
+    var headerBar = ctrl.createHeaderBar();
+    expect(headerBar.headerBarEle().children().eq(0).hasClass('back-button')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).hasClass('buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(0).hasClass('primary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(1).children().eq(1).hasClass('secondary-buttons')).toBe(true);
+    expect(headerBar.headerBarEle().children().eq(2).hasClass('title')).toBe(true);
+  }));
 
   it('should createHeaderBar and apply scope to new header bar', function() {
     var ctrl = makeNavBarCtrl();

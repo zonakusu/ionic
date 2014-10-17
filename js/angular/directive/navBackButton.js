@@ -63,11 +63,11 @@ IonicModule
 
       divEle.html( btnContent );
 
-      var hasIconChild = /class=.*?ion-|class=.*?icon/.test( btnContent );
-      if (!hasIconChild) {
+      if (!/class=.*?ion-|class=.*?icon/.test( btnContent )) {
         var defaultIcon = $ionicConfig.navBar.backButtonIcon();
         if (defaultIcon && defaultIcon !== 'none') {
-          divEle.prepend('<i class="icon ' + defaultIcon + '"></i>' + (btnContent ? ' ' : ''));
+          divEle.prepend('<i class="icon ' + defaultIcon + '"></i> ');
+          divEle.addClass('button-clear');
         }
       }
 

@@ -81,11 +81,6 @@ IonicModule
 
       return function($scope, $element, $attr, navBarCtrl) {
         navBarCtrl.init();
-
-        $scope.$on('$destroy', function() {
-          $scope.$parent.$hasHeader = false;
-        });
-
       };
     }
   };

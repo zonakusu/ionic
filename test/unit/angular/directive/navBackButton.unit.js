@@ -74,7 +74,7 @@ describe('ionNavBackButton directive', function() {
     $ionicConfig.navBar.backButtonIcon('ion-ios7-arrow-back');
     setup();
     expect( navBackButtonEle.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
-      '<button class="button back-button"><i class="icon ion-ios7-arrow-back"></i></button>', 'backButton'
+      '<button class="button back-button button-clear"><i class="icon ion-ios7-arrow-back"></i> </button>', 'backButton'
     );
   }));
 
@@ -82,7 +82,7 @@ describe('ionNavBackButton directive', function() {
     $ionicConfig.navBar.backButtonIcon('ion-ios7-arrow-back');
     setup('', 'Back');
     expect( navBackButtonEle.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
-      '<button class="button back-button"><i class="icon ion-ios7-arrow-back"></i> Back</button>', 'backButton'
+      '<button class="button back-button button-clear"><i class="icon ion-ios7-arrow-back"></i> Back</button>', 'backButton'
     );
   }));
 

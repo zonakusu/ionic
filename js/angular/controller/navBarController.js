@@ -7,7 +7,8 @@ IonicModule
   '$animate',
   '$ionicHistory',
   '$ionicNavBarDelegate',
-function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavBarDelegate) {
+  '$ionicConfig',
+function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavBarDelegate, $ionicConfig) {
 
   var CSS_HIDE = 'hide';
   var CSS_BACK_BUTTON_HIDE = 'back-button-hide';
@@ -21,6 +22,7 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
   var navElementHtml = {};
   var title, previousTitle;
   var isShown;
+  var navBarConfig = $ionicConfig.navBar;
 
   $element.parent().data(DATA_NAV_BAR_CTRL, self);
 
@@ -42,14 +44,22 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
     var titleEle = jqLite('<div class="title">');
     var navEle = {};
     var lastViewBtnsEle = {};
+    var leftButtonsEle, rightButtonsEle;
 
+    // append title in the header, this is the rock to where buttons append
     navEle[BACK_BUTTON] = self.createBackButtonElement(headerBarEle);
-    navEle[PRIMARY_BUTTONS] = self.createNavElement(headerBarEle, PRIMARY_BUTTONS);
     headerBarEle.append(titleEle);
-    navEle[SECONDARY_BUTTONS] = self.createNavElement(headerBarEle, SECONDARY_BUTTONS);
 
+    // create default button elements
+    navEle[PRIMARY_BUTTONS] = createNavElement(PRIMARY_BUTTONS);
+    navEle[SECONDARY_BUTTONS] = createNavElement(SECONDARY_BUTTONS);
+
+    // append and position buttons
+    positionButtons(navEle[PRIMARY_BUTTONS], PRIMARY_BUTTONS);
+    positionButtons(navEle[SECONDARY_BUTTONS], SECONDARY_BUTTONS);
+
+    // compile header and append to the DOM
     containerEle.append(headerBarEle);
-
     $element.append( $compile(containerEle)($scope) );
 
     var headerBarCtrl = headerBarEle.data('$ionHeaderBarController');
@@ -73,18 +83,7 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
 
         if (viewBtnsEle) {
           // there's a view button for this side
-          if (side == SECONDARY_BUTTONS) {
-            // secondary buttons go immediate after the title element
-            titleEle.after(viewBtnsEle);
-
-          } else if (navEle[BACK_BUTTON]) {
-            // primary buttons should go after the back button
-            navEle[BACK_BUTTON].after(viewBtnsEle);
-
-          } else {
-            // primary buttons should be the first child element if no back button
-            headerBarEle.prepend(viewBtnsEle);
-          }
+          positionButtons(viewBtnsEle, side);
 
           // make sure the default button on this side is hidden
           if (navEle[side]) {
@@ -122,9 +121,47 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
         return navEle[BACK_BUTTON];
       },
       destroy: function() {
-        containerEle = headerBarEle = titleEle = navEle[PRIMARY_BUTTONS] = navEle[SECONDARY_BUTTONS] = navEle[BACK_BUTTON] = viewBtnsEle[PRIMARY_BUTTONS] = viewBtnsEle[SECONDARY_BUTTONS] = null;
+        containerEle = headerBarEle = titleEle = leftButtonsEle = rightButtonsEle = navEle[PRIMARY_BUTTONS] = navEle[SECONDARY_BUTTONS] = navEle[BACK_BUTTON] = viewBtnsEle[PRIMARY_BUTTONS] = viewBtnsEle[SECONDARY_BUTTONS] = null;
       }
     };
+
+    function positionButtons(btnsEle, buttonType) {
+      if (!btnsEle) return;
+
+      var appendToRight = (buttonType == SECONDARY_BUTTONS && navBarConfig.positionSecondaryButtons() != 'left') ||
+                          (buttonType == PRIMARY_BUTTONS && navBarConfig.positionPrimaryButtons() == 'right');
+
+      if (appendToRight) {
+        // right side
+        if (!rightButtonsEle) {
+          rightButtonsEle = jqLite('<div class="buttons">');
+          headerBarEle.append(rightButtonsEle);
+        }
+        if (buttonType == SECONDARY_BUTTONS) {
+          rightButtonsEle.append(btnsEle);
+        } else {
+          rightButtonsEle.prepend(btnsEle);
+        }
+
+      } else {
+        // left side
+        if (!leftButtonsEle) {
+          leftButtonsEle = jqLite('<div class="buttons">');
+          if (navEle[BACK_BUTTON]) {
+            navEle[BACK_BUTTON].after(leftButtonsEle);
+          } else {
+            headerBarEle.prepend(leftButtonsEle);
+          }
+        }
+        if (buttonType == SECONDARY_BUTTONS) {
+          leftButtonsEle.append(btnsEle);
+        } else {
+          leftButtonsEle.prepend(btnsEle);
+        }
+      }
+
+    }
+
     return headerBarInstance;
   };
 
@@ -227,7 +264,8 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
 
   self.createBackButtonElement = function(headerBarEle) {
     if ( navElementHtml[BACK_BUTTON] ) {
-      var ele = self.createNavElement(headerBarEle, BACK_BUTTON);
+      var ele = createNavElement(BACK_BUTTON);
+      headerBarEle.append(ele);
       if (!ele.attr('ng-click')) {
         ele.attr('ng-click', '$goBack()');
       }
@@ -236,13 +274,11 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
   };
 
 
-  self.createNavElement = function(headerBarEle, type) {
+  function createNavElement(type) {
     if ( navElementHtml[type] ) {
-      var ele = jqLite(navElementHtml[type]);
-      headerBarEle.append(ele);
-      return ele;
+      return jqLite(navElementHtml[type]);
     }
-  };
+  }
 
 
   function getOnScreenHeaderBar() {
@@ -267,6 +303,7 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
 
 
   $scope.$on('$destroy', function(){
+    $scope.$parent.$hasHeader = false;
     $element.parent().removeData(DATA_NAV_BAR_CTRL);
     for (var x=0; x<headerBars.length; x++) {
       headerBars[x].destroy();

@@ -95,8 +95,8 @@ describe('$ionicConfigProvider', function() {
         },
         navBar: {
           alignTitle: 'right',
-          alignPrimaryButtons: 'left',
-          alignSecondaryButtons: 'left',
+          positionPrimaryButtons: 'left',
+          positionSecondaryButtons: 'left',
           backButtonIcon: 'ion-win32-arrow-back',
           transition: 'win32-nav-bar'
         },
@@ -112,8 +112,8 @@ describe('$ionicConfigProvider', function() {
       ionic.Platform.setPlatform('win32');
       expect($ionicConfig.views.transition()).toBe('win32-transition');
       expect($ionicConfig.navBar.alignTitle()).toBe('right');
-      expect($ionicConfig.navBar.alignPrimaryButtons()).toBe('left');
-      expect($ionicConfig.navBar.alignSecondaryButtons()).toBe('left');
+      expect($ionicConfig.navBar.positionPrimaryButtons()).toBe('left');
+      expect($ionicConfig.navBar.positionSecondaryButtons()).toBe('left');
       expect($ionicConfig.navBar.backButtonIcon()).toBe('ion-win32-arrow-back');
 
       $ionicConfig.platform.win32.views.transition('winwin-transition');

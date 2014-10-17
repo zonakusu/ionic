@@ -84,8 +84,8 @@ IonicModule
     },
     navBar: {
       alignTitle: PLATFORM,
-      alignPrimaryButtons: PLATFORM,
-      alignSecondaryButtons: PLATFORM,
+      positionPrimaryButtons: PLATFORM,
+      positionSecondaryButtons: PLATFORM,
       backButtonIcon: PLATFORM,
       transition: PLATFORM
     },
@@ -115,9 +115,9 @@ IonicModule
     },
     navBar: {
       alignTitle: 'center',
-      alignPrimaryButtons: 'left',
-      alignSecondaryButtons: 'right',
-      backButtonIcon: 'ion-chevron-left',
+      positionPrimaryButtons: 'left',
+      positionSecondaryButtons: 'right',
+      backButtonIcon: 'ion-ios7-arrow-back',
       transition: 'ios-nav-bar'
     },
     menus: {
@@ -152,8 +152,8 @@ IonicModule
     },
     navBar: {
       alignTitle: 'left',
-      alignPrimaryButtons: 'right',
-      alignSecondaryButtons: 'right',
+      positionPrimaryButtons: 'right',
+      positionSecondaryButtons: 'right',
       backButtonIcon: 'ion-android-arrow-back',
       transition: 'android-nav-bar'
     },

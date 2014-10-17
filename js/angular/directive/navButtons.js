@@ -44,22 +44,18 @@ IonicModule
     require: '^ionNavBar',
     restrict: 'E',
     compile: function(tElement, tAttrs) {
-      var btnsEle = jqLite('<div class="buttons">');
+      var spanEle = jqLite('<span>');
       var navElementType;
 
       if (tAttrs.side == 'secondary' || tAttrs.side == 'right') {
-        btnsEle.addClass('secondary-buttons');
+        spanEle.addClass('secondary-buttons');
         navElementType = 'secondaryButtons';
       } else {
-        btnsEle.addClass('primary-buttons');
+        spanEle.addClass('primary-buttons');
         navElementType = 'primaryButtons';
       }
 
-      var spanEle = jqLite('<span>');
       spanEle.html( tElement.html() );
-      btnsEle.append(spanEle);
-      var btnsHtml = btnsEle[0].outerHTML;
-      btnsEle = spanEle = null;
 
       tElement.attr('class', 'hide');
       tElement.empty();
@@ -70,12 +66,12 @@ IonicModule
           // if the parent is an ion-view, then these are ion-nav-buttons for JUST this ion-view
           var parentViewCtrl = $element.parent().data('$ionViewController');
           if (parentViewCtrl) {
-            parentViewCtrl.registerNavElement(btnsHtml, navElementType);
+            parentViewCtrl.registerNavElement(spanEle[0].outerHTML, navElementType);
             return;
           }
 
           // these are buttons for all views that do not have their own ion-nav-buttons
-          navBarCtrl.registerNavElement(btnsHtml, navElementType);
+          navBarCtrl.registerNavElement(spanEle[0].outerHTML, navElementType);
         }
       };
     }

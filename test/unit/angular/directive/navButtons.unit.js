@@ -40,35 +40,35 @@ describe('ionNavButtons directive', function() {
   it('should add buttons to primary side by default', function() {
     var el = setup(null, '<button>');
     expect( el.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
-      '<div class="buttons primary-buttons"><span><button></button></span></div>', 'primaryButtons'
+      '<span class="primary-buttons"><button></button></span>', 'primaryButtons'
     );
   });
 
   it('should add buttons to primary side when given primary side attr', function() {
     var el = setup('primary', '<button>');
     expect( el.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
-      '<div class="buttons primary-buttons"><span><button></button></span></div>', 'primaryButtons'
+      '<span class="primary-buttons"><button></button></span>', 'primaryButtons'
     );
   });
 
   it('should add buttons to primary side when given left side attr', function() {
     var el = setup('left', '<button>');
     expect( el.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
-      '<div class="buttons primary-buttons"><span><button></button></span></div>', 'primaryButtons'
+      '<span class="primary-buttons"><button></button></span>', 'primaryButtons'
     );
   });
 
   it('should add buttons to secondary side when given secondary side attr', function() {
     var el = setup('secondary', '<button>');
     expect( el.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
-      '<div class="buttons secondary-buttons"><span><button></button></span></div>', 'secondaryButtons'
+      '<span class="secondary-buttons"><button></button></span>', 'secondaryButtons'
     );
   });
 
   it('should add buttons to secondary side when given right side attr', function() {
     var el = setup('right', '<button>');
     expect( el.controller('ionNavBar').registerNavElement ).toHaveBeenCalledWith(
-      '<div class="buttons secondary-buttons"><span><button></button></span></div>', 'secondaryButtons'
+      '<span class="secondary-buttons"><button></button></span>', 'secondaryButtons'
     );
   });
 
