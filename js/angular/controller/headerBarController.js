@@ -3,36 +3,35 @@ IonicModule
   '$scope',
   '$element',
   '$attrs',
-function($scope, $element, $attrs) {
+  '$ionicConfig',
+function($scope, $element, $attrs, $ionicConfig) {
   var self = this;
-  var title = '';
+  var titleHtml = '';
+  var titleLeft = 0;
+  var titleRight = 0;
+  var titleCss = '';
 
 
-  self.title = function(newTitle) {
-    if (arguments.length && newTitle !== title) {
+  self.title = function(newTitleHtml) {
+    if (arguments.length && newTitleHtml !== titleHtml) {
       var titleEl = getTitleEle();
       if (titleEl) {
-        titleEl.innerHTML = newTitle;
-        title = newTitle;
+        titleEl.innerHTML = newTitleHtml;
+        titleHtml = newTitleHtml;
       }
     }
-    return title;
+    return titleHtml;
   };
 
 
   self.alignTitle = function(align) {
 
-    align || (align = $attrs.alignTitle);
-
-    // Find the titleEl element
     var titleEl = getTitleEle();
-    if (!titleEl) {
-      return;
-    }
+    if (!titleEl) return;
 
-    //We have to rAF here so all of the elements have time to initialize
-    ionic.requestAnimationFrame(function() {
-      var i, c, childSize;
+
+    ionic.requestAnimationFrame(function(){
+      var x, c, childSize, bounds;
       var childNodes = $element[0].childNodes;
       var leftWidth = 0;
       var rightWidth = 0;
@@ -41,22 +40,27 @@ function($scope, $element, $attrs) {
       // Compute how wide the left children are
       // Skip all titles (there may still be two titles, one leaving the dom)
       // Once we encounter a titleEl, realize we are now counting the right-buttons, not left
-      for (i = 0; i < childNodes.length; i++) {
-        c = childNodes[i];
-        if (c.classList && c.classList.contains('title')) {
-          isCountingRightWidth = true;
-          continue;
-        }
+      for (x = 0; x < childNodes.length; x++) {
+        c = childNodes[x];
 
-        childSize = null;
-        if (c.nodeType == 3) {
-          var bounds = ionic.DomUtil.getTextBounds(c);
+        childSize = 0;
+        if (c.nodeType == 1) {
+          if (c.classList.contains('hide')) {
+            continue;
+          }
+          if (c.classList.contains('title')) {
+            isCountingRightWidth = true;
+            continue;
+          }
+          childSize = c.offsetWidth;
+
+        } else if (c.nodeType == 3 && c.innerText.trim()) {
+          bounds = ionic.DomUtil.getTextBounds(c);
           if (bounds) {
             childSize = bounds.width;
           }
-        } else if (c.nodeType == 1) {
-          childSize = c.offsetWidth;
         }
+
         if (childSize) {
           if (isCountingRightWidth) {
             rightWidth += childSize;
@@ -66,35 +70,53 @@ function($scope, $element, $attrs) {
         }
       }
 
-      var margin = Math.max(leftWidth, rightWidth) + 10;
+      align = align || $attrs.alignTitle || $ionicConfig.navBar.alignTitle() || 'center';
 
-      //Reset left and right before setting again
-      titleEl.style.left = titleEl.style.right = '';
+      var updateLeft = 0;
+      var updateRight = 0;
+      var updateCss = '';
 
       // Size and align the header titleEl based on the sizes of the left and
       // right children, and the desired alignment mode
       if (align == 'center') {
+        var margin = Math.max(leftWidth, rightWidth) + 10;
         if (margin > 10) {
-          titleEl.style.left = margin + 'px';
-          titleEl.style.right = margin + 'px';
+          updateLeft = updateRight = margin;
         }
         if (titleEl.offsetWidth < titleEl.scrollWidth) {
-          if (rightWidth > 0) {
-            titleEl.style.right = (rightWidth + 5) + 'px';
+          if (rightWidth) {
+            updateRight = rightWidth + 5;
           }
         }
       } else if (align == 'left') {
-        titleEl.classList.add('title-left');
-        if (leftWidth > 0) {
-          titleEl.style.left = (leftWidth + 15) + 'px';
+        updateCss = 'title-left';
+        if (leftWidth) {
+          updateLeft = leftWidth + 15;
         }
+        updateRight = rightWidth + 15;
       } else if (align == 'right') {
-        titleEl.classList.add('title-right');
-        if (rightWidth > 0) {
-          titleEl.style.right = (rightWidth + 15) + 'px';
+        updateCss = 'title-right';
+        if (rightWidth) {
+          updateRight = rightWidth + 15;
         }
+        updateLeft = leftWidth + 15;
+      }
+
+      if (updateLeft !== titleLeft) {
+        titleEl.style.left = updateLeft ? updateLeft + 'px' : '';
+        titleLeft = updateLeft;
+      }
+      if (updateRight !== titleRight) {
+        titleEl.style.right = updateRight ? updateRight + 'px' : '';
+        titleRight = updateRight;
+      }
+      if (updateCss !== titleCss) {
+        updateCss && titleEl.classList.add(updateCss);
+        titleCss && titleEl.classList.remove(titleCss);
+        titleCss = updateCss;
       }
     });
+
   };
 
 

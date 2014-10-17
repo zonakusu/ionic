@@ -231,6 +231,20 @@ $android-view-slide-start-y:                    20%;
 
 }
 
+.android-transition {
+  .nav-bar-entering, // entering: before animate
+  .nav-bar-active.nav-bar-leaving // leaving: after animate
+  {
+    opacity: 0;
+  }
+
+  .nav-bar-entering.nav-bar, // entering: during and after animate
+  .nav-bar-active.nav-bar-leaving.ng-animate // leaving: before and during animate
+  {
+    opacity: 1;
+  }
+}
+
 
 
 // Intermediate Settings Between Steps Of A Transition

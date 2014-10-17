@@ -38,7 +38,7 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
   self.createHeaderBar = function(navBarClass) {
     var isBackShown;
     var containerEle = jqLite( '<div class="nav-bar-block nav-bar-cache">' );
-    var headerBarEle = jqLite( '<ion-header-bar class="nav-bar">' ).addClass(navBarClass).addClass(CSS_BACK_BUTTON_HIDE);
+    var headerBarEle = jqLite( '<ion-header-bar>' ).addClass(navBarClass).addClass(CSS_BACK_BUTTON_HIDE);
     var titleEle = jqLite('<div class="title">');
     var navEle = {};
     var lastViewBtnsEle = {};
@@ -103,16 +103,23 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
           lastViewBtnsEle[side] = null;
         }
       },
-      render: function(callback) {
-        ionic.requestAnimationFrame(function(){
-          callback && callback();
-        });
+      render: function() {
+        headerBarCtrl.alignTitle();
       },
       containerEle: function() {
         return containerEle;
       },
       headerBarEle: function() {
         return headerBarEle;
+      },
+      primaryButtonsEle: function() {
+        return navEle[PRIMARY_BUTTONS];
+      },
+      secondaryButtonsEle: function() {
+        return navEle[SECONDARY_BUTTONS];
+      },
+      backButtonEle: function() {
+        return navEle[BACK_BUTTON];
       },
       destroy: function() {
         containerEle = headerBarEle = titleEle = navEle[PRIMARY_BUTTONS] = navEle[SECONDARY_BUTTONS] = navEle[BACK_BUTTON] = viewBtnsEle[PRIMARY_BUTTONS] = viewBtnsEle[SECONDARY_BUTTONS] = null;
@@ -142,12 +149,10 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
     enteringHeaderBar.setViewButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
 
     // render/place the elements in the correct locations
-    enteringHeaderBar.render(function(){
+    enteringHeaderBar.render();
 
-      // begin transition of entering and leaving header bars
-      self.transition(enteringHeaderBar, getOnScreenHeaderBar(), viewData.transition, viewData.direction);
-
-    });
+    // begin transition of entering and leaving header bars
+    self.transition(enteringHeaderBar, getOnScreenHeaderBar(), viewData.transition, viewData.direction);
 
   };
 
