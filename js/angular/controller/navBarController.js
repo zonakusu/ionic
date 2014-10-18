@@ -197,7 +197,7 @@ function($scope, $element, $attrs, $compile, $animate, $ionicHistory, $ionicNavB
   self.transition = function(enteringHeaderBar, leavingHeaderBar, transition, direction) {
 
     // start transitioning the entering/leaving header-bars
-    $animate.transition( 'nav-bar', transition, direction, enteringHeaderBar.containerEle(), leavingHeaderBar && leavingHeaderBar.containerEle()).then(function(){
+    $animate.transition('nav-bar', transition, direction, enteringHeaderBar.containerEle(), leavingHeaderBar && leavingHeaderBar.containerEle()).then(function(){
 
       // transition done, reset header-bar is the active one
       for (var x=0; x<headerBars.length; x++) {

@@ -305,3 +305,16 @@ $view-box-shadow: 0 4px 20px rgba(0,0,0,.3);
 @keyframes spin {
   100% { transform: rotate(360deg); }
 }
+
+
+// Animate Holder
+// -------------------------------
+
+@-webkit-keyframes holdAnimate {
+  from { opacity: 1; }
+  to   { opacity: 1; }
+}
+@keyframes holdAnimate {
+  from { opacity: 1; }
+  to   { opacity: 1; }
+}

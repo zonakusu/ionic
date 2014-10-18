@@ -89,7 +89,7 @@ function($provide) {
         }
       }
 
-      $timeout(callback, 8);
+      $timeout(callback, 12);
     };
 
 
@@ -121,26 +121,43 @@ function($provide) {
       var deferred = $q.defer();
 
       ionic.requestAnimationFrame(function(){
+        var enteringCancelled = false;
+        var leavingElements = [];
+        var x;
 
         if (enteringElement) {
-          enteringElement.addClass(animation + '-active')
-                         .removeClass(animation + '-cache')
-                         .removeClass(animation + '-entering')
-                         .removeClass(animation + '-leaving')
-                         .addClass(animation);
+          if (enteringElement.hasClass(animation + '-entering-cancelled')) {
+            leavingElements.push(enteringElement);
+            enteringCancelled = true;
+
+          } else {
+            enteringElement.addClass(animation + '-active')
+                           .removeClass(animation + '-cache')
+                           .removeClass(animation + '-entering')
+                           .removeClass(animation + '-leaving')
+                           .removeClass(animation + '-entering-cancelled')
+                           .addClass(animation);
+          }
         }
 
-        if (leavingElement) {
-          leavingElement.addClass(animation + '-cache')
-                        .removeClass(animation + '-active')
-                        .removeClass(animation + '-entering')
-                        .removeClass(animation + '-leaving');
+        leavingElement && leavingElements.push(leavingElement);
+        for (x=0; x<leavingElements.length; x++) {
+          leavingElements[x].addClass(animation + '-cache')
+                            .removeClass(animation + '-active')
+                            .removeClass(animation + '-entering')
+                            .removeClass(animation + '-leaving')
+                            .removeClass(animation)
+                            .removeClass(animation + '-entering-cancelled');
+
         }
+        leavingElements = null;
 
-        parentElement.removeClass(animation);
+        if (!enteringCancelled) {
+          parentElement.removeClass(animation);
 
-        for (var x=0; x<CSS_DIRECTIONS.length; x++) {
-          parentElement.removeClass(CSS_DIRECTIONS[x]);
+          for (x=0; x<CSS_DIRECTIONS.length; x++) {
+            parentElement.removeClass(CSS_DIRECTIONS[x]);
+          }
         }
 
         deferred.resolve();

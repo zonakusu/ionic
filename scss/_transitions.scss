@@ -11,16 +11,6 @@ $ios-transition-container-bg-color:         #000 !default;
 .ios-transition.nav-forward {
   background-color: $ios-transition-container-bg-color;
 
-  .nav-view-entering {
-    // where the entering view will be immediately before the transition
-    @include translate3d(98%, 0, 0);
-  }
-
-  .nav-view-entering.nav-view {
-    // where the entering view will be immediately after the transition
-    @include translate3d(0, 0, 0);
-  }
-
   .nav-view-add {
     // set the animation for the entering view
     @include animation-name( slideInFromRight, removeBoxShadow );
@@ -37,20 +27,56 @@ $ios-transition-container-bg-color:         #000 !default;
     z-index: $z-index-view-below;
   }
 
+  .nav-bar-entering .bar {
+    background: transparent;
+  }
+
+  .nav-bar-entering {
+    z-index: $z-index-bar-above;
+  }
+
+  .nav-bar-add,
+  .nav-bar-remove {
+    @include animation-name( holdAnimate );
+    @include animation-duration( $ios-transition-view-duration );
+  }
+
+  .nav-bar-entering .title {
+    @include translate3d(98%, 0, 0);
+  }
+
+  .nav-bar-entering.nav-bar .title {
+    @include translate3d(0, 0, 0);
+  }
+
+  .nav-bar-add .title {
+    @include animation-name( slideInFromRight, fadeIn );
+    @include animation-duration( $ios-transition-view-duration );
+    @include animation-timing-function( $ios-transition-view-timing-function );
+  }
+
+  .nav-bar-remove .title {
+    @include animation-name( slideOutToLeft, fadeOut );
+    @include animation-duration( $ios-transition-view-duration );
+    @include animation-timing-function( $ios-transition-view-timing-function );
+  }
+
+  .nav-bar-entering .title, // entering: before animate
+  .nav-bar-active.nav-bar-leaving .title // leaving: after animate
+  {
+    opacity: 0;
+  }
+
+  .nav-bar-entering.nav-bar .title, // entering: during and after animate
+  .nav-bar-active.nav-bar-leaving.ng-animate .title // leaving: before and during animate
+  {
+    opacity: 1;
+  }
+
 }
 
 .ios-transition.nav-back {
   background-color: $ios-transition-container-bg-color;
-
-  .nav-view-entering {
-    // where the entering view will be immediately before the transition
-    @include translate3d(-33%, 0, 0);
-  }
-
-  .nav-view-entering.nav-view {
-    // where the entering view will be immediately after the transition
-    @include translate3d(0, 0, 0);
-  }
 
   .nav-view-add {
     // set the animation for the entering view
@@ -72,11 +98,6 @@ $ios-transition-container-bg-color:         #000 !default;
 
 .ios-transition.nav-enter,
 .ios-transition.nav-exit {
-
-  .nav-view-entering,
-  .nav-view-leaving {
-    @include translate3d(0, 0, 0);
-  }
 
   .nav-view-add {
     // set the animation for the entering view
@@ -287,10 +308,13 @@ $android-view-slide-start-y:                    20%;
 .nav-swap .nav-view-entering {
   opacity: 1;
   @include animation-duration( 0 );
-  @include animation-fill-mode( forwards );
 }
 
 // required for Android
 .ng-animate .pane {
   position: absolute;
+}
+
+.pane {
+  @include animation-fill-mode( both );
 }

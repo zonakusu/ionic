@@ -94,21 +94,24 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
         },
 
         loadViewElements: function() {
-          var viewElements = navViewElement.children();
+          var viewEle, viewElements = navViewElement.children();
           var enteringEleIdentifier = getViewElementIdentifier(viewLocals, enteringView);
 
           for(var x=0, l=viewElements.length; x<l; x++) {
+            viewEle = viewElements.eq(x);
 
-            if (enteringEleIdentifier && viewElements.eq(x).data(DATA_ELE_IDENTIFIER) == enteringEleIdentifier) {
+            if (enteringEleIdentifier && viewEle.data(DATA_ELE_IDENTIFIER) == enteringEleIdentifier) {
               // we found an existing element in the DOM that should be entering the view
-              enteringEle = viewElements.eq(x);
+              enteringEle = viewEle;
 
-            } else if (viewElements.eq(x).hasClass('nav-view-active')) {
+            } else if (viewEle.hasClass('nav-view-entering')) {
+              // there's already an element that's entering!! Cancel that this one would be the active one
+              viewEle.addClass('nav-view-entering-cancelled');
+
+            } else if (viewEle.hasClass('nav-view-active')) {
               // this element is currently the active one, so it will be the leaving element
-              leavingEle = viewElements.eq(x);
+              leavingEle = viewEle;
             }
-
-            if (enteringEle && leavingEle) break;
           }
 
           alreadyInDom = !!enteringEle;
@@ -178,8 +181,8 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
           switcher.notify('before', transData);
 
           $animate.transition( 'nav-view', transData.transition, transData.direction, enteringEle, leavingEle).then(function(){
-            if (transitionId === transitionCounter) {
 
+            if (transitionId === transitionCounter) {
               switcher.notify('after', transData);
 
               switcher.cleanup(transData);
