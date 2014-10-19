@@ -13,64 +13,14 @@ $ios-transition-container-bg-color:         #000 !default;
 
   .nav-view-add {
     // set the animation for the entering view
-    @include animation-name( slideInFromRight, removeBoxShadow );
-    @include animation-duration( $ios-transition-view-duration );
-    @include animation-timing-function( $ios-transition-view-timing-function );
+    @include animation-name( slideInFromRight );
     z-index: $z-index-view-above;
   }
 
   .nav-view-remove {
     // set the animation for the leaving view
     @include animation-name( slideOutToLeft33, fadeOutToPartial );
-    @include animation-duration( $ios-transition-view-duration );
-    @include animation-timing-function( $ios-transition-view-timing-function );
     z-index: $z-index-view-below;
-  }
-
-  .nav-bar-entering .bar {
-    background: transparent;
-  }
-
-  .nav-bar-entering {
-    z-index: $z-index-bar-above;
-  }
-
-  .nav-bar-add,
-  .nav-bar-remove {
-    @include animation-name( holdAnimate );
-    @include animation-duration( $ios-transition-view-duration );
-  }
-
-  .nav-bar-entering .title {
-    @include translate3d(98%, 0, 0);
-  }
-
-  .nav-bar-entering.nav-bar .title {
-    @include translate3d(0, 0, 0);
-  }
-
-  .nav-bar-add .title {
-    @include animation-name( slideInFromRight, fadeIn );
-    @include animation-duration( $ios-transition-view-duration );
-    @include animation-timing-function( $ios-transition-view-timing-function );
-  }
-
-  .nav-bar-remove .title {
-    @include animation-name( slideOutToLeft, fadeOut );
-    @include animation-duration( $ios-transition-view-duration );
-    @include animation-timing-function( $ios-transition-view-timing-function );
-  }
-
-  .nav-bar-entering .title, // entering: before animate
-  .nav-bar-active.nav-bar-leaving .title // leaving: after animate
-  {
-    opacity: 0;
-  }
-
-  .nav-bar-entering.nav-bar .title, // entering: during and after animate
-  .nav-bar-active.nav-bar-leaving.ng-animate .title // leaving: before and during animate
-  {
-    opacity: 1;
   }
 
 }
@@ -81,16 +31,13 @@ $ios-transition-container-bg-color:         #000 !default;
   .nav-view-add {
     // set the animation for the entering view
     @include animation-name( slideInFromLeft33, fadeInFromPartial );
-    @include animation-duration( $ios-transition-view-duration );
-    @include animation-timing-function( $ios-transition-view-timing-function );
+    @include animation-name( slideInFromLeft33 );
     z-index: $z-index-view-below;
   }
 
   .nav-view-remove {
     // set the animation for the leaving view
-    @include animation-name( slideOutToRight, removeBoxShadow );
-    @include animation-duration( $ios-transition-view-duration );
-    @include animation-timing-function( $ios-transition-view-timing-function );
+    @include animation-name( slideOutToRight );
     z-index: $z-index-view-above;
   }
 
@@ -103,7 +50,6 @@ $ios-transition-container-bg-color:         #000 !default;
     // set the animation for the entering view
     @include animation-name( fadeIn );
     @include animation-duration( $ios-transition-view-duration / 2 );
-    @include animation-timing-function( $ios-transition-view-timing-function );
     z-index: $z-index-view-above;
   }
 
@@ -111,10 +57,78 @@ $ios-transition-container-bg-color:         #000 !default;
     // set the animation for the leaving view
     @include animation-name( fadeOutToPartial );
     @include animation-duration( $ios-transition-view-duration / 2 );
-    @include animation-timing-function( $ios-transition-view-timing-function );
     z-index: $z-index-view-below;
   }
 
+}
+
+.ios-transition {
+
+  .nav-bar-entering {
+    z-index: $z-index-bar-above;
+  }
+
+  .nav-bar-entering .bar {
+    background: transparent;
+  }
+
+  &.nav-forward .nav-bar-add .title {
+    @include animation-name( slideInFromRight, fadeIn );
+  }
+
+  &.nav-forward .nav-bar-remove .title {
+    @include animation-name( slideOutToLeft, fadeOut );
+  }
+
+  &.nav-back .nav-bar-add .title {
+    @include animation-name( slideInFromLeft, fadeIn );
+  }
+
+  &.nav-back .nav-bar-remove .title {
+    @include animation-name( slideOutToRight, fadeOut );
+  }
+
+  .nav-bar-add .buttons {
+    @include animation-name( fadeIn );
+  }
+
+  .nav-bar-remove .buttons {
+    @include animation-name( fadeOut );
+  }
+
+  .nav-bar-add,
+  .nav-bar-remove {
+    @include animation-name( holdAnimate );
+  }
+
+  .nav-bar-entering .title, // entering: before animate
+  .nav-bar-active.nav-bar-leaving .title, // leaving: after animate
+  .nav-bar-entering .buttons, // entering: before animate
+  .nav-bar-active.nav-bar-leaving .buttons // leaving: after animate
+  {
+    opacity: 0;
+  }
+
+  .nav-bar-entering.nav-bar .title, // entering: during and after animate
+  .nav-bar-active.nav-bar-leaving.ng-animate .title, // leaving: before and during animate
+  .nav-bar-entering.nav-bar .buttons, // entering: during and after animate
+  .nav-bar-active.nav-bar-leaving.ng-animate .buttons // leaving: before and during animate
+  {
+    opacity: 1;
+  }
+
+}
+
+.ios-transition .nav-view-add,
+.ios-transition .nav-view-remove,
+.ios-transition .nav-bar-add,
+.ios-transition .nav-bar-remove,
+.ios-transition .nav-bar-add .buttons,
+.ios-transition .nav-bar-remove .buttons,
+.ios-transition .nav-bar-add .title,
+.ios-transition .nav-bar-remove .title {
+  @include animation-duration( $ios-transition-view-duration );
+  @include animation-timing-function( $ios-transition-view-timing-function );
 }
 
 

@@ -21,6 +21,9 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
   var transitionCounter = 0;
   var nextTransition;
   var nextDirection;
+  ionic.transition = ionic.transition || {};
+  ionic.transition.isActive = false;
+  var isActiveTimer;
 
 
   function createViewElement(viewLocals) {
@@ -73,7 +76,7 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
   }
 
 
-  return {
+  var ionicViewSwitcher = {
 
     create: function(navViewScope, navViewElement, viewLocals, enteringView) {
       // get a reference to an entering/leaving element if they exist
@@ -85,6 +88,8 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
       var switcher = {
 
         init: function(callback) {
+          ionicViewSwitcher.isActive(true);
+
           $ionicClickBlock.show();
           switcher.loadViewElements();
 
@@ -187,7 +192,8 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
 
               switcher.cleanup(transData);
 
-              // allow clicks to happen again after the transition
+              ionicViewSwitcher.isActive(false);
+
               $ionicClickBlock.hide();
             }
 
@@ -267,8 +273,23 @@ function($timeout, $compile, $controller, $animate, $ionicClickBlock, $ionicConf
       nextDirection = val;
     },
 
-    getTransitionData: getTransitionData
+    getTransitionData: getTransitionData,
+
+    isActive: function(val) {
+      if (arguments.length) {
+        ionic.transition.isActive = !!val;
+        $timeout.cancel(isActiveTimer);
+        if (val) {
+          isActiveTimer = $timeout(function(){
+            ionicViewSwitcher.isActive(false);
+          }, 999);
+        }
+      }
+      return ionic.transition.isActive;
+    }
 
   };
+
+  return ionicViewSwitcher;
 
 }]);

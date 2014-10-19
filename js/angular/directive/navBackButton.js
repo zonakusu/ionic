@@ -56,7 +56,7 @@ IonicModule
           divEle.attr(n, tAttrs[n]);
         }
       }
-      divEle.addClass('button back-button');
+      divEle.addClass('button back-button buttons');
       var btnContent = tElement.html() || '';
       tElement.attr('class', 'hide');
       tElement.empty();
