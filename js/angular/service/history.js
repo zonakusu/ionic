@@ -447,8 +447,21 @@ function($rootScope, $state, $location, $window) {
       return viewHistory.currentView;
     },
 
+    currentTitle: function(val) {
+      if (arguments.length) {
+        viewHistory.currentView.title = val;
+      }
+      return viewHistory.currentView.title;
+    },
+
     backView: function() {
       return viewHistory.backView;
+    },
+
+    backTitle: function() {
+      if (viewHistory.backView) {
+        return viewHistory.backView.title;
+      }
     },
 
     forwardView: function() {

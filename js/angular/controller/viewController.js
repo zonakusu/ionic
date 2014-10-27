@@ -4,7 +4,8 @@ IonicModule
   '$element',
   '$attrs',
   '$compile',
-function($scope, $element, $attrs, $compile) {
+  '$ionicHistory',
+function($scope, $element, $attrs, $compile, $ionicHistory) {
   var self = this;
   var navElementHtml = {};
   var navViewCtrl;
@@ -35,6 +36,8 @@ function($scope, $element, $attrs, $compile) {
     if (!transitionData.viewNotified) {
       transitionData.viewNotified = true;
 
+      $ionicHistory.currentTitle( $attrs.title );
+
       navViewCtrl.beforeEnter({
         title: $attrs.title,
         direction: transitionData.direction,
@@ -50,7 +53,7 @@ function($scope, $element, $attrs, $compile) {
   function generateButton(html) {
     if (html) {
       // every time a view enters we need to recreate its view buttons if they exist
-      return $compile( jqLite(html) )($scope);
+      return $compile(html)($scope.$new());
     }
   }
 
@@ -60,7 +63,7 @@ function($scope, $element, $attrs, $compile) {
   };
 
 
-  self.registerNavElement = function(html, type) {
+  self.navElement = function(type, html) {
     navElementHtml[type] = html;
   };
 

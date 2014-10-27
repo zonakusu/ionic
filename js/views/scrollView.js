@@ -1045,7 +1045,11 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
       }
 
-      self.__indicatorX.indicator.style[self.__transformProperty] = 'translate3d(' + x + 'px, 0, 0) scaleX(' + widthScale + ')';
+      var translate3dX = 'translate3d(' + x + 'px, 0, 0) scaleX(' + widthScale + ')';
+      if (self.__indicatorX.transformProp !== translate3dX) {
+        self.__indicatorX.indicator.style[self.__transformProperty] = translate3dX;
+        self.__indicatorX.transformProp = translate3dX;
+      }
     }
 
     if (self.__indicatorY) {
@@ -1091,10 +1095,10 @@ ionic.views.Scroll = ionic.views.View.inherit({
 
       }
 
-      var translate3d = 'translate3d(0,' + y + 'px, 0) scaleY(' + heightScale + ')';
-      if (self.__indicatorY.transformProp !== translate3d) {
-        self.__indicatorY.indicator.style[self.__transformProperty] = translate3d;
-        self.__indicatorY.transformProp = translate3d;
+      var translate3dY = 'translate3d(0,' + y + 'px, 0) scaleY(' + heightScale + ')';
+      if (self.__indicatorY.transformProp !== translate3dY) {
+        self.__indicatorY.indicator.style[self.__transformProperty] = translate3dY;
+        self.__indicatorY.transformProp = translate3dY;
       }
     }
   },

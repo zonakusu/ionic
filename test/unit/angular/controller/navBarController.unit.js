@@ -17,46 +17,11 @@ describe('$ionNavBar controller', function() {
     return ctrl;
   }
 
-  it('should createBackButtonElement when no registerBackButton', function() {
-    var ctrl = makeNavBarCtrl();
-    var headerBarEle = angular.element('<div>');
-
-    var ele = ctrl.createBackButtonElement(headerBarEle);
-    expect(ele).toBeUndefined();
-  });
-
-  it('should registerBackButton and createBackButtonElement', function() {
-    var ctrl = makeNavBarCtrl();
-    var headerBarEle = angular.element('<div>');
-    ctrl.registerNavElement('<button>', 'backButton');
-    var ele = ctrl.createBackButtonElement(headerBarEle);
-    expect(ele).toBeDefined();
-  });
-
-  it('should registerBackButton, createBackButtonElement and add ng-click if one wasnt provided', function() {
-    var ctrl = makeNavBarCtrl();
-    var headerBarEle = angular.element('<div>');
-    ctrl.registerNavElement('<button>', 'backButton');
-    var ele = ctrl.createBackButtonElement(headerBarEle);
-    expect(ele.attr('ng-click')).toBe('$goBack()');
-  });
-
-  it('should registerBackButton, createBackButtonElement and not add ng-click if one was provided', function() {
-    var ctrl = makeNavBarCtrl();
-    var headerBarEle = angular.element('<div>');
-    ctrl.registerNavElement('<button ng-click="myClick()">Back</button>', 'backButton');
-    var ele = ctrl.createBackButtonElement(headerBarEle);
-    expect(ele.attr('ng-click')).toBe('myClick()');
-  });
-
   it('should createHeaderBar instance', function() {
-    var ctrl = makeNavBarCtrl();
-    var headerBar = ctrl.createHeaderBar('bar-royal');
+    var ctrl = makeNavBarCtrl('bar-royal');
+    var headerBar = ctrl.createHeaderBar();
     expect(headerBar).toBeDefined();
-    expect(headerBar.isActive).toBe(false);
     expect(headerBar.containerEle()).toBeDefined();
-    expect(headerBar.containerEle().hasClass('nav-bar-block')).toBe(true);
-    expect(headerBar.containerEle().hasClass('nav-bar-cache')).toBe(true);
     expect(headerBar.headerBarEle().hasClass('bar-royal')).toBe(true);
     expect(headerBar.headerBarEle().children().eq(0).hasClass('title')).toBe(true);
   });
@@ -64,7 +29,7 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar and add back button', function() {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<button>Back</button>', 'backButton');
+    ctrl.navElement('backButton', '<button>Back</button>');
 
     var headerBar = ctrl.createHeaderBar();
     var backBtnEle = headerBar.headerBarEle().find('button');
@@ -75,7 +40,7 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar and add primary buttons', function() {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
+    ctrl.navElement('primaryButtons', '<div class="primary-buttons">');
 
     var headerBar = ctrl.createHeaderBar();
     expect(headerBar.headerBarEle().children().eq(0).hasClass('buttons')).toBe(true);
@@ -86,8 +51,8 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, back button and primary buttons', function() {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="back-button">', 'backButton');
-    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
+    ctrl.navElement('backButton', '<div class="back-button">');
+    ctrl.navElement('primaryButtons', '<div class="primary-buttons">');
 
     var headerBar = ctrl.createHeaderBar();
     expect(headerBar.headerBarEle().children().eq(0).hasClass('back-button')).toBe(true);
@@ -99,7 +64,7 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar and add secondary buttons', function() {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     var headerBar = ctrl.createHeaderBar();
     expect(headerBar.headerBarEle().children().eq(0).hasClass('title')).toBe(true);
@@ -110,8 +75,8 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, back button add secondary buttons', function() {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="back-button">', 'backButton');
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('backButton', '<div class="back-button">');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     var headerBar = ctrl.createHeaderBar();
     expect(headerBar.headerBarEle().children().eq(0).hasClass('back-button')).toBe(true);
@@ -123,9 +88,9 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, back button, primary buttons, and secondary buttons', function() {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="back-button">', 'backButton');
-    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('backButton', '<div class="back-button">');
+    ctrl.navElement('primaryButtons', '<div class="primary-buttons">');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     var headerBar = ctrl.createHeaderBar();
     expect(headerBar.headerBarEle().children().eq(0).hasClass('back-button')).toBe(true);
@@ -139,7 +104,7 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, primary btns right from config', inject(function($ionicConfig) {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
+    ctrl.navElement('primaryButtons', '<div class="primary-buttons">');
 
     $ionicConfig.navBar.positionPrimaryButtons('right')
 
@@ -152,7 +117,7 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, secondary btns right from config', inject(function($ionicConfig) {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     $ionicConfig.navBar.positionPrimaryButtons('right')
 
@@ -165,8 +130,8 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, primary btns right, secondary btns right, from config', inject(function($ionicConfig) {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('primaryButtons', '<div class="primary-buttons">');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     $ionicConfig.navBar.positionPrimaryButtons('right');
     $ionicConfig.navBar.positionSecondaryButtons('right');
@@ -181,8 +146,8 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, primary btns right, secondary btns left, from config', inject(function($ionicConfig) {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('primaryButtons', '<div class="primary-buttons">');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     $ionicConfig.navBar.positionPrimaryButtons('right');
     $ionicConfig.navBar.positionSecondaryButtons('left');
@@ -198,9 +163,9 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, back button, primary btns right, secondary btns right, from config', inject(function($ionicConfig) {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="back-button">', 'backButton');
-    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('backButton' ,'<div class="back-button">');
+    ctrl.navElement('primaryButtons', '<div class="primary-buttons">');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     $ionicConfig.navBar.positionPrimaryButtons('left');
     $ionicConfig.navBar.positionSecondaryButtons('right');
@@ -217,7 +182,7 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, secondary btns left, from config', inject(function($ionicConfig) {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     $ionicConfig.navBar.positionSecondaryButtons('left');
 
@@ -230,8 +195,8 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, primary btns left, secondary btns left, from config', inject(function($ionicConfig) {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('primaryButtons', '<div class="primary-buttons">');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     $ionicConfig.navBar.positionPrimaryButtons('left');
     $ionicConfig.navBar.positionSecondaryButtons('left');
@@ -246,8 +211,8 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, primary btns left, secondary btns left, from config', inject(function($ionicConfig) {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="back-button">', 'backButton');
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('backButton', '<div class="back-button">');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     $ionicConfig.navBar.positionSecondaryButtons('left');
 
@@ -261,9 +226,9 @@ describe('$ionNavBar controller', function() {
   it('should createHeaderBar, back button, primary btns left, secondary btns left, from config', inject(function($ionicConfig) {
     var ctrl = makeNavBarCtrl();
 
-    ctrl.registerNavElement('<div class="back-button">', 'backButton');
-    ctrl.registerNavElement('<div class="primary-buttons">', 'primaryButtons');
-    ctrl.registerNavElement('<div class="secondary-buttons">', 'secondaryButtons');
+    ctrl.navElement('backButton', '<div class="back-button">');
+    ctrl.navElement('primaryButtons', '<div class="primary-buttons">');
+    ctrl.navElement('secondaryButtons', '<div class="secondary-buttons">');
 
     $ionicConfig.navBar.positionPrimaryButtons('left');
     $ionicConfig.navBar.positionSecondaryButtons('left');
@@ -280,7 +245,7 @@ describe('$ionNavBar controller', function() {
     var ctrl = makeNavBarCtrl();
 
     scope.buttonText = 'My Button';
-    ctrl.registerNavElement('<button>{{ buttonText }}</button>', 'backButton');
+    ctrl.navElement('backButton', '<button>{{ buttonText }}</button>');
 
     var headerBar = ctrl.createHeaderBar();
     scope.$digest();

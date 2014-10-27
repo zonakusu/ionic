@@ -43,37 +43,75 @@
  * ```
  */
 IonicModule
-.directive('ionNavBackButton', ['$ionicConfig', function($ionicConfig) {
+.directive('ionNavBackButton', ['$ionicConfig', '$document', function($ionicConfig, $document) {
   return {
     restrict: 'E',
     require: '^ionNavBar',
     compile: function(tElement, tAttrs) {
 
       // clone the back button, but as a <div>
-      var divEle = jqLite( '<button>' );
+      var buttonEle = $document[0].createElement('button');
       for (var n in tAttrs) {
         if (isString(tAttrs[n])) {
-          divEle.attr(n, tAttrs[n]);
+          buttonEle.setAttribute(n, tAttrs[n]);
         }
       }
-      divEle.addClass('button back-button buttons');
-      var btnContent = tElement.html() || '';
+
+      if (!tElement.attr('ng-click')) {
+        buttonEle.setAttribute('ng-click', '$goBack()');
+      }
+
+      buttonEle.className = 'button back-button hide buttons';
+      buttonEle.innerHTML = tElement.html() || '';
+
+      var childNode;
+      var hasIcon = hasIconClass(tElement[0]);
+      var hasInnerText;
+      var hasButtonText;
+      var hasPreviousTitle;
+
+      for (var x = 0; x < tElement[0].childNodes.length; x++) {
+        childNode = tElement[0].childNodes[x];
+        if (childNode.nodeType === 1) {
+          if (hasIconClass(childNode)) {
+            hasIcon = true;
+          } else if (childNode.classList.contains('button-text')) {
+            hasButtonText = true;
+          } else if (childNode.classList.contains('previous-title')) {
+            hasPreviousTitle = true;
+          }
+        } else if (!hasInnerText && childNode.nodeType === 3) {
+          hasInnerText = !!childNode.nodeValue.trim();
+        }
+      }
+
+      function hasIconClass(ele) {
+        return /ion-|icon/.test(ele.className);
+      }
+
+      var defaultIcon = $ionicConfig.backButton.icon();
+      if (!hasIcon && defaultIcon && defaultIcon !== 'none') {
+        buttonEle.innerHTML = '<i class="icon ' + defaultIcon + '"></i> ' + buttonEle.innerHTML;
+        buttonEle.className += ' button-clear';
+      }
+
+      if (!hasInnerText) {
+        if (!hasButtonText && $ionicConfig.backButton.text()) {
+          buttonEle.innerHTML += '<span class="button-text">' + $ionicConfig.backButton.text() + '</span>';
+        }
+        if (!hasPreviousTitle && $ionicConfig.backButton.previousTitleText()) {
+          buttonEle.innerHTML += '<span class="previous-title"></span>';
+        }
+      }
+
       tElement.attr('class', 'hide');
       tElement.empty();
 
-      divEle.html( btnContent );
-
-      if (!/class=.*?ion-|class=.*?icon/.test( btnContent )) {
-        var defaultIcon = $ionicConfig.navBar.backButtonIcon();
-        if (defaultIcon && defaultIcon !== 'none') {
-          divEle.prepend('<i class="icon ' + defaultIcon + '"></i> ');
-          divEle.addClass('button-clear');
-        }
-      }
-
       return {
         pre: function($scope, $element, $attr, navBarCtrl) {
-          navBarCtrl.registerNavElement(divEle[0].outerHTML, 'backButton');
+          // only register the plain HTML, the navBarCtrl takes care of scope/compile/link
+          navBarCtrl.navElement('backButton', buttonEle.outerHTML);
+          buttonEle = null;
         }
       };
     }

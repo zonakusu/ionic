@@ -72,9 +72,8 @@ function($compile, $ionicConfig, $ionicBind) {
       element.empty();
 
       var navViewName;
-      var tabChildEle = tabContent.children;
-      if (tabChildEle.length && tabChildEle[0].tagName === 'ION-NAV-VIEW') {
-        navViewName = tabChildEle[0].getAttribute('name');
+      if (tabContent.children.length && tabContent.children[0].tagName === 'ION-NAV-VIEW') {
+        navViewName = tabContent.children[0].getAttribute('name');
       }
 
       return function link($scope, $element, $attr, ctrls) {
@@ -103,6 +102,7 @@ function($compile, $ionicConfig, $ionicBind) {
           }
           tabNavElement.isolateScope().$destroy();
           tabNavElement.remove();
+          tabNavElement = childElement = null;
         });
 
         //Remove title attribute so browser-tooltip does not apear

@@ -39,41 +39,44 @@
  * {@link ionic.directive:ionNavBar}. Available: 'primary' or 'secondary'.
  */
 IonicModule
-.directive('ionNavButtons', function() {
+.directive('ionNavButtons', ['$document', function($document) {
   return {
     require: '^ionNavBar',
     restrict: 'E',
     compile: function(tElement, tAttrs) {
-      var spanEle = jqLite('<span>');
+      var spanEle = $document[0].createElement('span');
       var navElementType;
 
       if (tAttrs.side == 'secondary' || tAttrs.side == 'right') {
-        spanEle.addClass('secondary-buttons');
+        spanEle.className = 'secondary-buttons';
         navElementType = 'secondaryButtons';
       } else {
-        spanEle.addClass('primary-buttons');
+        spanEle.className = 'primary-buttons';
         navElementType = 'primaryButtons';
       }
 
-      spanEle.html( tElement.html() );
+      spanEle.innerHTML = tElement.html();
 
       tElement.attr('class', 'hide');
       tElement.empty();
 
       return {
         pre: function($scope, $element, $attrs, navBarCtrl) {
+          // only register the plain HTML, the navBarCtrl takes care of scope/compile/link
 
-          // if the parent is an ion-view, then these are ion-nav-buttons for JUST this ion-view
           var parentViewCtrl = $element.parent().data('$ionViewController');
           if (parentViewCtrl) {
-            parentViewCtrl.registerNavElement(spanEle[0].outerHTML, navElementType);
-            return;
+            // if the parent is an ion-view, then these are ion-nav-buttons for JUST this ion-view
+            parentViewCtrl.navElement(navElementType, spanEle.outerHTML);
+
+          } else {
+            // these are buttons for all views that do not have their own ion-nav-buttons
+            navBarCtrl.navElement(navElementType, spanEle.outerHTML);
           }
 
-          // these are buttons for all views that do not have their own ion-nav-buttons
-          navBarCtrl.registerNavElement(spanEle[0].outerHTML, navElementType);
+          spanEle = null;
         }
       };
     }
   };
-});
+}]);

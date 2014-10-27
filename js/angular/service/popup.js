@@ -288,6 +288,7 @@ function($ionicTemplateLoader, $ionicBackdrop, $q, $timeout, $rootScope, $ionicB
     .then(function(results) {
       var self = results[0];
       var content = results[1];
+      results[0] = results[1] = null;
       var responseDeferred = $q.defer();
 
       self.responseDeferred = responseDeferred;

@@ -86,8 +86,14 @@ IonicModule
       alignTitle: PLATFORM,
       positionPrimaryButtons: PLATFORM,
       positionSecondaryButtons: PLATFORM,
-      backButtonIcon: PLATFORM,
-      transition: PLATFORM
+      transition: 'ios-nav-bar',
+      transitionScript: 'ios-nav-bar'
+    },
+    backButton: {
+      enabled: PLATFORM,
+      icon: PLATFORM,
+      text: PLATFORM,
+      previousTitleText: PLATFORM,
     },
     menus: {
       transition: PLATFORM
@@ -116,9 +122,12 @@ IonicModule
     navBar: {
       alignTitle: 'center',
       positionPrimaryButtons: 'left',
-      positionSecondaryButtons: 'right',
-      backButtonIcon: 'ion-ios7-arrow-back',
-      transition: 'ios-nav-bar'
+      positionSecondaryButtons: 'right'
+    },
+    backButton: {
+      icon: 'ion-ios7-arrow-back',
+      text: 'Back',
+      previousTitleText: true,
     },
     menus: {
       transition: 'push-menu'
@@ -138,7 +147,7 @@ IonicModule
   // -------------------------
   setPlatformConfig('ios', {
     navBar: {
-      backButtonIcon: 'ion-ios7-arrow-back',
+      icon: 'ion-ios7-arrow-back',
     }
   });
 
@@ -154,8 +163,9 @@ IonicModule
       alignTitle: 'left',
       positionPrimaryButtons: 'right',
       positionSecondaryButtons: 'right',
-      backButtonIcon: 'ion-android-arrow-back',
-      transition: 'android-nav-bar'
+    },
+    backButton: {
+      icon: 'ion-android-arrow-back'
     },
     tabs: {
       type: 'tabs-striped'

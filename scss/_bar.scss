@@ -39,6 +39,7 @@
     background-size: 100% 1px;
     background-repeat: no-repeat;
   }
+  pointer-events: auto;
 
   &.bar-clear {
     border: none;
@@ -359,18 +360,7 @@
   z-index: $z-index-bar;
 }
 
-.nav-bar-active .bar {
-  pointer-events: auto;
-}
-
-.nav-bar-cache {
-  @include translate3d(-9999px, 0, 0);
-}
-
-.back-button-hide .back-button {
-  display: none;
-}
-
+.bar .back-button.hide,
 .bar .buttons .hide {
   display: none;
 }

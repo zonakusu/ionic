@@ -5,7 +5,8 @@ IonicModule
   '$attrs',
   '$ionicHistory',
   '$ionicViewSwitcher',
-function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
+  '$ionicConfig',
+function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher, $ionicConfig) {
   var self = this;
   var direction;
   var isPrimary = false;
@@ -94,6 +95,7 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher) {
     if (isPrimary) {
       // only update this nav-view's nav-bar if this is the primary nav-view
       var associatedNavBarCtrl = getAssociatedNavBarCtrl();
+      transData.transition = $ionicConfig.navBar.transition();
       associatedNavBarCtrl && associatedNavBarCtrl.updateNavBar(transData);
     }
   };

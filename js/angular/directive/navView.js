@@ -84,7 +84,8 @@
 IonicModule
 .directive('ionNavView', [
   '$state',
-function( $state) {
+  '$ionicConfig',
+function($state, $ionicConfig) {
   // IONIC's fork of Angular UI Router, v0.2.10
   // the navView handles registering views in the history and how to transition between them
   return {
@@ -96,8 +97,7 @@ function( $state) {
     compile: function (tElement, tAttrs, transclude) {
 
       // a nav view element is a container for numerous views
-      tElement.addClass('view-container');
-      tElement.removeAttr('title');
+      tElement.addClass('view-container ' + $ionicConfig.views.transition());
 
       return function($scope, $element, $attr, navViewCtrl) {
         var latestLocals;
