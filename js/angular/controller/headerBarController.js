@@ -21,7 +21,6 @@ function($scope, $element, $attrs, $animate, $ionicConfig, $ionicHistory) {
     if (arguments.length && newTitleText !== titleText) {
       getEle('.title').innerHTML = newTitleText;
       titleText = newTitleText;
-
     }
     return titleText;
   };
@@ -40,7 +39,7 @@ function($scope, $element, $attrs, $animate, $ionicConfig, $ionicHistory) {
 
 
   self.transition = function(animation) {
-    if (!animation) return angular.noop;
+    if (!animation) return;
 
     var titleStyle = getEleStyle('.title');
     var buttonsAStyle = getEleStyle('.buttons-a');
@@ -120,7 +119,7 @@ function($scope, $element, $attrs, $animate, $ionicConfig, $ionicHistory) {
       }
     }
 
-    self.updatePositions(titleEle, widths.titleLeft, widths.titleRight, widths.css, widths.showPrevTitle);
+    self.updatePositions(titleEle, widths.titleLeft, widths.titleRight, widths.buttonsRight, widths.css, widths.showPrevTitle);
   };
 
 
@@ -209,9 +208,6 @@ function($scope, $element, $attrs, $animate, $ionicConfig, $ionicHistory) {
       if (margin > 10) {
         updateTitleLeft = updateTitleRight = margin;
       }
-      if (buttonsRight && titleEle.offsetWidth < titleEle.scrollWidth) {
-        updateTitleRight = buttonsRight + 5;
-      }
     }
 
     return {
@@ -226,7 +222,7 @@ function($scope, $element, $attrs, $animate, $ionicConfig, $ionicHistory) {
   };
 
 
-  self.updatePositions = function(titleEle, updateTitleLeft, updateTitleRight, updateCss, showPreviousTitle) {
+  self.updatePositions = function(titleEle, updateTitleLeft, updateTitleRight, buttonsRight, updateCss, showPreviousTitle) {
     // only make DOM updates when there are actual changes
     if (updateTitleLeft !== titleLeft) {
       titleEle.style.left = updateTitleLeft ? updateTitleLeft + 'px' : '';
@@ -235,7 +231,15 @@ function($scope, $element, $attrs, $animate, $ionicConfig, $ionicHistory) {
     if (updateTitleRight !== titleRight) {
       titleEle.style.right = updateTitleRight ? updateTitleRight + 'px' : '';
       titleRight = updateTitleRight;
+
+      ionic.requestAnimationFrame(function(){
+        if (titleEle.offsetWidth < titleEle.scrollWidth) {
+          titleRight = buttonsRight + 5;
+          titleEle.style.right = titleRight ? titleRight + 'px' : '';
+        }
+      });
     }
+
     if (updateCss !== titleCss) {
       updateCss && titleEle.classList.add(updateCss);
       titleCss && titleEle.classList.remove(titleCss);

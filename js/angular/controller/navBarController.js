@@ -33,14 +33,17 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
 
   self.init = function() {
     // create two nav bar blocks which will trade out which one is shown
-    self.createHeaderBar(false);
-    self.createHeaderBar(true);
+    self.createHeaderBar(false, 'bar-positive');
+    self.createHeaderBar(true, 'bar-assertive');
   };
 
 
   self.createHeaderBar = function(isActive, navBarClass) {
     var containerEle = jqLite( '<div class="nav-bar-block">' );
-    var headerBarEle = jqLite( '<ion-header-bar>' ).addClass($attrs.class);
+    if (isActive) {
+      containerEle.addClass('nav-bar-block-active');
+    }
+    var headerBarEle = jqLite( '<ion-header-bar>' ).addClass($attrs.class).addClass(navBarClass);
     var titleEle = jqLite('<div class="title">');
     var navEle = {};
     var lastViewBtnsEle = {};
@@ -58,8 +61,8 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
     navEle[SECONDARY_BUTTONS] = createNavElement(SECONDARY_BUTTONS);
 
     // append and position buttons
-    positionButtons(navEle[PRIMARY_BUTTONS], PRIMARY_BUTTONS);
-    positionButtons(navEle[SECONDARY_BUTTONS], SECONDARY_BUTTONS);
+    positionButtons(navEle[PRIMARY_BUTTONS], PRIMARY_BUTTONS, true && !isActive);
+    positionButtons(navEle[SECONDARY_BUTTONS], SECONDARY_BUTTONS, true && !isActive);
 
     // compile header and append to the DOM
     containerEle.append(headerBarEle);
@@ -131,10 +134,11 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
         headerBarCtrl.destroy();
         containerEle.scope().$destroy();
         containerEle = headerBarEle = titleEle = leftButtonsEle = rightButtonsEle = navEle[PRIMARY_BUTTONS] = navEle[SECONDARY_BUTTONS] = navEle[BACK_BUTTON] = null;
-      }
+      },
+      id: Math.random()
     };
 
-    function positionButtons(btnsEle, buttonType) {
+    function positionButtons(btnsEle, buttonType, isInitialLoad) {
       if (!btnsEle) return;
 
       var appendToRight = (buttonType == SECONDARY_BUTTONS && navBarConfig.positionSecondaryButtons() != 'left') ||
@@ -144,6 +148,9 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
         // right side
         if (!rightButtonsEle) {
           rightButtonsEle = jqLite('<div class="buttons buttons-b">');
+          if (isInitialLoad) {
+            rightButtonsEle.css('opacity', 0);
+          }
           headerBarEle.append(rightButtonsEle);
         }
         if (buttonType == SECONDARY_BUTTONS) {
@@ -156,6 +163,9 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
         // left side
         if (!leftButtonsEle) {
           leftButtonsEle = jqLite('<div class="buttons buttons-a">');
+          if (isInitialLoad) {
+            leftButtonsEle.css('opacity', 0);
+          }
           if (navEle[BACK_BUTTON]) {
             navEle[BACK_BUTTON].after(leftButtonsEle);
           } else {
@@ -188,7 +198,7 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
   self.updateNavBar = function(viewData) {
     self.enable();
     var enteringHeaderBar = self.isInitialized ? getOffScreenHeaderBar() : getOnScreenHeaderBar();
-    var leavingHeaderBar = getOnScreenHeaderBar();
+    var leavingHeaderBar = self.isInitialized ? getOnScreenHeaderBar() : null;
 
     // update if the entering header should show the back button or not
     self.showBackButton(viewData.showBack, enteringHeaderBar);
@@ -201,9 +211,7 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
     enteringHeaderBar.setButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
 
     // begin transition of entering and leaving header bars
-    if (leavingHeaderBar) {
-      self.transition(enteringHeaderBar, leavingHeaderBar, viewData);
-    }
+    if(leavingHeaderBar) self.transition(enteringHeaderBar, leavingHeaderBar, viewData);
 
     self.isInitialized = true;
   };
@@ -217,20 +225,20 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
         forward: {
           title: {
             from: {
-              opacity: '0',
+              opacity: 0,
               x: 'right'
             },
             to: {
-              opacity: '',
+              opacity: 1,
               x: 'center'
             }
           },
           buttons: {
             from: {
-              opacity: '0',
+              opacity: 0,
             },
             to: {
-              opacity: '',
+              opacity: 1,
             }
           },
           backButtonText: {
@@ -241,20 +249,20 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
         back: {
           title: {
             from: {
-              opacity: '0',
+              opacity: 0,
               x: 'left'
             },
             to: {
-              opacity: '',
+              opacity: 1,
               x: 'center'
             }
           },
           buttons: {
             from: {
-              opacity: '0',
+              opacity: 0,
             },
             to: {
-              opacity: '',
+              opacity: 1,
             }
           },
           backButtonText: {
@@ -268,20 +276,20 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
         forward: {
           title: {
             from: {
-              opacity: '',
+              opacity: 1,
               x: 'center'
             },
             to: {
-              opacity: '0',
+              opacity: 0,
               x: 'left'
             }
           },
           buttons: {
             from: {
-              opacity: '',
+              opacity: 1,
             },
             to: {
-              opacity: '0',
+              opacity: 0,
             }
           },
           backButtonText: {
@@ -292,20 +300,20 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
         back: {
           title: {
             from: {
-              opacity: '',
+              opacity: 1,
               x: 'center'
             },
             to: {
-              opacity: '0',
+              opacity: 0,
               x: 'right'
             }
           },
           buttons: {
             from: {
-              opacity: '',
+              opacity: 1,
             },
             to: {
-              opacity: '0',
+              opacity: 0,
             }
           },
           backButtonText: {
@@ -329,28 +337,18 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
       var startEnterTransition = enteringHeaderBarCtrl.transition( animation.entering[viewData.direction] );
       var startLeaveTransition = leavingHeaderBar.controller().transition( animation.leaving[viewData.direction] );
 
-      enteringHeaderBar.containerEle().css({
-        zIndex: ''
-      });
-      enteringHeaderBar.headerBarEle().css({
-        background: ''
-      });
-      leavingHeaderBar.containerEle().css({
-        zIndex: '11'
-      });
-      leavingHeaderBar.headerBarEle().css({
-        background: 'transparent'
-      });
-
       $timeout(function(){
         enteringHeaderBarCtrl.alignTitle();
-        startEnterTransition();
-        startLeaveTransition();
+        startEnterTransition && startEnterTransition();
+        startLeaveTransition && startLeaveTransition();
 
         for (var x=0; x<headerBars.length; x++) {
           headerBars[x].isActive = false;
         }
         enteringHeaderBar.isActive = true;
+
+        enteringHeaderBar.containerEle().addClass('nav-bar-block-active');
+        leavingHeaderBar.containerEle().removeClass('nav-bar-block-active');
       }, 16);
 
     }

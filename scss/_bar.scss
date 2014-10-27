@@ -360,6 +360,14 @@
   z-index: $z-index-bar;
 }
 
+.nav-bar-block-active {
+  z-index: $z-index-bar-above;
+
+  .bar {
+    background: transparent;
+  }
+}
+
 .bar .back-button.hide,
 .bar .buttons .hide {
   display: none;

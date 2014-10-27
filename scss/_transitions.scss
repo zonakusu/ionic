@@ -79,7 +79,7 @@ $ios-transition-container-bg-color:         #000 !default;
     @include transition-duration( $ios-transition-view-duration );
     @include transition-timing-function( $ios-transition-view-timing-function );
     -webkit-transition-property: opacity, -webkit-transform, transition;
-            transition-property: opacity. transform, -webkit-transform;
+            transition-property: opacity, transform, -webkit-transform;
   }
 
 }
