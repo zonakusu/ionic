@@ -96,12 +96,17 @@ IonicModule
       }
 
       if (!hasInnerText) {
+        var buttonTextEle = $document[0].createElement('span');
+        buttonTextEle.className = 'button-text';
+
         if (!hasButtonText && $ionicConfig.backButton.text()) {
-          buttonEle.innerHTML += '<span class="button-text">' + $ionicConfig.backButton.text() + '</span>';
+          buttonTextEle.innerHTML += '<span class="default-title">' + $ionicConfig.backButton.text() + '</span>';
         }
         if (!hasPreviousTitle && $ionicConfig.backButton.previousTitleText()) {
-          buttonEle.innerHTML += '<span class="previous-title"></span>';
+          buttonTextEle.innerHTML += '<span class="previous-title"></span>';
         }
+        buttonEle.appendChild(buttonTextEle);
+
       }
 
       tElement.attr('class', 'hide');

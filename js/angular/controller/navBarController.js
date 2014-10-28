@@ -211,7 +211,7 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
     enteringHeaderBar.setButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
 
     // begin transition of entering and leaving header bars
-    if(leavingHeaderBar) self.transition(enteringHeaderBar, leavingHeaderBar, viewData);
+    self.transition(enteringHeaderBar, leavingHeaderBar, viewData);
 
     self.isInitialized = true;
   };
@@ -241,10 +241,6 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
               opacity: 1,
             }
           },
-          backButtonText: {
-            from: {},
-            to: {}
-          },
         },
         back: {
           title: {
@@ -264,10 +260,6 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
             to: {
               opacity: 1,
             }
-          },
-          backButtonText: {
-            from: {},
-            to: {}
           },
         }
       },
@@ -292,10 +284,6 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
               opacity: 0,
             }
           },
-          backButtonText: {
-            from: {},
-            to: {}
-          },
         },
         back: {
           title: {
@@ -316,10 +304,6 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
               opacity: 0,
             }
           },
-          backButtonText: {
-            from: {},
-            to: {}
-          },
         },
       }
 
@@ -329,16 +313,18 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
     var enteringHeaderBarCtrl = enteringHeaderBar.controller();
     enteringHeaderBarCtrl.resetBackButton();
 
-
+    var startEnterTransition, startLeaveTransition;
     var animation = $ionicConfig.navBar.transitionScript(aniScript);
 
     if (animation) {
+      startEnterTransition = enteringHeaderBarCtrl.transition( animation.entering[viewData.direction] );
+      if (leavingHeaderBar) {
+        startLeaveTransition = leavingHeaderBar.controller().transition( animation.leaving[viewData.direction] );
+      }
+    }
 
-      var startEnterTransition = enteringHeaderBarCtrl.transition( animation.entering[viewData.direction] );
-      var startLeaveTransition = leavingHeaderBar.controller().transition( animation.leaving[viewData.direction] );
-
-      $timeout(function(){
-        enteringHeaderBarCtrl.alignTitle();
+    $timeout(function() {
+      enteringHeaderBarCtrl.alignTitle().then(function(){
         startEnterTransition && startEnterTransition();
         startLeaveTransition && startLeaveTransition();
 
@@ -348,10 +334,9 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
         enteringHeaderBar.isActive = true;
 
         enteringHeaderBar.containerEle().addClass('nav-bar-block-active');
-        leavingHeaderBar.containerEle().removeClass('nav-bar-block-active');
-      }, 16);
-
-    }
+        leavingHeaderBar && leavingHeaderBar.containerEle().removeClass('nav-bar-block-active');
+      });
+    }, 16);
 
   };
 

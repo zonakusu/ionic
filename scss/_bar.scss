@@ -208,6 +208,7 @@
     &.back-button {
       padding: 0;
       opacity: 0.8;
+      display: block;
       .back-button-title {
         display: inline-block;
         vertical-align: middle;
@@ -241,7 +242,7 @@
     display: inherit;
   }
   .buttons span {
-    display: inline-flex;
+    display: inline-block;
   }
 
   // Place the last button in a bar on the right of the bar
@@ -364,8 +365,13 @@
   z-index: $z-index-bar-above;
 
   .bar {
+    background: red;
     background: transparent;
   }
+}
+
+.nav-bar-block:nth-of-type(2) {
+  //top: 44px;
 }
 
 .bar .back-button.hide,

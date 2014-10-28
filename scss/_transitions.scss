@@ -75,7 +75,8 @@ $ios-transition-container-bg-color:         #000 !default;
 .ios-nav-bar {
 
   .title,
-  .buttons {
+  .buttons,
+  .button-text {
     @include transition-duration( $ios-transition-view-duration );
     @include transition-timing-function( $ios-transition-view-timing-function );
     -webkit-transition-property: opacity, -webkit-transform, transition;
