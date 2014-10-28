@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Scroll Click Tests</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <link rel="stylesheet" href="../../../../dist/css/ionic.css">
+    <script src="../../../../dist/js/ionic.bundle.js"></script>
+    <style>
+      li {padding: 0.5em;border-bottom: 1px solid #000;}
+      li:nth-last-child(1) {border: 0;}
+      #info {margin-bottom: 0.5em;}
+      #counter {float: right;}
+      #scroller {height: 20em;border: 1px solid #000;overflow: auto; -webkit-overflow-scrolling: touch;}
+    </style>
+  </head>
+  <body>
+    <article role="main">
+      <header><h1>Scroll Test</h1></header>
+      <div id="info">
+        <span id="counter"></span>
+        <span id="status"></span> <br>
+        <span id="firedCounter"></span>
+      </div>
+      <div id="scroller"></div>
+    </article>
+  </body>
+</html>
+<script>
+
+
+  function loadTest() {
+
+    var html = '<ul>',
+        scroller = document.getElementById('scroller'),
+        counter = document.getElementById('counter'),
+        count = 0,
+        firedCount = 0,
+        firedCounter = document.getElementById('firedCounter'),
+        status = document.getElementById('status');
+
+    for (var i = 0; i < 200; i++) {
+      html += '<li>Line ' + (i+1) + '</li>';
+    };
+
+    html += '</ul>';
+
+    scroller.innerHTML = html;
+
+    function scrollStatus(pos) {
+      status.innerHTML = 'Scroll position: ' +pos + ' px';
+      firedCount++;
+      firedCounter.innerHTML = 'Scroll events Fired: ' + firedCount;
+    }
+
+    function updateCounter() {
+
+      counter.innerHTML = 'Counter: ' +count;
+      count ++;
+    }
+
+
+    function updateScroll() {
+      scrollStatus(scroller.scrollTop);
+    }
+
+    updateScroll();
+
+    scroller.addEventListener('scroll', updateScroll, false)
+
+    window.setInterval(updateCounter, 500);
+
+  }
+
+  window.addEventListener('load', loadTest, false);
+
+</script>
