@@ -39,8 +39,11 @@
      * @param immediate {boolean} whether to call immediately or after the wait interval
      */
      debounce: function(func, wait, immediate) {
+
+      console.log('gets here')
       var timeout, args, context, timestamp, result;
       return function() {
+        console.log('gets here too')
         context = this;
         args = arguments;
         timestamp = new Date();

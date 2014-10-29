@@ -6,6 +6,7 @@
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
     <link rel="stylesheet" href="../../../../dist/css/ionic.css">
     <script src="../../../../dist/js/ionic.bundle.js"></script>
+    <script src="./scroll3.js"></script>
     <style>
       li {padding: 0.5em;border-bottom: 1px solid #000;}
       li:nth-last-child(1) {border: 0;}
@@ -21,6 +22,7 @@
         <span id="counter"></span>
         <span id="status"></span> <br>
         <span id="firedCounter"></span>
+        <span id="pollyFiredCounter"></span>
       </div>
       <div id="scroller"></div>
     </article>
@@ -37,6 +39,8 @@
         count = 0,
         firedCount = 0,
         firedCounter = document.getElementById('firedCounter'),
+        pollyFiredCount = 0,
+        pollyFiredCounter = document.getElementById('pollyFiredCounter'),
         status = document.getElementById('status');
 
     for (var i = 0; i < 200; i++) {
@@ -50,7 +54,7 @@
     function scrollStatus(pos) {
       status.innerHTML = 'Scroll position: ' +pos + ' px';
       firedCount++;
-      firedCounter.innerHTML = 'Scroll events Fired: ' + firedCount;
+      firedCounter.innerHTML = 'scroll Fired: ' + firedCount;
     }
 
     function updateCounter() {
@@ -66,9 +70,15 @@
 
     updateScroll();
 
-    scroller.addEventListener('scroll', updateScroll, false)
+    scroller.addEventListener('scroll', updateScroll, false);
+    ionic.on('$scroll', function(){
+      pollyFiredCount++;
+      pollyFiredCounter.innerHTML = '$scroll Fired: ' + firedCount;
+    }, scroller);
 
     window.setInterval(updateCounter, 500);
+
+    initScrollPolyfill(scroller);
 
   }
 
