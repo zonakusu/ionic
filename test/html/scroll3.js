@@ -18,7 +18,7 @@ function initScrollPolyfill(element){
   var debounceScrollEvents = ionic.Utils.debounce(loopScrollEvent, 100, false);
 
   function startScroll(){
-    console.log('scroll detected', isScrolling,activePolyfillEnabled);
+    //console.log('scroll detected', isScrolling,activePolyfillEnabled);
     if((!isScrolling) && activePolyfillEnabled){
       isScrolling = true;
       debounceScrollEvents();
@@ -29,17 +29,20 @@ function initScrollPolyfill(element){
   }
 
   function loopScrollEvent() {
-    console.log(lastScrollPos, scrollParent.scrollTop);
+    timestamp = new Date();
+    console.log(timestamp.getTime(), scrollParent.scrollTop);
     if(lastScrollPos == scrollParent.scrollTop){
       console.log('stopping');
       isScrolling = false;
       ionic.trigger('$scrollend');
     }else{
       ionic.trigger('$scroll',{target:element}, eventBubbles);
-      console.log('keep on scrolling');
+      //console.log('keep on scrolling');
       lastScrollPos = scrollParent.scrollTop;
       debounceScrollEvents();
     }
   }
+
+  ionic.on('touchend', function(){console.log('TOUCHEND')}, element);
 }
 
