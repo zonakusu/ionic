@@ -86,8 +86,8 @@ IonicModule
       alignTitle: PLATFORM,
       positionPrimaryButtons: PLATFORM,
       positionSecondaryButtons: PLATFORM,
-      transition: 'ios-nav-bar',
-      transitionScript: 'ios-nav-bar'
+      transition: PLATFORM,
+      transitionFn: PLATFORM
     },
     backButton: {
       enabled: PLATFORM,
@@ -122,7 +122,57 @@ IonicModule
     navBar: {
       alignTitle: 'center',
       positionPrimaryButtons: 'left',
-      positionSecondaryButtons: 'right'
+      positionSecondaryButtons: 'right',
+      transition: 'ios-nav-bar',
+
+      transitionFn: function(enteringCtrl, leavingCtrl) {
+
+        function setStyles(ctrl, opacity, titleX, backTextX) {
+          var title = ctrl.getEle('title');
+          var btnsA = ctrl.getEle('buttons-a');
+          var btnsB = ctrl.getEle('buttons-b');
+          var backBtn = ctrl.getEle('back-button');
+          var backText = ctrl.getEle('back-text');
+
+          title.style.opacity = btnsA.style.opacity = btnsB.style.opacity = backBtn.style.opacity = opacity;
+
+          title.style[ionic.CSS.TRANSFORM] = 'translate3d(' + titleX + 'px,0,0)';
+          backText.style[ionic.CSS.TRANSFORM] = 'translate3d(' + backTextX + 'px,0,0)';
+        }
+
+        function enter(ctrlA, ctrlB, value) {
+          if (!ctrlA) return;
+          var titleX = (ctrlA.titleTextX() + ctrlA.titleWidth()) * (1 - value);
+          var backTextX = (ctrlB.titleTextX() - ctrlA.backButtonTextLeft()) * (1 - value);
+          setStyles(ctrlA, value, titleX, backTextX);
+        }
+
+        function leave(ctrlA, ctrlB, value) {
+          if (!ctrlA) return;
+          var titleX = (-(ctrlA.titleTextX() - ctrlB.backButtonTextLeft()) - (ctrlA.titleLeftRight())) * value;
+          setStyles(ctrlA, 1 - value, titleX, 0);
+        }
+
+        return {
+          forward: {
+            enter: function(value) {
+              enter(enteringCtrl, leavingCtrl, value);
+            },
+            leave: function(value) {
+              leave(leavingCtrl, enteringCtrl, value);
+            }
+          },
+          back: {
+            enter: function(value) {
+              leave(enteringCtrl, leavingCtrl, 1-value);
+            },
+            leave: function(value) {
+              enter(leavingCtrl, enteringCtrl, 1-value);
+            }
+          }
+        };
+      }
+
     },
     backButton: {
       icon: 'ion-ios7-arrow-back',
@@ -146,7 +196,7 @@ IonicModule
   // iOS
   // -------------------------
   setPlatformConfig('ios', {
-    navBar: {
+    backButton: {
       icon: 'ion-ios7-arrow-back',
     }
   });

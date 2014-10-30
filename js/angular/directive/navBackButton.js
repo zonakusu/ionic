@@ -75,7 +75,7 @@ IonicModule
         if (childNode.nodeType === 1) {
           if (hasIconClass(childNode)) {
             hasIcon = true;
-          } else if (childNode.classList.contains('button-text')) {
+          } else if (childNode.classList.contains('default-title')) {
             hasButtonText = true;
           } else if (childNode.classList.contains('previous-title')) {
             hasPreviousTitle = true;
@@ -97,7 +97,7 @@ IonicModule
 
       if (!hasInnerText) {
         var buttonTextEle = $document[0].createElement('span');
-        buttonTextEle.className = 'button-text';
+        buttonTextEle.className = 'back-text';
 
         if (!hasButtonText && $ionicConfig.backButton.text()) {
           buttonTextEle.innerHTML += '<span class="default-title">' + $ionicConfig.backButton.text() + '</span>';

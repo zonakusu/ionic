@@ -211,132 +211,55 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
     enteringHeaderBar.setButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
 
     // begin transition of entering and leaving header bars
-    self.transition(enteringHeaderBar, leavingHeaderBar, viewData);
+    self.transition(enteringHeaderBar, leavingHeaderBar, viewData.direction);
 
     self.isInitialized = true;
   };
 
 
-  self.transition = function(enteringHeaderBar, leavingHeaderBar, viewData) {
-
-    var aniScript = {
-
-      entering: {
-        forward: {
-          title: {
-            from: {
-              opacity: 0,
-              x: 'right'
-            },
-            to: {
-              opacity: 1,
-              x: 'center'
-            }
-          },
-          buttons: {
-            from: {
-              opacity: 0,
-            },
-            to: {
-              opacity: 1,
-            }
-          },
-        },
-        back: {
-          title: {
-            from: {
-              opacity: 0,
-              x: 'left'
-            },
-            to: {
-              opacity: 1,
-              x: 'center'
-            }
-          },
-          buttons: {
-            from: {
-              opacity: 0,
-            },
-            to: {
-              opacity: 1,
-            }
-          },
-        }
-      },
-
-      leaving: {
-        forward: {
-          title: {
-            from: {
-              opacity: 1,
-              x: 'center'
-            },
-            to: {
-              opacity: 0,
-              x: 'left'
-            }
-          },
-          buttons: {
-            from: {
-              opacity: 1,
-            },
-            to: {
-              opacity: 0,
-            }
-          },
-        },
-        back: {
-          title: {
-            from: {
-              opacity: 1,
-              x: 'center'
-            },
-            to: {
-              opacity: 0,
-              x: 'right'
-            }
-          },
-          buttons: {
-            from: {
-              opacity: 1,
-            },
-            to: {
-              opacity: 0,
-            }
-          },
-        },
-      }
-
-    };
-
-
+  self.transition = function(enteringHeaderBar, leavingHeaderBar, direction) {
     var enteringHeaderBarCtrl = enteringHeaderBar.controller();
-    enteringHeaderBarCtrl.resetBackButton();
+    var leavingHeaderBarCtrl = leavingHeaderBar && leavingHeaderBar.controller();
 
-    var startEnterTransition, startLeaveTransition;
-    var animation = $ionicConfig.navBar.transitionScript(aniScript);
+    var transitionFn = $ionicConfig.navBar.transitionFn();
 
-    if (animation) {
-      startEnterTransition = enteringHeaderBarCtrl.transition( animation.entering[viewData.direction] );
-      if (leavingHeaderBar) {
-        startLeaveTransition = leavingHeaderBar.controller().transition( animation.leaving[viewData.direction] );
-      }
+    if (!self.isInitialized || !transitionFn) {
+      $timeout(function(){
+        enteringHeaderBarCtrl.alignTitle().then(transitionComplete);
+      });
+      return;
     }
 
-    $timeout(function() {
+    enteringHeaderBarCtrl.stage(true);
+
+    enteringHeaderBarCtrl.resetBackButton();
+
+    var animation = transitionFn(enteringHeaderBarCtrl, leavingHeaderBarCtrl);
+
+    animation[direction].enter(0);
+
+    $timeout(function(){
       enteringHeaderBarCtrl.alignTitle().then(function(){
-        startEnterTransition && startEnterTransition();
-        startLeaveTransition && startLeaveTransition();
 
-        for (var x=0; x<headerBars.length; x++) {
-          headerBars[x].isActive = false;
-        }
-        enteringHeaderBar.isActive = true;
+        enteringHeaderBarCtrl.stage(false);
 
-        enteringHeaderBar.containerEle().addClass('nav-bar-block-active');
-        leavingHeaderBar && leavingHeaderBar.containerEle().removeClass('nav-bar-block-active');
+        animation[direction].enter(1);
+        animation[direction].leave(1);
+
+        transitionComplete();
       });
+
     }, 16);
+
+    function transitionComplete() {
+      for (var x=0; x<headerBars.length; x++) {
+        headerBars[x].isActive = false;
+      }
+      enteringHeaderBar.isActive = true;
+
+      enteringHeaderBar.containerEle().addClass('nav-bar-block-active');
+      leavingHeaderBar && leavingHeaderBar.containerEle().removeClass('nav-bar-block-active');
+    }
 
   };
 

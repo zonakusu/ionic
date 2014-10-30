@@ -9,6 +9,13 @@ IonicModule
   '$ionicConfig',
   '$ionicHistory',
 function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
+  var TITLE = 'title';
+  var BACK_TEXT = 'back-text';
+  var BACK_BUTTON = 'back-button';
+  var DEFAULT_TITLE = 'default-title';
+  var PREVIOUS_TITLE = 'previous-title';
+  var HIDE = 'hide';
+
   var self = this;
   var titleText = '';
   var previousTitleText = '';
@@ -16,12 +23,14 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
   var titleRight = 0;
   var titleCss = '';
   var isBackShown;
+  var titleTextWidth = 0;
 
 
   self.title = function(newTitleText) {
     if (arguments.length && newTitleText !== titleText) {
-      getEle('.title').innerHTML = newTitleText;
+      getEle(TITLE).innerHTML = newTitleText;
       titleText = newTitleText;
+      titleTextWidth = 0;
     }
     return titleText;
   };
@@ -29,9 +38,9 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
 
   self.showBack = function(shouldShow) {
     if (arguments.length && shouldShow !== isBackShown) {
-      var backBtnEle = getEle('.back-button');
+      var backBtnEle = getEle(BACK_BUTTON);
       if (backBtnEle) {
-        backBtnEle.classList[ shouldShow ? 'remove' : 'add' ]('hide');
+        backBtnEle.classList[ shouldShow ? 'remove' : 'add' ](HIDE);
         isBackShown = shouldShow;
       }
     }
@@ -39,101 +48,73 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
   };
 
 
-  self.transition = function(animation) {
-    if (!animation) return;
-
-    var titleEle = getEle('.title');
-
-    var titleStyle = getEleStyle('.title');
-    var buttonsAStyle = getEleStyle('.buttons-a');
-    var buttonsBStyle = getEleStyle('.buttons-b');
-    var backButtonStyle = getEleStyle('.back-button');
-
-    var backButtonTextEle = getEle('.button-text');
-
-    titleStyle.transition = backButtonTextEle.style.transition = '0s linear';
-    setTransition(titleStyle, animation.title.from);
-
-    setTransition(buttonsAStyle, animation.buttons.from);
-    setTransition(buttonsBStyle, animation.buttons.from);
-    setTransition(backButtonStyle, animation.buttons.from);
-
-    if (!titleEle.ionicTextWidth) {
-      loadTextBounds(titleEle);
+  self.titleTextWidth = function() {
+    if (!titleTextWidth) {
+      var bounds = ionic.DomUtil.getTextBounds( getEle(TITLE) );
+      titleTextWidth = Math.min(bounds && bounds.width || 30);
     }
-
-    var titleTextX = (titleEle.parentElement.offsetWidth / 2) - (titleEle.ionicTextWidth / 2);
-
-    if (animation.title.to.x == 'center') {
-      setTransition(backButtonTextEle.style, {
-        x: titleTextX
-      });
-    }
-
-    return function() {
-      titleStyle.transition = backButtonTextEle.style.transition = '';
-
-      var backButtonTextX = backButtonTextEle.offsetLeft + 5;
-      if (animation.title.to.x == 'left') {
-        animation.title.to.x = -(titleTextX - backButtonTextX);
-
-      } else if (animation.title.to.x == 'center') {
-        setTransition(backButtonTextEle.style, {
-          x: 0
-        });
-
-      }
-
-      setTransition(titleStyle, animation.title.to);
-
-      setTransition(buttonsAStyle, animation.buttons.to);
-      setTransition(buttonsBStyle, animation.buttons.to);
-      setTransition(backButtonStyle, animation.buttons.to);
-    };
+    return titleTextWidth;
   };
 
 
-  function setTransition(eleStyle, animationSetting) {
-    if ( isDefined(animationSetting.opacity) ) {
-      eleStyle.opacity = animationSetting.opacity;
+  self.titleWidth = function() {
+    var titleWidth = self.titleTextWidth();
+    var offsetWidth = getEle(TITLE).offsetWidth;
+    if (offsetWidth < titleWidth) {
+      titleWidth = offsetWidth + (titleLeft - titleRight - 5);
     }
+    return titleWidth;
+  };
 
-    if ( isDefined(animationSetting.x) ) {
-      var transform;
-      if (animationSetting.x == 'right') {
-        transform = 'translate3d(100%,0,0)';
-      } else if (animationSetting.x == 'left') {
-        transform = 'translate3d(-100%,0,0)';
-      } else if (animationSetting.x == 'center') {
-        transform = 'translate3d(0,0,0)';
-      } else {
-        transform = 'translate3d(' + animationSetting.x + 'px,0,0)';
-      }
-      eleStyle[ionic.CSS.TRANSFORM] = transform;
+
+  self.titleTextX = function() {
+    return ($element[0].offsetWidth / 2) - (self.titleWidth() / 2);
+  };
+
+
+  self.backButtonTextLeft = function() {
+    var offsetLeft = 0;
+    var ele = getEle(BACK_TEXT);
+    while(ele) {
+      offsetLeft += ele.offsetLeft;
+      ele = ele.parentElement;
     }
+    return offsetLeft;
+  };
 
-  }
+
+  self.stage = function(val) {
+    $element[0].classList[ val ? 'add' : 'remove' ]('nav-bar-stage');
+  };
+
+
+  self.noTransition = function(val) {
+    $element[0].classList[ val ? 'add' : 'remove' ]('nav-bar-no-transition');
+  };
 
 
   self.resetBackButton = function() {
-    if ($ionicConfig.backButton.previousTitleText() ) {
-      var previousTitleEle = getEle('.previous-title');
+    if ( $ionicConfig.backButton.previousTitleText() ) {
+      var previousTitleEle = getEle(PREVIOUS_TITLE);
       if (previousTitleEle) {
-        previousTitleEle.classList.remove('hide');
+        previousTitleEle.classList.remove(HIDE);
 
         var newPreviousTitleText = $ionicHistory.backTitle();
 
         if (newPreviousTitleText !== previousTitleText) {
           previousTitleText = previousTitleEle.innerHTML = newPreviousTitleText;
         }
-
+      }
+      var defaultTitleEle = getEle(DEFAULT_TITLE);
+      if (defaultTitleEle) {
+        defaultTitleEle.classList.remove(HIDE);
       }
     }
   };
 
 
   self.alignTitle = function(align) {
-    var titleEle = getEle('.title');
+    var titleEle = getEle(TITLE);
 
     align = align || $attrs.alignTitle || $ionicConfig.navBar.alignTitle();
 
@@ -142,8 +123,9 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
     if ( isBackShown && previousTitleText && $ionicConfig.backButton.previousTitleText() ) {
       var previousTitleWidths = self.calcWidths(align, true);
 
-      var maxButtonsWidth = $element[0].offsetWidth * 0.3;
-      if (previousTitleWidths.buttonsLeft < maxButtonsWidth) {
+      var availableTitleWidth = $element[0].offsetWidth - previousTitleWidths.titleLeft - previousTitleWidths.titleRight;
+
+      if (self.titleTextWidth() <= availableTitleWidth) {
         widths = previousTitleWidths;
       }
     }
@@ -153,8 +135,8 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
 
 
   self.calcWidths = function(align, isPreviousTitle) {
-    var titleEle = getEle('.title');
-    var backBtnEle = getEle('.back-button');
+    var titleEle = getEle(TITLE);
+    var backBtnEle = getEle(BACK_BUTTON);
     var x, y, z, b, c, d, childSize, bounds;
     var childNodes = $element[0].childNodes;
     var buttonsLeft = 0;
@@ -179,7 +161,7 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
           continue;
         }
 
-        if (c.classList.contains('hide')) {
+        if (c.classList.contains(HIDE)) {
           continue;
         }
 
@@ -188,15 +170,15 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
           for (y = 0; y < c.children.length; y++) {
             b = c.children[y];
 
-            if (b.classList.contains('button-text')) {
+            if (b.classList.contains(BACK_TEXT)) {
               for (z = 0; z < b.children.length; z++) {
                 d = b.children[z];
 
                 if (isPreviousTitle) {
-                  if ( d.classList.contains('default-title') ) continue;
-                  backButtonWidth += b.offsetWidth;
+                  if ( d.classList.contains(DEFAULT_TITLE) ) continue;
+                  backButtonWidth += d.offsetWidth;
                 } else {
-                  if ( d.classList.contains('previous-title') ) continue;
+                  if ( d.classList.contains(PREVIOUS_TITLE) ) continue;
                   backButtonWidth += d.offsetWidth;
                 }
               }
@@ -206,7 +188,7 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
             }
 
           }
-          childSize += backButtonWidth;
+          childSize = backButtonWidth;
 
         } else {
           // not the title, not the back button, not a hidden element
@@ -282,8 +264,8 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
     }
 
     if ($ionicConfig.backButton.previousTitleText()) {
-      getEle('.previous-title').classList[ showPreviousTitle ? 'remove' : 'add']('hide');
-      getEle('.default-title').classList[ showPreviousTitle ? 'add' : 'remove']('hide');
+      getEle(PREVIOUS_TITLE).classList[ showPreviousTitle ? 'remove' : 'add'](HIDE);
+      getEle(DEFAULT_TITLE).classList[ showPreviousTitle ? 'add' : 'remove'](HIDE);
     }
 
     ionic.requestAnimationFrame(function(){
@@ -291,9 +273,6 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
         titleRight = buttonsRight + 5;
         titleEle.style.right = titleRight ? titleRight + 'px' : '';
       }
-
-      loadTextBounds(titleEle);
-
       deferred.resolve();
     });
 
@@ -301,23 +280,20 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
   };
 
 
+  self.titleLeftRight = function() {
+    return titleLeft - titleRight;
+  };
+
+
   var eleCache = {};
-  function getEle(selector) {
-    if (!eleCache[selector]) {
-      eleCache[selector] = $element[0].querySelector(selector);
+  function getEle(className) {
+    if (!eleCache[className]) {
+      eleCache[className] = $element[0].querySelector('.' + className);
     }
-    return eleCache[selector];
+    return eleCache[className];
   }
+  self.getEle = getEle;
 
-  function getEleStyle(selector) {
-    var ele = getEle(selector);
-    return ele ? ele.style : {};
-  }
-
-  function loadTextBounds(ele) {
-    var bounds = ionic.DomUtil.getTextBounds(ele);
-    ele.ionicTextWidth = Math.min(bounds && bounds.width || 50, ele.offsetWidth);
-  }
 
   self.destroy = function() {
     for(var n in eleCache) eleCache[n] = null;
