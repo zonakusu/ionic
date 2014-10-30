@@ -61,7 +61,7 @@ IonicModule
         buttonEle.setAttribute('ng-click', '$goBack()');
       }
 
-      buttonEle.className = 'button back-button hide buttons';
+      buttonEle.className = 'button back-button hide buttons ' + (tElement.attr('class') || '');
       buttonEle.innerHTML = tElement.html() || '';
 
       var childNode;
