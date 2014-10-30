@@ -33,8 +33,8 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
 
   self.init = function() {
     // create two nav bar blocks which will trade out which one is shown
-    self.createHeaderBar(false, 'bar-positive');
-    self.createHeaderBar(true, 'bar-assertive');
+    self.createHeaderBar(false);
+    self.createHeaderBar(true);
   };
 
 
@@ -43,7 +43,7 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
     if (isActive) {
       containerEle.addClass('nav-bar-block-active');
     }
-    var headerBarEle = jqLite( '<ion-header-bar>' ).addClass($attrs.class).addClass(navBarClass);
+    var headerBarEle = jqLite( '<ion-header-bar>' ).addClass($attrs.class);
     var titleEle = jqLite('<div class="title">');
     var navEle = {};
     var lastViewBtnsEle = {};
@@ -211,7 +211,7 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
 
     var transitionFn = $ionicConfig.navBar.transitionFn();
 
-    if (!self.isInitialized || !angular.isFunction(transitionFn)) {
+    if (!self.isInitialized || !angular.isFunction(transitionFn) || (direction != 'forward' && direction != 'back')) {
       $timeout(function(){
         enteringHeaderBarCtrl.alignTitle().then(transitionComplete);
       });
