@@ -269,8 +269,11 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
     }
 
     if ($ionicConfig.backButton.previousTitleText()) {
-      getEle(PREVIOUS_TITLE).classList[ showPreviousTitle ? 'remove' : 'add'](HIDE);
-      getEle(DEFAULT_TITLE).classList[ showPreviousTitle ? 'add' : 'remove'](HIDE);
+      var prevTitle = getEle(PREVIOUS_TITLE);
+      var defaultTitle = getEle(DEFAULT_TITLE);
+
+      prevTitle && prevTitle.classList[ showPreviousTitle ? 'remove' : 'add'](HIDE);
+      defaultTitle && defaultTitle.classList[ showPreviousTitle ? 'add' : 'remove'](HIDE);
     }
 
     ionic.requestAnimationFrame(function(){
@@ -304,11 +307,9 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
   }
 
 
-  self.destroy = function() {
+  $scope.$on('$destroy', function() {
     for(var n in eleCache) eleCache[n] = null;
-  };
-
-  $scope.$on('$destroy', self.destroy);
+  });
 
 }]);
 

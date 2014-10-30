@@ -322,9 +322,6 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
   $scope.$on('$destroy', function(){
     $scope.$parent.$hasHeader = false;
     $element.parent().removeData(DATA_NAV_BAR_CTRL);
-    for (var x=0; x<headerBars.length; x++) {
-      headerBars[x].destroy();
-    }
     headerBars = null;
     deregisterInstance();
   });
