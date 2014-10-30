@@ -5,10 +5,9 @@ function initScrollPolyfill(element){
   var isScrolling = false;
   var lastScrollPos;
   //var scrollParent = ionic.DomUtil.getParentOrSelfWithClass(element,'scroller', 10);
-  var scrollParent = document.getElementById('scroller');
+  var scrollParent = document.getElementById('scroller'); // TODO: use domUtil to look for 'scroll' class
   console.log(scrollParent);
   var activePolyfillEnabled = true; // TODO: make this configurable
-  var eventBubbles = false; // TODO: make this configurable
   var eventObj = {
     target:element,
     scrollParent:scrollParent
@@ -30,7 +29,7 @@ function initScrollPolyfill(element){
 
   function loopScrollEvent() {
     timestamp = new Date();
-    console.log(timestamp.getTime(), scrollParent.scrollTop);
+    console.log(timestamp.getTime() - 1414700000000, scrollParent.scrollTop);
     if(lastScrollPos == scrollParent.scrollTop){
       console.log('stopping');
       isScrolling = false;
