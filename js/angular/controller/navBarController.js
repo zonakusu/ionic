@@ -23,7 +23,7 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
   var navElementHtml = {};
   var titleText = '';
   var previousTitleText;
-  var isShown;
+  var isVisible = true;
   var navBarConfig = $ionicConfig.navBar;
 
   $element.parent().data(DATA_NAV_BAR_CTRL, self);
@@ -252,14 +252,30 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
   };
 
 
-  self.showBar = function(show) {
-    if (show && !isShown) {
+  self.showBar = function(shouldShow) {
+    self.visibleBar(shouldShow);
+    $scope.$parent.$hasHeader = !!shouldShow;
+  };
+
+
+  self.visibleBar = function(shouldShow) {
+    if (shouldShow && !isVisible) {
       $element.removeClass(CSS_HIDE);
-    } else if (!show && isShown) {
+    } else if (!shouldShow && isVisible) {
       $element.addClass(CSS_HIDE);
     }
-    $scope.$parent.$hasHeader = !!show;
-    isShown = show;
+    isVisible = shouldShow;
+  };
+
+
+  self.enable = function() {
+    // set primary to show first
+    self.visibleBar(true);
+
+    // set non primary to hide second
+    for (var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
+      if ($ionicNavBarDelegate._instances[x] !== self) $ionicNavBarDelegate._instances[x].visibleBar(false);
+    }
   };
 
 
@@ -278,17 +294,6 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
       titleText = newTitleText;
     }
     return titleText;
-  };
-
-
-  self.enable = function() {
-    // set primary to show first
-    self.showBar(true);
-
-    // set non primary to hide second
-    for (var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
-      if ($ionicNavBarDelegate._instances[x] !== self) $ionicNavBarDelegate._instances[x].showBar(false);
-    }
   };
 
 
