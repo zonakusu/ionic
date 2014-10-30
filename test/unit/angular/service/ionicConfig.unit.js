@@ -71,19 +71,19 @@ describe('$ionicConfigProvider', function() {
 
   it('should set default platform value for ios platform', function() {
     module('ionic', function($ionicConfigProvider) {
-      $ionicConfigProvider.platform.android.menus.transition('android-menu');
+      $ionicConfigProvider.platform.android.navBar.transition('custom-transition');
     });
     inject(function($ionicConfig) {
       ionic.Platform.setPlatform('ios');
-      expect($ionicConfig.menus.transition()).toBe('push-menu');
+      expect($ionicConfig.navBar.transition()).toBe('ios-nav-bar');
 
-      $ionicConfig.platform.ios.menus.transition('ios-whatnot');
+      $ionicConfig.platform.ios.navBar.transition('ios-whatnot');
 
       ionic.Platform.setPlatform('android');
-      expect($ionicConfig.menus.transition()).toBe('android-menu');
+      expect($ionicConfig.navBar.transition()).toBe('custom-transition');
 
       ionic.Platform.setPlatform('ios');
-      expect($ionicConfig.menus.transition()).toBe('ios-whatnot');
+      expect($ionicConfig.navBar.transition()).toBe('ios-whatnot');
     });
   });
 
@@ -100,9 +100,6 @@ describe('$ionicConfigProvider', function() {
         },
         backButton: {
           icon: 'ion-win32-arrow-back'
-        },
-        menus: {
-          transition: 'win32-menu'
         }
       });
     });
@@ -124,18 +121,18 @@ describe('$ionicConfigProvider', function() {
 
   it('should set a new default in the default platform', function() {
     module('ionic', function($ionicConfigProvider) {
-      $ionicConfigProvider.platform.default.menus.transition('new-default');
-      $ionicConfigProvider.platform.ios.menus.transition('new-ios');
-      $ionicConfigProvider.platform.android.menus.transition('new-android');
+      $ionicConfigProvider.platform.default.navBar.transition('new-default');
+      $ionicConfigProvider.platform.ios.navBar.transition('new-ios');
+      $ionicConfigProvider.platform.android.navBar.transition('new-android');
     });
     inject(function($ionicConfig) {
-      expect($ionicConfig.menus.transition()).toBe('new-default');
+      expect($ionicConfig.navBar.transition()).toBe('new-default');
 
       ionic.Platform.setPlatform('ios');
-      expect($ionicConfig.menus.transition()).toBe('new-ios');
+      expect($ionicConfig.navBar.transition()).toBe('new-ios');
 
       ionic.Platform.setPlatform('android');
-      expect($ionicConfig.menus.transition()).toBe('new-android');
+      expect($ionicConfig.navBar.transition()).toBe('new-android');
     });
   });
 

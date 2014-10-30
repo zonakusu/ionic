@@ -107,6 +107,9 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
       containerEle: function() {
         return containerEle;
       },
+      headerBarEle: function() {
+        return headerBarEle;
+      },
       afterLeave: function() {
         headerBarInstance.removeButtons(PRIMARY_BUTTONS);
         headerBarInstance.removeButtons(SECONDARY_BUTTONS);

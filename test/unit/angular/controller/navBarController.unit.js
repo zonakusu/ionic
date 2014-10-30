@@ -249,7 +249,8 @@ describe('$ionNavBar controller', function() {
 
     var headerBar = ctrl.createHeaderBar();
     scope.$digest();
-    expect(headerBar.backButtonEle().text()).toBe(scope.buttonText);
+    var backButtonEle = headerBar.headerBarEle().find('button');
+    expect(backButtonEle.text()).toBe(scope.buttonText);
   });
 
 });
