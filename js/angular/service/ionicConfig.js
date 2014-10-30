@@ -93,10 +93,7 @@ IonicModule
       enabled: PLATFORM,
       icon: PLATFORM,
       text: PLATFORM,
-      previousTitleText: PLATFORM,
-    },
-    menus: {
-      transition: PLATFORM
+      previousTitleText: PLATFORM
     },
     tabs: {
       position: PLATFORM,
@@ -128,16 +125,17 @@ IonicModule
       transitionFn: function(enteringCtrl, leavingCtrl) {
 
         function setStyles(ctrl, opacity, titleX, backTextX) {
-          var title = ctrl.getEle('title');
-          var btnsA = ctrl.getEle('buttons-a');
-          var btnsB = ctrl.getEle('buttons-b');
-          var backBtn = ctrl.getEle('back-button');
-          var backText = ctrl.getEle('back-text');
+          var css = { opacity: opacity };
 
-          title.style.opacity = btnsA.style.opacity = btnsB.style.opacity = backBtn.style.opacity = opacity;
+          ctrl.setCss('buttons-a', css);
+          ctrl.setCss('buttons-b', css);
+          ctrl.setCss('back-button', css);
 
-          title.style[ionic.CSS.TRANSFORM] = 'translate3d(' + titleX + 'px,0,0)';
-          backText.style[ionic.CSS.TRANSFORM] = 'translate3d(' + backTextX + 'px,0,0)';
+          css[ionic.CSS.TRANSFORM] = 'translate3d(' + titleX + 'px,0,0)';
+          ctrl.setCss('title', css);
+
+          css[ionic.CSS.TRANSFORM] = 'translate3d(' + backTextX + 'px,0,0)';
+          ctrl.setCss('back-text', css);
         }
 
         function enter(ctrlA, ctrlB, value) {
@@ -177,10 +175,7 @@ IonicModule
     backButton: {
       icon: 'ion-ios7-arrow-back',
       text: 'Back',
-      previousTitleText: true,
-    },
-    menus: {
-      transition: 'push-menu'
+      previousTitleText: true
     },
     tabs: {
       position: '',
@@ -197,7 +192,7 @@ IonicModule
   // -------------------------
   setPlatformConfig('ios', {
     backButton: {
-      icon: 'ion-ios7-arrow-back',
+      icon: 'ion-ios7-arrow-back'
     }
   });
 
@@ -213,15 +208,16 @@ IonicModule
       alignTitle: 'left',
       positionPrimaryButtons: 'right',
       positionSecondaryButtons: 'right',
+      transition: 'android-transition',
+      transitionFn: 'none'
     },
     backButton: {
-      icon: 'ion-android-arrow-back'
+      icon: 'ion-android-arrow-back',
+      text: '',
+      previousTitleText: false
     },
     tabs: {
       type: 'tabs-striped'
-    },
-    menus: {
-      transition: 'drawer-menu'
     }
   });
 

@@ -72,6 +72,11 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
   };
 
 
+  self.titleLeftRight = function() {
+    return titleLeft - titleRight;
+  };
+
+
   self.backButtonTextLeft = function() {
     var offsetLeft = 0;
     var ele = getEle(BACK_TEXT);
@@ -280,8 +285,13 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
   };
 
 
-  self.titleLeftRight = function() {
-    return titleLeft - titleRight;
+  self.setCss = function(elementClassname, css) {
+    var ele = getEle(elementClassname);
+    if (ele) {
+      for (var prop in css) {
+        ele.style[prop] = css[prop];
+      }
+    }
   };
 
 
@@ -292,7 +302,6 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
     }
     return eleCache[className];
   }
-  self.getEle = getEle;
 
 
   self.destroy = function() {

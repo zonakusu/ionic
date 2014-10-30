@@ -107,18 +107,6 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
       containerEle: function() {
         return containerEle;
       },
-      headerBarEle: function() {
-        return headerBarEle;
-      },
-      primaryButtonsEle: function() {
-        return navEle[PRIMARY_BUTTONS];
-      },
-      secondaryButtonsEle: function() {
-        return navEle[SECONDARY_BUTTONS];
-      },
-      backButtonEle: function() {
-        return navEle[BACK_BUTTON];
-      },
       afterLeave: function() {
         headerBarInstance.removeButtons(PRIMARY_BUTTONS);
         headerBarInstance.removeButtons(SECONDARY_BUTTONS);
@@ -223,7 +211,7 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
 
     var transitionFn = $ionicConfig.navBar.transitionFn();
 
-    if (!self.isInitialized || !transitionFn) {
+    if (!self.isInitialized || !angular.isFunction(transitionFn)) {
       $timeout(function(){
         enteringHeaderBarCtrl.alignTitle().then(transitionComplete);
       });
