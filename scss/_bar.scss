@@ -368,16 +368,9 @@
 
 .nav-bar-container .nav-bar-block .nav-bar-stage {
   .title,
-  .buttons {
-    opacity: 0;
-  }
-}
-
-.nav-bar-container .nav-bar-block .nav-bar-stage,
-.nav-bar-container .nav-bar-block .nav-bar-no-transition {
-  .title,
   .buttons,
   .back-text {
+    opacity: 0;
     @include transition-duration(0s);
   }
 }

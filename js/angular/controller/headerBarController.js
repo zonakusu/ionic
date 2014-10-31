@@ -93,11 +93,6 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
   };
 
 
-  self.noTransition = function(val) {
-    $element[0].classList[ val ? 'add' : 'remove' ]('nav-bar-no-transition');
-  };
-
-
   self.resetBackButton = function() {
     if ( $ionicConfig.backButton.previousTitleText() ) {
       var previousTitleEle = getEle(PREVIOUS_TITLE);
