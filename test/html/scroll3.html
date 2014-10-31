@@ -71,14 +71,18 @@
     updateScroll();
 
     scroller.addEventListener('scroll', updateScroll, false);
-    ionic.on('$scroll', function(){
+    angular.element(scroller).on('$scroll', function(){
       pollyFiredCount++;
       pollyFiredCounter.innerHTML = '$scroll Fired: ' + firedCount;
-    }, scroller);
+      console.log(now(), scroller.scrollTop)
+    });
+    scroller.addEventListener('touchend', function(){
+      console.log('RELEASED!')
+    });
 
     window.setInterval(updateCounter, 500);
 
-    initScrollPolyfill(scroller);
+    setupScrollPolyfill(angular.element(scroller));
 
   }
 
