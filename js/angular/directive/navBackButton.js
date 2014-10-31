@@ -41,70 +41,83 @@
  *   };
  * }
  * ```
- *
- * Displaying the previous title on the back button, again using
- * {@link ionic.service:$ionicNavBarDelegate}.
- *
- * ```html
- * <ion-nav-bar ng-controller="MyCtrl">
- *   <ion-nav-back-button class="button-icon">
- *     <i class="icon ion-arrow-left-c"></i>{% raw %}{{getPreviousTitle() || 'Back'}}{% endraw %}
- *   </ion-nav-back-button>
- * </ion-nav-bar>
- * ```
- * ```js
- * function MyCtrl($scope, $ionicNavBarDelegate) {
- *   $scope.getPreviousTitle = function() {
- *     return $ionicNavBarDelegate.getPreviousTitle();
- *   };
- * }
- * ```
  */
 IonicModule
-.directive('ionNavBackButton', [
-  '$animate',
-  '$rootScope',
-  '$sanitize',
-  '$ionicNavBarConfig',
-  '$ionicNgClick',
-function($animate, $rootScope, $sanitize, $ionicNavBarConfig, $ionicNgClick) {
-  var backIsShown = false;
-  //If the current viewstate does not allow a back button,
-  //always hide it.
-  $rootScope.$on('$viewHistory.historyChange', function(e, data) {
-    backIsShown = !!data.showBack;
-  });
+.directive('ionNavBackButton', ['$ionicConfig', '$document', function($ionicConfig, $document) {
   return {
     restrict: 'E',
     require: '^ionNavBar',
     compile: function(tElement, tAttrs) {
-      tElement.addClass('button back-button ng-hide');
 
-      var hasIconChild = !!(tElement.html() || '').match(/class=.*?ion-/);
-
-      return function($scope, $element, $attr, navBarCtrl) {
-
-        // Add a default back button icon based on the nav config, unless one is set
-        if (!hasIconChild && $element[0].className.indexOf('ion-') === -1) {
-          $element.addClass($ionicNavBarConfig.backButtonIcon);
+      // clone the back button, but as a <div>
+      var buttonEle = $document[0].createElement('button');
+      for (var n in tAttrs) {
+        if (isString(tAttrs[n])) {
+          buttonEle.setAttribute(n, tAttrs[n]);
         }
+      }
 
-        //Default to ngClick going back, but don't override a custom one
-        if (!isDefined($attr.ngClick)) {
-          $ionicNgClick($scope, $element, navBarCtrl.back);
-        }
+      if (!tElement.attr('ng-click')) {
+        buttonEle.setAttribute('ng-click', '$goBack()');
+      }
 
-        //Make sure both that a backButton is allowed in the first place,
-        //and that it is shown by the current view.
-        $scope.$watch(function() {
-          if(isDefined($attr.fromTitle)) {
-            $element[0].innerHTML = '<span class="back-button-title">' + $sanitize($scope.oldTitle) + '</span>';
+      buttonEle.className = 'button back-button hide buttons ' + (tElement.attr('class') || '');
+      buttonEle.innerHTML = tElement.html() || '';
+
+      var childNode;
+      var hasIcon = hasIconClass(tElement[0]);
+      var hasInnerText;
+      var hasButtonText;
+      var hasPreviousTitle;
+
+      for (var x = 0; x < tElement[0].childNodes.length; x++) {
+        childNode = tElement[0].childNodes[x];
+        if (childNode.nodeType === 1) {
+          if (hasIconClass(childNode)) {
+            hasIcon = true;
+          } else if (childNode.classList.contains('default-title')) {
+            hasButtonText = true;
+          } else if (childNode.classList.contains('previous-title')) {
+            hasPreviousTitle = true;
           }
-          return !!(backIsShown && $scope.backButtonShown);
-        }, ionic.animationFrameThrottle(function(show) {
-          if (show) $animate.removeClass($element, 'ng-hide');
-          else $animate.addClass($element, 'ng-hide');
-        }));
+        } else if (!hasInnerText && childNode.nodeType === 3) {
+          hasInnerText = !!childNode.nodeValue.trim();
+        }
+      }
+
+      function hasIconClass(ele) {
+        return /ion-|icon/.test(ele.className);
+      }
+
+      var defaultIcon = $ionicConfig.backButton.icon();
+      if (!hasIcon && defaultIcon && defaultIcon !== 'none') {
+        buttonEle.innerHTML = '<i class="icon ' + defaultIcon + '"></i> ' + buttonEle.innerHTML;
+        buttonEle.className += ' button-clear';
+      }
+
+      if (!hasInnerText) {
+        var buttonTextEle = $document[0].createElement('span');
+        buttonTextEle.className = 'back-text';
+
+        if (!hasButtonText && $ionicConfig.backButton.text()) {
+          buttonTextEle.innerHTML += '<span class="default-title">' + $ionicConfig.backButton.text() + '</span>';
+        }
+        if (!hasPreviousTitle && $ionicConfig.backButton.previousTitleText()) {
+          buttonTextEle.innerHTML += '<span class="previous-title"></span>';
+        }
+        buttonEle.appendChild(buttonTextEle);
+
+      }
+
+      tElement.attr('class', 'hide');
+      tElement.empty();
+
+      return {
+        pre: function($scope, $element, $attr, navBarCtrl) {
+          // only register the plain HTML, the navBarCtrl takes care of scope/compile/link
+          navBarCtrl.navElement('backButton', buttonEle.outerHTML);
+          buttonEle = null;
+        }
       };
     }
   };

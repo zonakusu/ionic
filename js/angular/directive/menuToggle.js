@@ -24,14 +24,10 @@ IonicModule
 .directive('menuToggle', function() {
   return {
     restrict: 'AC',
-    require: '^ionSideMenus',
-    link: function($scope, $element, $attr, sideMenuCtrl) {
+    link: function($scope, $element, $attr) {
       $element.bind('click', function(){
-        if ($attr.menuToggle === 'right') {
-          sideMenuCtrl.toggleRight();
-        } else {
-          sideMenuCtrl.toggleLeft();
-        }
+        var sideMenuCtrl = $element.inheritedData('$ionSideMenusController');
+        sideMenuCtrl && sideMenuCtrl.toggle($attr.menuToggle);
       });
     }
   };

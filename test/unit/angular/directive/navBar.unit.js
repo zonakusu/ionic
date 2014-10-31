@@ -1,9 +1,9 @@
-describe('ionNavBar', function() {
+xdescribe('ionNavBar', function() {
   describe('$ionicNavBar controller', function() {
 
     var backView = { go: jasmine.createSpy('backViewGo') };
     beforeEach(module('ionic', function($provide) {
-      $provide.value('$ionicViewService', {
+      $provide.value('$ionicHistory', {
         getBackView: jasmine.createSpy('getBackView').andCallFake(function() {
           return backView;
         })
@@ -47,10 +47,10 @@ describe('ionNavBar', function() {
       expect(ctrl.rightButtonsElement.hasClass('right-buttons')).toBe(true);
     });
 
-    it('should go back', inject(function($ionicViewService) {
+    it('should go back', inject(function($ionicHistory) {
       var ctrl = setup();
       ctrl.back();
-      expect($ionicViewService.getBackView).toHaveBeenCalled();
+      expect($ionicHistory.getBackView).toHaveBeenCalled();
       expect(backView.go).toHaveBeenCalled();
     }));
 

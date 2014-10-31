@@ -22,7 +22,7 @@
  *   .config(function($stateProvider, $ionicConfigProvider) {
  *
  *     // disable preemptive template caching globally
- *     $ionicConfigProvider.prefetchTemplates(false);
+ *     $ionicConfigProvider.templates.prefetch(false);
  *
  *     // disable individual states
  *     $stateProvider
@@ -68,7 +68,7 @@ function($http, $templateCache, $timeout, $ionicConfig) {
 
   // run through methods - internal method
   var run = function(){
-    if($ionicConfig.prefetchTemplates === false)return;
+    if($ionicConfig.templates.prefetch() === false)return;
     //console.log('prefetching', toCache);
     //for testing
     $ionicTemplateCache._runCount++;
@@ -101,7 +101,7 @@ function($stateProvider, $ionicConfigProvider) {
   var stateProviderState = $stateProvider.state;
   $stateProvider.state = function(stateName, definition) {
     // don't even bother if it's disabled. note, another config may run after this, so it's not a catch-all
-    if(typeof definition === 'object' && $ionicConfigProvider.prefetchTemplates() !== false){
+    if(typeof definition === 'object' && $ionicConfigProvider.templates.prefetch() !== false){
       var enabled = definition.prefetchTemplate !== false;
       if(enabled && isString(definition.templateUrl))templatesToCache.push(definition.templateUrl);
       if(angular.isObject(definition.views)){

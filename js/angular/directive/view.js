@@ -30,53 +30,16 @@
  * {@link ionic.directive:ionNavBar} by default.
  */
 IonicModule
-.directive('ionView', ['$ionicViewService', '$rootScope', '$animate',
-           function( $ionicViewService,   $rootScope,   $animate) {
+.directive('ionView', function() {
   return {
     restrict: 'EA',
     priority: 1000,
-    require: ['^?ionNavBar', '^?ionModal'],
-    compile: function(tElement, tAttrs, transclude) {
+    controller: '$ionView',
+    compile: function(tElement) {
       tElement.addClass('pane');
-      tElement[0].removeAttribute('title');
-
-      return function link($scope, $element, $attr, ctrls) {
-        var navBarCtrl = ctrls[0];
-        var modalCtrl = ctrls[1];
-
-        //Don't use the ionView if we're inside a modal or there's no navbar
-        if (!navBarCtrl || modalCtrl) {
-          return;
-        }
-
-        if (angular.isDefined($attr.title)) {
-
-          var initialTitle = $attr.title;
-          navBarCtrl.changeTitle(initialTitle, $scope.$navDirection);
-
-          // watch for changes in the title, don't set initial value as changeTitle does that
-          $attr.$observe('title', function(val, oldVal) {
-            navBarCtrl.setTitle(val);
-          });
-        }
-
-        var hideBackAttr = angular.isDefined($attr.hideBackButton) ?
-          $attr.hideBackButton :
-          'false';
-        $scope.$watch(hideBackAttr, function(value) {
-          // Should we hide a back button when this tab is shown
-          navBarCtrl.showBackButton(!value);
-        });
-
-        var hideNavAttr = angular.isDefined($attr.hideNavBar) ?
-          $attr.hideNavBar :
-          'false';
-        $scope.$watch(hideNavAttr, function(value) {
-          // Should the nav bar be hidden for this view or not?
-          navBarCtrl.showBar(!value);
-        });
-
+      return function link($scope, $element, $attrs, viewCtrl) {
+        viewCtrl.init();
       };
     }
   };
-}]);
+});
