@@ -292,7 +292,9 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
     var ele = getEle(elementClassname);
     if (ele) {
       for (var prop in css) {
-        ele.style[prop] = css[prop];
+        if (ele['$style_' + prop] !== css[prop]) {
+          ele['$style_' + prop] = ele.style[prop] = css[prop];
+        }
       }
     }
   };
