@@ -9,10 +9,26 @@ function($scope, $element, $attrs, $compile, $ionicHistory) {
   var self = this;
   var navElementHtml = {};
   var navViewCtrl;
-  var navBarDelegate;
+  var navBarDelegateHandle;
+  var hasViewHeaderBar;
+
+  var deregIonNavBarInit = $scope.$on('ionNavBar.init', function(ev, delegateHandle){
+    // this view has its own ion-nav-bar, remember the navBarDelegateHandle for this view
+    ev.stopPropagation();
+    navBarDelegateHandle = delegateHandle;
+  });
+
+  var deregIonHeaderBarInit = $scope.$on('ionHeaderBar.init', function(ev){
+    // this view has its own ion-header-bar, remember it should trump other nav bars
+    ev.stopPropagation();
+    hasViewHeaderBar = true;
+  });
 
 
   self.init = function() {
+    deregIonNavBarInit();
+    deregIonHeaderBarInit();
+
     var modalCtrl = $element.inheritedData('$ionModalController');
     navViewCtrl = $element.inheritedData('$ionNavViewController');
 
@@ -30,11 +46,6 @@ function($scope, $element, $attrs, $compile, $ionicHistory) {
     });
   };
 
-  $scope.$on('$ionNavBar.init', function(ev, delegateHandle){
-    ev.stopPropagation();
-    navBarDelegate = delegateHandle;
-  });
-
   self.beforeEnter = function(ev, transitionData) {
     // this event was emitted, starting at intial ion-view, then bubbles up
     // only the first ion-view should do something with it, parent ion-views should ignore
@@ -50,7 +61,8 @@ function($scope, $element, $attrs, $compile, $ionicHistory) {
         showBack: transitionData.showBack && !$attrs.hideBackButton,
         primaryButtons: generateButton(navElementHtml.primaryButtons),
         secondaryButtons: generateButton(navElementHtml.secondaryButtons),
-        navBarDelegate: navBarDelegate
+        navBarDelegate: navBarDelegateHandle,
+        hasHeaderBar: hasViewHeaderBar
       });
     }
   };

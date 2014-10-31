@@ -37,7 +37,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
     self.createHeaderBar(false);
     self.createHeaderBar(true);
 
-    $scope.$emit('$ionNavBar.init', delegateHandle);
+    $scope.$emit('ionNavBar.init', delegateHandle);
   };
 
 
@@ -189,8 +189,15 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
   };
 
 
-  self.updateNavBar = function(viewData) {
-    self.enable();
+  self.update = function(viewData) {
+    var direction = viewData.direction;
+    var showNavBar = !viewData.hasHeaderBar;
+
+    if (!showNavBar) {
+      direction = 'none';
+    }
+
+    self.enable(showNavBar);
     var enteringHeaderBar = self.isInitialized ? getOffScreenHeaderBar() : getOnScreenHeaderBar();
     var leavingHeaderBar = self.isInitialized ? getOnScreenHeaderBar() : null;
 
@@ -205,7 +212,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
     enteringHeaderBar.setButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
 
     // begin transition of entering and leaving header bars
-    self.transition(enteringHeaderBar, leavingHeaderBar, viewData.direction);
+    self.transition(enteringHeaderBar, leavingHeaderBar, direction);
 
     self.isInitialized = true;
   };
@@ -217,7 +224,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
 
     var transitionFn = $ionicConfig.navBar.transitionFn();
 
-    if (!self.isInitialized || !angular.isFunction(transitionFn) || (direction != 'forward' && direction != 'back')) {
+    if (!self.isInitialized || !angular.isFunction(transitionFn)) {
       $timeout(function(){
         enteringHeaderBarCtrl.alignTitle().then(transitionComplete);
       });
@@ -228,17 +235,16 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
 
     enteringHeaderBarCtrl.resetBackButton();
 
-    var animation = transitionFn(enteringHeaderBarCtrl, leavingHeaderBarCtrl);
+    var transition = transitionFn(enteringHeaderBarCtrl, leavingHeaderBarCtrl, direction, true);
 
-    animation[direction].enter(0);
+    transition(0);
 
     $timeout(function(){
       enteringHeaderBarCtrl.alignTitle().then(function(){
 
         enteringHeaderBarCtrl.stage(false);
 
-        animation[direction].enter(1);
-        animation[direction].leave(1);
+        transition(1);
 
         transitionComplete();
       });
@@ -274,9 +280,9 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
   };
 
 
-  self.enable = function() {
+  self.enable = function(val) {
     // set primary to show first
-    self.visibleBar(true);
+    self.visibleBar(val);
 
     // set non primary to hide second
     for (var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
@@ -328,6 +334,11 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
     var backView = $ionicHistory.backView();
     backView && backView.go();
   };
+
+
+  $scope.$on('ionHeaderBar.init', function(ev){
+    ev.stopPropagation();
+  });
 
 
   $scope.$on('$destroy', function(){

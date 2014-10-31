@@ -122,10 +122,17 @@ IonicModule
       positionSecondaryButtons: 'right',
       transition: 'ios-nav-bar',
 
-      transitionFn: function(enteringCtrl, leavingCtrl) {
+      transitionFn: function(enteringCtrl, leavingCtrl, direction, shouldAnimate) {
+
+        shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
 
         function setStyles(ctrl, opacity, titleX, backTextX) {
-          var css = { opacity: opacity };
+          var css = {
+            opacity: opacity
+          };
+
+          css[ionic.CSS.TRANSITION_DURATION] = (shouldAnimate ? '' : 0);
+          css.opacity = opacity;
 
           ctrl.setCss('buttons-a', css);
           ctrl.setCss('buttons-b', css);
@@ -151,23 +158,16 @@ IonicModule
           setStyles(ctrlA, 1 - value, titleX, 0);
         }
 
-        return {
-          forward: {
-            enter: function(value) {
-              enter(enteringCtrl, leavingCtrl, value);
-            },
-            leave: function(value) {
-              leave(leavingCtrl, enteringCtrl, value);
-            }
-          },
-          back: {
-            enter: function(value) {
-              leave(enteringCtrl, leavingCtrl, 1-value);
-            },
-            leave: function(value) {
-              enter(leavingCtrl, enteringCtrl, 1-value);
-            }
-          }
+        if (direction == 'back') {
+          return function(value) {
+            leave(enteringCtrl, leavingCtrl, 1-value);
+            enter(leavingCtrl, enteringCtrl, 1-value);
+          };
+        }
+
+        return function(value) {
+          enter(enteringCtrl, leavingCtrl, value);
+          leave(leavingCtrl, enteringCtrl, value);
         };
       }
 

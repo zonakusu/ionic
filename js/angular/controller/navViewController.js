@@ -100,7 +100,7 @@ function($scope, $element, $attrs, $ionicNavBarDelegate, $ionicHistory, $ionicVi
       transitionData.transition = $ionicConfig.navBar.transition();
       navBarDelegate = transitionData.navBarDelegate;
       var associatedNavBarCtrl = getAssociatedNavBarCtrl();
-      associatedNavBarCtrl && associatedNavBarCtrl.updateNavBar(transitionData);
+      associatedNavBarCtrl && associatedNavBarCtrl.update(transitionData);
     }
   };
 
