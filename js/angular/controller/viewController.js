@@ -9,6 +9,7 @@ function($scope, $element, $attrs, $compile, $ionicHistory) {
   var self = this;
   var navElementHtml = {};
   var navViewCtrl;
+  var navBarDelegate;
 
 
   self.init = function() {
@@ -29,6 +30,10 @@ function($scope, $element, $attrs, $compile, $ionicHistory) {
     });
   };
 
+  $scope.$on('$ionNavBar.init', function(ev, delegateHandle){
+    ev.stopPropagation();
+    navBarDelegate = delegateHandle;
+  });
 
   self.beforeEnter = function(ev, transitionData) {
     // this event was emitted, starting at intial ion-view, then bubbles up
@@ -44,7 +49,8 @@ function($scope, $element, $attrs, $compile, $ionicHistory) {
         transition: transitionData.transition,
         showBack: transitionData.showBack && !$attrs.hideBackButton,
         primaryButtons: generateButton(navElementHtml.primaryButtons),
-        secondaryButtons: generateButton(navElementHtml.secondaryButtons)
+        secondaryButtons: generateButton(navElementHtml.secondaryButtons),
+        navBarDelegate: navBarDelegate
       });
     }
   };

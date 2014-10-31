@@ -5,12 +5,11 @@ IonicModule
   '$element',
   '$attrs',
   '$compile',
-  '$animate',
   '$timeout',
   '$ionicHistory',
   '$ionicNavBarDelegate',
   '$ionicConfig',
-function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, $ionicNavBarDelegate, $ionicConfig) {
+function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavBarDelegate, $ionicConfig) {
 
   var CSS_HIDE = 'hide';
   var DATA_NAV_BAR_CTRL = '$ionNavBarController';
@@ -28,13 +27,17 @@ function($scope, $element, $attrs, $compile, $animate, $timeout, $ionicHistory, 
 
   $element.parent().data(DATA_NAV_BAR_CTRL, self);
 
-  var deregisterInstance = $ionicNavBarDelegate._registerInstance(this, $attrs.delegateHandle);
+  var delegateHandle = $attrs.delegateHandle || 'navBar' + ionic.Utils.nextUid();
+
+  var deregisterInstance = $ionicNavBarDelegate._registerInstance(self, delegateHandle);
 
 
   self.init = function() {
     // create two nav bar blocks which will trade out which one is shown
     self.createHeaderBar(false);
     self.createHeaderBar(true);
+
+    $scope.$emit('$ionNavBar.init', delegateHandle);
   };
 
 

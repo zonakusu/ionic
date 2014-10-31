@@ -3,13 +3,15 @@ IonicModule
   '$scope',
   '$element',
   '$attrs',
+  '$ionicNavBarDelegate',
   '$ionicHistory',
   '$ionicViewSwitcher',
   '$ionicConfig',
-function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher, $ionicConfig) {
+function($scope, $element, $attrs, $ionicNavBarDelegate, $ionicHistory, $ionicViewSwitcher, $ionicConfig) {
   var self = this;
   var direction;
   var isPrimary = false;
+  var navBarDelegate;
 
 
   self.init = function() {
@@ -31,7 +33,8 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher, $ionicConf
 
   self.register = function(viewLocals) {
     // register that a view is coming in and get info on how it should transition
-    var registerData = $ionicHistory.register($scope, viewLocals);
+    var isAbstractView = viewLocals && viewLocals.$$state && viewLocals.$$state.self && viewLocals.$$state.self.abstract;
+    var registerData = $ionicHistory.register($scope, isAbstractView);
 
     // update which direction
     self.update(registerData);
@@ -53,7 +56,7 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher, $ionicConf
     if (parentNavViewCtrl) {
       // this navView is nested inside another one
       // update the parent to use this direction and not
-      // the another it originally was set to
+      // the other it originally was set to
 
       // inform the parent navView that it is not the primary navView
       parentNavViewCtrl.isPrimary(false);
@@ -91,12 +94,13 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher, $ionicConf
   };
 
 
-  self.beforeEnter = function(transData) {
+  self.beforeEnter = function(transitionData) {
     if (isPrimary) {
       // only update this nav-view's nav-bar if this is the primary nav-view
+      transitionData.transition = $ionicConfig.navBar.transition();
+      navBarDelegate = transitionData.navBarDelegate;
       var associatedNavBarCtrl = getAssociatedNavBarCtrl();
-      transData.transition = $ionicConfig.navBar.transition();
-      associatedNavBarCtrl && associatedNavBarCtrl.updateNavBar(transData);
+      associatedNavBarCtrl && associatedNavBarCtrl.updateNavBar(transitionData);
     }
   };
 
@@ -130,6 +134,13 @@ function($scope, $element, $attrs, $ionicHistory, $ionicViewSwitcher, $ionicConf
 
 
   function getAssociatedNavBarCtrl() {
+    if (navBarDelegate) {
+      for (var x=0; x<$ionicNavBarDelegate._instances.length; x++) {
+        if ($ionicNavBarDelegate._instances[x].$$delegateHandle == navBarDelegate) {
+          return $ionicNavBarDelegate._instances[x];
+        }
+      }
+    }
     return $element.inheritedData('$ionNavBarController');
   }
 

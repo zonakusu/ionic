@@ -228,7 +228,7 @@ function($rootScope, $state, $location, $window) {
 
   return {
 
-    register: function(parentScope, viewLocals) {
+    register: function(parentScope, isAbstractView) {
 
       var currentStateId = getCurrentStateId(),
           hist = getHistory(parentScope),
@@ -241,7 +241,7 @@ function($rootScope, $state, $location, $window) {
           historyId = hist.historyId,
           tmp;
 
-      if ( viewLocals && viewLocals.$$state && viewLocals.$$state.self && viewLocals.$$state.self.abstract ) {
+      if ( isAbstractView ) {
         // abstract states should not register themselves in the history stack
         return {
           action: 'abstractView',
