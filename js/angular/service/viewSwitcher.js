@@ -209,28 +209,29 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig) {
             // 2) attach transitionend events (and fallback timer)
             enteringEle.on(TRANSITIONEND_EVENT, transitionComplete);
             enteringEle.data(DATA_FALLBACK_TIMER, $timeout(transitionComplete, 750));
-
-            // 3) stage entering element, opacity 0, no transition duration
-            navViewAttr(enteringEle, VIEW_STATUS_STAGED);
-
-            // 4) place the elements in the correct step to begin
-            viewTransition.run(0);
-
-            // 5) wait a frame so the styles apply
-            $timeout(onReflow, 16);
-
-          } else {
-            // no animated transition
-            transitionComplete();
           }
+
+          // 3) stage entering element, opacity 0, no transition duration
+          navViewAttr(enteringEle, VIEW_STATUS_STAGED);
+
+          // 4) place the elements in the correct step to begin
+          viewTransition.run(0);
+
+          // 5) wait a frame so the styles apply
+          $timeout(onReflow, 16);
 
           function onReflow() {
             // 6) remove that we're staging the entering element so it can transition
-            navViewAttr(enteringEle, 'entering');
-            navViewAttr(leavingEle, 'leaving');
+            navViewAttr(enteringEle, viewTransition.shouldAnimate ? 'entering' : VIEW_STATUS_ACTIVE);
+            navViewAttr(leavingEle, viewTransition.shouldAnimate ? 'leaving' : VIEW_STATUS_CACHED);
 
             // 7) start the transition
             viewTransition.run(1);
+
+            if (!viewTransition.shouldAnimate) {
+              // no animated transition
+              transitionComplete();
+            }
           }
 
           function transitionComplete() {

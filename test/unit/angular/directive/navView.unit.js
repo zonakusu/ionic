@@ -296,7 +296,7 @@ describe('Ionic nav-view', function() {
     $state.go(iState);
     $q.flush();
     $timeout.flush();
-
+    $timeout.flush();
 
     // verify if ng-repeat has been compiled
     expect(elem.find('li').length).toBe(scope.items.length);
@@ -305,7 +305,7 @@ describe('Ionic nav-view', function() {
     $state.go(jState);
     $q.flush();
     $timeout.flush();
-
+    $timeout.flush();
 
     expect(elem[0].querySelector('[nav-view="active"]').innerText).toBe(jState.template);
 
@@ -313,7 +313,7 @@ describe('Ionic nav-view', function() {
     $state.go(iState);
     $q.flush();
     $timeout.flush();
-
+    $timeout.flush();
 
     // verify if the initial view is correct
     expect(elem[0].querySelectorAll('[nav-view="active"] li').length).toBe(scope.items.length);
@@ -369,6 +369,7 @@ describe('Ionic nav-view', function() {
     $state.go(page1State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     var divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(1);
     expect(divs.eq(0).attr('nav-view')).toBe('active');
@@ -376,6 +377,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(page2State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(2);
@@ -388,6 +390,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(page3State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(3);
@@ -403,6 +406,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(page4State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(4);
@@ -426,17 +430,21 @@ describe('Ionic nav-view', function() {
     $state.go(page1State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
 
     $state.go(page2State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
 
     $state.go(page3State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
 
     $state.go(page4State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
 
     var divs = elem.find('ion-nav-view').find('div');
@@ -449,6 +457,7 @@ describe('Ionic nav-view', function() {
     $state.go(page3State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(3);
     expect(divs.eq(0).attr('nav-view')).toBe('cached');
@@ -458,6 +467,7 @@ describe('Ionic nav-view', function() {
     $state.go(page2State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(2);
     expect(divs.eq(0).attr('nav-view')).toBe('cached');
@@ -465,6 +475,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(page1State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(1);
@@ -479,35 +490,42 @@ describe('Ionic nav-view', function() {
     $state.go(page1State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(1);
 
     $state.go(page2State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(2);
 
     $state.go(page3State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(3);
 
     $state.go(page4State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(3);
 
     $state.go(page3State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(2);
 
     $state.go(page2State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(1);
 
     $state.go(page1State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     expect(elem.find('ion-nav-view').find('div').length).toBe(1);
   }));
@@ -559,11 +577,13 @@ describe('Ionic nav-view', function() {
     $state.go(ionView1State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(1);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
 
     $state.go(ionViewCacheFalseAttrState);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
@@ -571,6 +591,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(ionView2State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
@@ -583,11 +604,13 @@ describe('Ionic nav-view', function() {
     $state.go(ionView1State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(1);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
 
     $state.go(ionViewCacheFalsePropertyState);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
@@ -595,6 +618,7 @@ describe('Ionic nav-view', function() {
 
     $state.go(ionView2State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     expect(elem.find('ion-nav-view').find('ion-view').length).toBe(2);
     expect(elem.find('ion-nav-view').find('ion-view').eq(0).text()).toBe('ionView1');
@@ -609,12 +633,14 @@ describe('Ionic nav-view', function() {
     $state.go(page1State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     var divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(1);
     expect(divs.eq(0).text()).toBe('page1');
 
     $state.go(page2State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(2);
@@ -623,6 +649,7 @@ describe('Ionic nav-view', function() {
     $state.go(page3State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(3);
     expect(divs.eq(2).text()).toBe('page3');
@@ -630,17 +657,20 @@ describe('Ionic nav-view', function() {
     $state.go(page4State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(4);
 
     $state.go(page1State);
     $q.flush();
     $timeout.flush();
+    $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(4);
 
     $state.go(page5State);
     $q.flush();
+    $timeout.flush();
     $timeout.flush();
     divs = elem.find('ion-nav-view').find('div');
     expect(divs.length).toBe(4);
