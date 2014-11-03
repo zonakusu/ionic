@@ -129,33 +129,20 @@ IonicModule
           ionic.DomUtil.cachedCss(ele, css);
         }
 
-        function enter(ele, step, startX) {
-          if (ele) {
-            setStyles(ele, 1, (1-step) * startX);
-          }
-        }
-
-        function leave(ele, step, endX) {
-          if (ele) {
-            var opacity = 1 - 0.1 * step;
-            setStyles(ele, opacity, step * endX);
-          }
-        }
-
         return {
           run: function(step) {
             if (direction == 'forward') {
-              enter(enteringEle, step, 100);
-              leave(leavingEle, step, -33);
+              setStyles(enteringEle, 1, (1-step) * 100);
+              setStyles(leavingEle, (1 - 0.1 * step), step * -33);
 
             } else if (direction == 'back') {
-              leave(enteringEle, 1-step, -33);
-              enter(leavingEle, 1-step, 100);
+              setStyles(enteringEle, (1 - 0.1 * (1-step)), (1-step) * -33);
+              setStyles(leavingEle, 1, step * 100);
 
             } else {
               // swap, enter, exit
-              enter(enteringEle, step, 0);
-              leave(leavingEle, step, 0);
+              setStyles(enteringEle, 1, 0);
+              setStyles(leavingEle, 0, 0);
             }
           },
           shouldAnimate: shouldAnimate
@@ -202,16 +189,16 @@ IonicModule
           setStyles(ctrlA, 1 - step, titleX, 0);
         }
 
-        if (direction == 'back') {
-          return function(step) {
-            leave(enteringCtrl, leavingCtrl, 1-step);
-            enter(leavingCtrl, enteringCtrl, 1-step);
-          };
-        }
-
-        return function(step) {
-          enter(enteringCtrl, leavingCtrl, step);
-          leave(leavingCtrl, enteringCtrl, step);
+        return {
+          run: function(step) {
+            if (direction == 'back') {
+              leave(enteringCtrl, leavingCtrl, 1-step);
+              enter(leavingCtrl, enteringCtrl, 1-step);
+            } else {
+              enter(enteringCtrl, leavingCtrl, step);
+              leave(leavingCtrl, enteringCtrl, step);
+            }
+          }
         };
       }
 
@@ -254,7 +241,37 @@ IonicModule
 
     views: {
       transition: 'android',
-      transitionFn: 'none'
+
+      transitionFn: function(enteringEle, leavingEle, direction, shouldAnimate) {
+        shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
+
+        function setStyles(ele, opacity, viewY) {
+          var css = {};
+          css[ionic.CSS.TRANSITION_DURATION] = (shouldAnimate ? '' : 0);
+          css.opacity = opacity;
+          css[ionic.CSS.TRANSFORM] = 'translate3d(0,' + viewY + '%,0)';
+          ionic.DomUtil.cachedCss(ele, css);
+        }
+
+        return {
+          run: function(step) {
+            if (direction == 'forward') {
+              setStyles(enteringEle, step, (1-step) * 20);
+              setStyles(leavingEle, 1, 0);
+
+            } else if (direction == 'back') {
+              setStyles(enteringEle, 1, 0);
+              setStyles(leavingEle, (1-step), step * 20);
+
+            } else {
+              // swap, enter, exit
+              setStyles(enteringEle, 1, 0);
+              setStyles(leavingEle, 0, 0);
+            }
+          },
+          shouldAnimate: shouldAnimate
+        };
+      }
     },
 
     navBar: {
@@ -262,12 +279,57 @@ IonicModule
       positionPrimaryButtons: 'right',
       positionSecondaryButtons: 'right',
       transition: 'android',
-      transitionFn: 'none'
+
+      transitionFn: function(enteringCtrl, leavingCtrl, direction, shouldAnimate) {
+
+        shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
+
+        function setStyles(ctrl, opacity, titleX, backTextX) {
+          var css = {};
+          css[ionic.CSS.TRANSITION_DURATION] = (shouldAnimate ? '' : 0);
+          css.opacity = opacity;
+
+          ctrl.setCss('buttons-a', css);
+          ctrl.setCss('buttons-b', css);
+          ctrl.setCss('back-button', css);
+
+          css[ionic.CSS.TRANSFORM] = 'translate3d(' + titleX + 'px,0,0)';
+          ctrl.setCss('title', css);
+
+          css[ionic.CSS.TRANSFORM] = 'translate3d(' + backTextX + 'px,0,0)';
+          ctrl.setCss('back-text', css);
+        }
+
+        function enter(ctrlA, ctrlB, step) {
+          if (!ctrlA) return;
+          var titleX = (ctrlA.titleTextX() + ctrlA.titleWidth()) * (1 - step);
+          var backTextX = (ctrlB.titleTextX() - ctrlA.backButtonTextLeft()) * (1 - step);
+          setStyles(ctrlA, step, titleX, backTextX);
+        }
+
+        function leave(ctrlA, ctrlB, step) {
+          if (!ctrlA) return;
+          var titleX = (-(ctrlA.titleTextX() - ctrlB.backButtonTextLeft()) - (ctrlA.titleLeftRight())) * step;
+          setStyles(ctrlA, 1 - step, titleX, 0);
+        }
+
+        return {
+          run: function(step) {
+            if (direction == 'back') {
+              leave(enteringCtrl, leavingCtrl, 1-step);
+              enter(leavingCtrl, enteringCtrl, 1-step);
+            } else {
+              enter(enteringCtrl, leavingCtrl, step);
+              leave(leavingCtrl, enteringCtrl, step);
+            }
+          }
+        };
+      }
     },
 
     backButton: {
       icon: 'ion-android-arrow-back',
-      text: '',
+      text: false,
       previousTitleText: false
     },
 
@@ -324,7 +386,7 @@ IonicModule
           if (configObj[namespace] == PLATFORM) {
             // if the config is set to 'platform', then get this config's platform value
             var platformConfig = stringObj(configProperties.platform, ionic.Platform.platform() + platformPath + '.' + namespace);
-            if (platformConfig) {
+            if (platformConfig || platformConfig === false) {
               return platformConfig;
             }
             // didnt find a specific platform config, now try the default

@@ -237,14 +237,14 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
 
     var navBarTransition = transitionFn(enteringHeaderBarCtrl, leavingHeaderBarCtrl, direction, shouldAnimate);
 
-    navBarTransition(0);
+    navBarTransition.run(0);
 
     $timeout(function(){
       enteringHeaderBarCtrl.alignTitle().then(function(){
 
         enteringHeaderBarCtrl.stage(false);
 
-        navBarTransition(1);
+        navBarTransition.run(1);
 
         transitionComplete();
       });
