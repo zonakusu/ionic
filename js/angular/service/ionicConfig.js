@@ -78,9 +78,10 @@ IonicModule
 
   var configProperties = {
     views: {
-      transition: PLATFORM,
       maxCache: PLATFORM,
-      forwardCache: PLATFORM
+      forwardCache: PLATFORM,
+      transition: PLATFORM,
+      transitionFn: PLATFORM
     },
     navBar: {
       alignTitle: PLATFORM,
@@ -111,26 +112,69 @@ IonicModule
   // Default
   // -------------------------
   setPlatformConfig('default', {
+
     views: {
-      transition: 'ios-transition',
       maxCache: 10,
-      forwardCache: false
+      forwardCache: false,
+      transition: 'ios',
+
+      transitionFn: function(enteringEle, leavingEle, direction, shouldAnimate) {
+        shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
+
+        function setStyles(ele, opacity, viewX) {
+          var css = {};
+          css[ionic.CSS.TRANSITION_DURATION] = (shouldAnimate ? '' : 0);
+          css.opacity = opacity;
+          css[ionic.CSS.TRANSFORM] = 'translate3d(' + viewX + '%,0,0)';
+          ionic.DomUtil.cachedCss(ele, css);
+        }
+
+        function enter(ele, step, startX) {
+          if (ele) {
+            setStyles(ele, 1, (1-step) * startX);
+          }
+        }
+
+        function leave(ele, step, endX) {
+          if (ele) {
+            var opacity = 1 - 0.1 * step;
+            setStyles(ele, opacity, step * endX);
+          }
+        }
+
+        return {
+          run: function(step) {
+            if (direction == 'forward') {
+              enter(enteringEle, step, 100);
+              leave(leavingEle, step, -33);
+
+            } else if (direction == 'back') {
+              leave(enteringEle, 1-step, -33);
+              enter(leavingEle, 1-step, 100);
+
+            } else {
+              // swap, enter, exit
+              enter(enteringEle, step, 0);
+              leave(leavingEle, step, 0);
+            }
+          },
+          shouldAnimate: shouldAnimate
+        };
+      }
     },
+
     navBar: {
       alignTitle: 'center',
       positionPrimaryButtons: 'left',
       positionSecondaryButtons: 'right',
-      transition: 'ios-nav-bar',
+      transition: 'ios',
 
       transitionFn: function(enteringCtrl, leavingCtrl, direction, shouldAnimate) {
 
         shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
 
         function setStyles(ctrl, opacity, titleX, backTextX) {
-          var css = {
-            opacity: opacity
-          };
-
+          var css = {};
           css[ionic.CSS.TRANSITION_DURATION] = (shouldAnimate ? '' : 0);
           css.opacity = opacity;
 
@@ -145,45 +189,49 @@ IonicModule
           ctrl.setCss('back-text', css);
         }
 
-        function enter(ctrlA, ctrlB, value) {
+        function enter(ctrlA, ctrlB, step) {
           if (!ctrlA) return;
-          var titleX = (ctrlA.titleTextX() + ctrlA.titleWidth()) * (1 - value);
-          var backTextX = (ctrlB.titleTextX() - ctrlA.backButtonTextLeft()) * (1 - value);
-          setStyles(ctrlA, value, titleX, backTextX);
+          var titleX = (ctrlA.titleTextX() + ctrlA.titleWidth()) * (1 - step);
+          var backTextX = (ctrlB.titleTextX() - ctrlA.backButtonTextLeft()) * (1 - step);
+          setStyles(ctrlA, step, titleX, backTextX);
         }
 
-        function leave(ctrlA, ctrlB, value) {
+        function leave(ctrlA, ctrlB, step) {
           if (!ctrlA) return;
-          var titleX = (-(ctrlA.titleTextX() - ctrlB.backButtonTextLeft()) - (ctrlA.titleLeftRight())) * value;
-          setStyles(ctrlA, 1 - value, titleX, 0);
+          var titleX = (-(ctrlA.titleTextX() - ctrlB.backButtonTextLeft()) - (ctrlA.titleLeftRight())) * step;
+          setStyles(ctrlA, 1 - step, titleX, 0);
         }
 
         if (direction == 'back') {
-          return function(value) {
-            leave(enteringCtrl, leavingCtrl, 1-value);
-            enter(leavingCtrl, enteringCtrl, 1-value);
+          return function(step) {
+            leave(enteringCtrl, leavingCtrl, 1-step);
+            enter(leavingCtrl, enteringCtrl, 1-step);
           };
         }
 
-        return function(value) {
-          enter(enteringCtrl, leavingCtrl, value);
-          leave(leavingCtrl, enteringCtrl, value);
+        return function(step) {
+          enter(enteringCtrl, leavingCtrl, step);
+          leave(leavingCtrl, enteringCtrl, step);
         };
       }
 
     },
+
     backButton: {
       icon: 'ion-ios7-arrow-back',
       text: 'Back',
       previousTitleText: true
     },
+
     tabs: {
       position: '',
       type: ''
     },
+
     templates: {
       prefetch: true
     }
+
   });
 
 
@@ -191,9 +239,11 @@ IonicModule
   // iOS
   // -------------------------
   setPlatformConfig('ios', {
+
     backButton: {
       icon: 'ion-ios7-arrow-back'
     }
+
   });
 
 
@@ -201,24 +251,30 @@ IonicModule
   // Android
   // -------------------------
   setPlatformConfig('android', {
+
     views: {
-      transition: 'android-transition'
+      transition: 'android',
+      transitionFn: 'none'
     },
+
     navBar: {
       alignTitle: 'left',
       positionPrimaryButtons: 'right',
       positionSecondaryButtons: 'right',
-      transition: 'android-transition',
+      transition: 'android',
       transitionFn: 'none'
     },
+
     backButton: {
       icon: 'ion-android-arrow-back',
       text: '',
       previousTitleText: false
     },
+
     tabs: {
       type: 'tabs-striped'
     }
+
   });
 
 

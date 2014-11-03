@@ -5,7 +5,8 @@ IonicModule
   '$attrs',
   '$compile',
   '$ionicHistory',
-function($scope, $element, $attrs, $compile, $ionicHistory) {
+  '$ionicViewSwitcher',
+function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) {
   var self = this;
   var navElementHtml = {};
   var navViewCtrl;
@@ -58,6 +59,7 @@ function($scope, $element, $attrs, $compile, $ionicHistory) {
         title: $attrs.title,
         direction: transitionData.direction,
         transition: transitionData.transition,
+        shouldAnimate: transitionData.shouldAnimate,
         showBack: transitionData.showBack && !$attrs.hideBackButton,
         primaryButtons: generateButton(navElementHtml.primaryButtons),
         secondaryButtons: generateButton(navElementHtml.secondaryButtons),
@@ -76,8 +78,8 @@ function($scope, $element, $attrs, $compile, $ionicHistory) {
   }
 
 
-  self.afterEnter = function() {
-    $element.removeClass('nav-view-cache');
+  self.afterEnter = function(ev, transitionData) {
+    $ionicViewSwitcher.setActiveView($element.parent());
   };
 
 

@@ -212,17 +212,17 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
     enteringHeaderBar.setButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
 
     // begin transition of entering and leaving header bars
-    self.transition(enteringHeaderBar, leavingHeaderBar, direction);
+    self.transition(enteringHeaderBar, leavingHeaderBar, direction, viewData.shouldAnimate);
 
     self.isInitialized = true;
   };
 
 
-  self.transition = function(enteringHeaderBar, leavingHeaderBar, direction) {
+  self.transition = function(enteringHeaderBar, leavingHeaderBar, direction, shouldAnimate) {
     var enteringHeaderBarCtrl = enteringHeaderBar.controller();
     var leavingHeaderBarCtrl = leavingHeaderBar && leavingHeaderBar.controller();
 
-    var transitionFn = $ionicConfig.navBar.transitionFn();
+    var transitionFn = navBarConfig.transitionFn();
 
     if (!self.isInitialized || !angular.isFunction(transitionFn)) {
       $timeout(function(){
@@ -235,16 +235,16 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
 
     enteringHeaderBarCtrl.resetBackButton();
 
-    var transition = transitionFn(enteringHeaderBarCtrl, leavingHeaderBarCtrl, direction, true);
+    var navBarTransition = transitionFn(enteringHeaderBarCtrl, leavingHeaderBarCtrl, direction, shouldAnimate);
 
-    transition(0);
+    navBarTransition(0);
 
     $timeout(function(){
       enteringHeaderBarCtrl.alignTitle().then(function(){
 
         enteringHeaderBarCtrl.stage(false);
 
-        transition(1);
+        navBarTransition(1);
 
         transitionComplete();
       });

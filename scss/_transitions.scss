@@ -3,68 +3,57 @@
 // iOS View Transitions
 // -------------------------------
 
-$ios-transition-view-duration:              420ms !default;
+$ios-transition-view-duration:              450ms !default;
 $ios-transition-view-timing-function:       cubic-bezier(.3, .9, .4, 1) !default;
 $ios-transition-container-bg-color:         #000 !default;
 
 
-.ios-transition.nav-forward {
-  background-color: $ios-transition-container-bg-color;
+[nav-view-transition="ios"] {
 
-  .nav-view-add {
-    // set the animation for the entering view
-    @include animation-name( slideInFromRight );
+  [nav-view="entering"],
+  [nav-view="leaving"] {
+    @include transition-duration( $ios-transition-view-duration );
+    @include transition-timing-function( $ios-transition-view-timing-function );
+    -webkit-transition-property: opacity, -webkit-transform, transition;
+            transition-property: opacity, transform, -webkit-transform;
+  }
+
+  [nav-view="active"],
+  [nav-view="entering"] {
     z-index: $z-index-view-above;
   }
 
-  .nav-view-remove {
-    // set the animation for the leaving view
-    @include animation-name( slideOutToLeft33, fadeOutToPartial );
+  [nav-view="leaving"] {
     z-index: $z-index-view-below;
+  }
+
+  &[nav-view-direction="forward"],
+  &[nav-view-direction="back"] {
+    background-color: $ios-transition-container-bg-color;
+  }
+
+  &[nav-view-direction="back"],
+  &[nav-view-direction="exit"] {
+
+    [nav-view="entering"] {
+      z-index: $z-index-view-below;
+    }
+
+    [nav-view="leaving"] {
+      z-index: $z-index-view-above;
+    }
+
   }
 
 }
 
-.ios-transition.nav-back {
-  background-color: $ios-transition-container-bg-color;
-
-  .nav-view-add {
-    // set the animation for the entering view
-    @include animation-name( slideInFromLeft33, fadeInFromPartial );
-    z-index: $z-index-view-below;
-  }
-
-  .nav-view-remove {
-    // set the animation for the leaving view
-    @include animation-name( slideOutToRight );
-    z-index: $z-index-view-above;
-  }
-
+[nav-view="cached"] {
+  display: none;
 }
 
-.ios-transition.nav-enter,
-.ios-transition.nav-exit {
-
-  .nav-view-add {
-    // set the animation for the entering view
-    @include animation-name( fadeIn );
-    @include animation-duration( $ios-transition-view-duration / 2 );
-    z-index: $z-index-view-above;
-  }
-
-  .nav-view-remove {
-    // set the animation for the leaving view
-    @include animation-name( fadeOutToPartial );
-    @include animation-duration( $ios-transition-view-duration / 2 );
-    z-index: $z-index-view-below;
-  }
-
-}
-
-.ios-transition .nav-view-add,
-.ios-transition .nav-view-remove {
-  @include animation-duration( $ios-transition-view-duration );
-  @include animation-timing-function( $ios-transition-view-timing-function );
+[nav-view="stage"] {
+  opacity: 0;
+  @include transition-duration( 0 );
 }
 
 
@@ -72,7 +61,7 @@ $ios-transition-container-bg-color:         #000 !default;
 // iOS Nav Bar Transitions
 // -------------------------------
 
-.ios-nav-bar .nav-bar-block {
+[nav-bar-transition="ios"] {
 
   .title,
   .buttons,
@@ -236,56 +225,7 @@ $android-view-slide-start-y:                    20%;
 
 
 
-// Intermediate Settings Between Steps Of A Transition
-// -------------------------------
-// These prevent flickers as elements are added and removed,
-// holds their correct opacity between setting final states
 
-.nav-view-entering, // entering: before animate
-.nav-view-active.nav-view-leaving // leaving: after animate
-{
-  opacity: 0;
-}
-
-.nav-view-entering.nav-view, // entering: during and after animate
-.nav-view-active.nav-view-leaving.ng-animate // leaving: before and during animate
-{
-  opacity: 1;
-}
-
-
-
-
-// Transition Defaults (no animation)
-// -------------------------------
-
-.nav-view-add,
-.nav-bar-add {
-  @include animation-name( fadeIn );
-}
-
-.nav-view-remove,
-.nav-bar-remove {
-  @include animation-name( fadeOut );
-}
-
-.nav-view-add,
-.nav-view-remove,
-.nav-bar-add,
-.nav-bar-remove,
-.nav-swap .nav-view-entering {
-  opacity: 1;
-  @include animation-duration( 0 );
-}
-
-// required for Android
-.ng-animate .pane {
-  position: absolute;
-}
-
-.pane {
-  @include animation-fill-mode( both );
-}
 
 
 

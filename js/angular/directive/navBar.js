@@ -76,8 +76,8 @@ IonicModule
     controller: '$ionNavBar',
     scope: true,
     compile: function(tElement) {
-      //We cannot transclude here because it breaks element.data() inheritance on compile
-      tElement.attr('class', 'nav-bar-container ' + $ionicConfig.navBar.transition());
+      tElement.attr('class', 'nav-bar-container');
+      ionic.DomUtil.cachedAttr(tElement, 'nav-bar-transition', $ionicConfig.navBar.transition());
 
       return function($scope, $element, $attr, navBarCtrl) {
         navBarCtrl.init();

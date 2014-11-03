@@ -284,14 +284,7 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
 
 
   self.setCss = function(elementClassname, css) {
-    var ele = getEle(elementClassname);
-    if (ele) {
-      for (var prop in css) {
-        if (ele['$style_' + prop] !== css[prop]) {
-          ele['$style_' + prop] = ele.style[prop] = css[prop];
-        }
-      }
-    }
+    ionic.DomUtil.cachedCss( getEle(elementClassname), css);
   };
 
 
