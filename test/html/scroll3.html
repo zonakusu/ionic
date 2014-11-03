@@ -51,30 +51,25 @@
 
     scroller.innerHTML = html;
 
-    function scrollStatus(pos) {
-      status.innerHTML = 'Scroll position: ' +pos + ' px';
-      firedCount++;
-      firedCounter.innerHTML = 'scroll Fired: ' + firedCount;
-    }
-
     function updateCounter() {
-
       counter.innerHTML = 'Counter: ' +count;
       count ++;
     }
 
-
-    function updateScroll() {
-      scrollStatus(scroller.scrollTop);
+    function updateScroll(event) {
+      status.innerHTML = 'Scroll position: ' +event.scrollTop + ' px';
+      firedCount++;
+      firedCounter.innerHTML = 'scroll Fired: ' + firedCount;
     }
 
-    updateScroll();
+    updateScroll({scrollTop:0});
 
-    scroller.addEventListener('scroll', updateScroll, false);
-    angular.element(scroller).on('$scroll', function(){
+    angular.element(scroller).on('$scroll', function(event){
+      updateScroll(event)
       pollyFiredCount++;
       pollyFiredCounter.innerHTML = '$scroll Fired: ' + firedCount;
-      console.log(now(), scroller.scrollTop)
+      //console.log(now(), scroller.scrollTop)
+      //console.log(event.element);
     });
     scroller.addEventListener('touchend', function(){
       console.log('RELEASED!')
@@ -85,7 +80,6 @@
     setupScrollPolyfill(angular.element(scroller));
 
   }
-
   window.addEventListener('load', loadTest, false);
 
 </script>
