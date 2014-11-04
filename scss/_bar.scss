@@ -351,28 +351,9 @@
   position: absolute;
   top: 0;
   right: 0;
-  bottom: 0;
   left: 0;
   pointer-events: none;
   z-index: $z-index-bar;
-}
-
-.nav-bar-block-active {
-  z-index: $z-index-bar-above;
-
-  .bar {
-    background: red;
-    background: transparent;
-  }
-}
-
-.nav-bar-container .nav-bar-block .nav-bar-stage {
-  .title,
-  .buttons,
-  .back-text {
-    opacity: 0;
-    @include transition-duration(0s);
-  }
 }
 
 .bar .back-button.hide,

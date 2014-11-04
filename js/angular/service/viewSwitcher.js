@@ -10,7 +10,8 @@ IonicModule
   '$controller',
   '$ionicClickBlock',
   '$ionicConfig',
-function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig) {
+  '$ionicNavBarDelegate',
+function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionicNavBarDelegate) {
 
   var TRANSITIONEND_EVENT = 'webkitTransitionEnd transitionend';
   var DATA_NO_CACHE = '$noCache';
@@ -187,11 +188,12 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig) {
           // update that this view was just accessed
           enteringEle.data(DATA_VIEW_ACCESSED, Date.now());
 
-          $timeout(callback, 10);
+          $timeout(callback, 16);
         },
 
         transition: function(direction, showBack) {
           var transData = getTransitionData(viewLocals, enteringEle, direction, enteringView, showBack);
+          transData.transitionId = transitionId;
 
           ionic.DomUtil.cachedAttr(enteringEle.parent(), 'nav-view-transition', transData.transition);
           ionic.DomUtil.cachedAttr(enteringEle.parent(), 'nav-view-direction', transData.direction);
@@ -199,7 +201,7 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig) {
           // cancel any previous transition complete fallbacks
           $timeout.cancel( enteringEle.data(DATA_FALLBACK_TIMER) );
 
-          switcher.emit('before', transData, true);
+          switcher.emit('before', transData);
 
           // 1) get the transition ready and see if it'll animate
           var transitionFn = $ionicConfig.views.transitionFn();
@@ -208,6 +210,7 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig) {
           if (viewTransition.shouldAnimate) {
             // 2) attach transitionend events (and fallback timer)
             enteringEle.on(TRANSITIONEND_EVENT, transitionComplete);
+            leavingEle && leavingEle.on(TRANSITIONEND_EVENT, transitionComplete);
             enteringEle.data(DATA_FALLBACK_TIMER, $timeout(transitionComplete, 750));
           }
 
@@ -228,6 +231,10 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig) {
             // 7) start the transition
             viewTransition.run(1);
 
+            for (var x = 0; x < $ionicNavBarDelegate._instances.length; x++) {
+              $ionicNavBarDelegate._instances[x].triggerTransitionStart(transitionId);
+            }
+
             if (!viewTransition.shouldAnimate) {
               // no animated transition
               transitionComplete();
@@ -235,7 +242,11 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig) {
           }
 
           function transitionComplete() {
+            if (transitionComplete.x) return;
+            transitionComplete.x = true;
+
             enteringEle.off(TRANSITIONEND_EVENT, transitionComplete);
+            leavingEle && leavingEle.off(TRANSITIONEND_EVENT, transitionComplete);
             $timeout.cancel( enteringEle.data(DATA_FALLBACK_TIMER) );
 
             switcher.emit('after', transData);
@@ -247,6 +258,10 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig) {
               switcher.cleanup(transData);
               ionicViewSwitcher.isTransitioning(false);
               $ionicClickBlock.hide();
+            }
+
+            for (var x = 0; x < $ionicNavBarDelegate._instances.length; x++) {
+              $ionicNavBarDelegate._instances[x].triggerTransitionEnd();
             }
 
             // remove any references that could cause memory issues

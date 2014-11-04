@@ -121,28 +121,31 @@ IonicModule
       transitionFn: function(enteringEle, leavingEle, direction, shouldAnimate) {
         shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
 
-        function setStyles(ele, opacity, viewX) {
+        function setStyles(ele, opacity, x, zIndex) {
           var css = {};
-          css[ionic.CSS.TRANSITION_DURATION] = (shouldAnimate ? '' : 0);
+          if (!shouldAnimate) {
+            css['transition-duration'] = 0;
+          }
           css.opacity = opacity;
-          css[ionic.CSS.TRANSFORM] = 'translate3d(' + viewX + '%,0,0)';
-          ionic.DomUtil.cachedCss(ele, css);
+          css['z-index'] = zIndex;
+          css.transform = 'translate3d(' + x + '%,0,0)';
+          ionic.DomUtil.inlineStyles(ele, css);
         }
 
         return {
           run: function(step) {
             if (direction == 'forward') {
-              setStyles(enteringEle, 1, (1-step) * 100);
-              setStyles(leavingEle, (1 - 0.1 * step), step * -33);
+              setStyles(enteringEle, 1, (1-step) * 98, 3); // starting at 98% prevents a flicker
+              setStyles(leavingEle, (1 - 0.1 * step), step * -33, 2);
 
             } else if (direction == 'back') {
-              setStyles(enteringEle, (1 - 0.1 * (1-step)), (1-step) * -33);
-              setStyles(leavingEle, 1, step * 100);
+              setStyles(enteringEle, (1 - 0.1 * (1-step)), (1-step) * -33, 2);
+              setStyles(leavingEle, 1, step * 100, 3);
 
             } else {
               // swap, enter, exit
-              setStyles(enteringEle, 1, 0);
-              setStyles(leavingEle, 0, 0);
+              setStyles(enteringEle, 1, 0, 3);
+              setStyles(leavingEle, 0, 0, 2);
             }
           },
           shouldAnimate: shouldAnimate
@@ -156,23 +159,25 @@ IonicModule
       positionSecondaryButtons: 'right',
       transition: 'ios',
 
-      transitionFn: function(enteringCtrl, leavingCtrl, direction, shouldAnimate) {
+      transitionFn: function(enteringHeaderBar, leavingHeaderBar, direction, shouldAnimate) {
 
         shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
 
         function setStyles(ctrl, opacity, titleX, backTextX) {
           var css = {};
-          css[ionic.CSS.TRANSITION_DURATION] = (shouldAnimate ? '' : 0);
+          if (!shouldAnimate) {
+            css['transition-duration'] = 0;
+          }
           css.opacity = opacity;
 
           ctrl.setCss('buttons-a', css);
           ctrl.setCss('buttons-b', css);
           ctrl.setCss('back-button', css);
 
-          css[ionic.CSS.TRANSFORM] = 'translate3d(' + titleX + 'px,0,0)';
+          css.transform = 'translate3d(' + titleX + 'px,0,0)';
           ctrl.setCss('title', css);
 
-          css[ionic.CSS.TRANSFORM] = 'translate3d(' + backTextX + 'px,0,0)';
+          css.transform = 'translate3d(' + backTextX + 'px,0,0)';
           ctrl.setCss('back-text', css);
         }
 
@@ -191,12 +196,14 @@ IonicModule
 
         return {
           run: function(step) {
+            var enteringHeaderCtrl = enteringHeaderBar.controller();
+            var leavingHeaderCtrl = leavingHeaderBar && leavingHeaderBar.controller();
             if (direction == 'back') {
-              leave(enteringCtrl, leavingCtrl, 1-step);
-              enter(leavingCtrl, enteringCtrl, 1-step);
+              leave(enteringHeaderCtrl, leavingHeaderCtrl, 1-step);
+              enter(leavingHeaderCtrl, enteringHeaderCtrl, 1-step);
             } else {
-              enter(enteringCtrl, leavingCtrl, step);
-              leave(leavingCtrl, enteringCtrl, step);
+              enter(enteringHeaderCtrl, leavingHeaderCtrl, step);
+              leave(leavingHeaderCtrl, enteringHeaderCtrl, step);
             }
           }
         };
@@ -245,28 +252,33 @@ IonicModule
       transitionFn: function(enteringEle, leavingEle, direction, shouldAnimate) {
         shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
 
-        function setStyles(ele, opacity, viewY) {
+        function setStyles(ele, opacity, y, zIndex) {
           var css = {};
-          css[ionic.CSS.TRANSITION_DURATION] = (shouldAnimate ? '' : 0);
+          if (!shouldAnimate) {
+            css['transition-duration'] = 0;
+          }
           css.opacity = opacity;
-          css[ionic.CSS.TRANSFORM] = 'translate3d(0,' + viewY + '%,0)';
-          ionic.DomUtil.cachedCss(ele, css);
+          css['z-index'] = zIndex;
+          css.transform = 'translate3d(0,' + y + 'px,0)';
+          ionic.DomUtil.inlineStyles(ele, css);
         }
+
+        var startX = Math.max(window.innerHeight, screen.height) * 0.2;
 
         return {
           run: function(step) {
             if (direction == 'forward') {
-              setStyles(enteringEle, step, (1-step) * 20);
-              setStyles(leavingEle, 1, 0);
+              setStyles(enteringEle, step, (1-step) * startX, 3);
+              setStyles(leavingEle, 1, 0, 2);
 
             } else if (direction == 'back') {
-              setStyles(enteringEle, 1, 0);
-              setStyles(leavingEle, (1-step), step * 20);
+              setStyles(enteringEle, 1, 0, 2);
+              setStyles(leavingEle, (1-step), step * startX, 3);
 
             } else {
               // swap, enter, exit
-              setStyles(enteringEle, 1, 0);
-              setStyles(leavingEle, 0, 0);
+              setStyles(enteringEle, 1, 0, 3);
+              setStyles(leavingEle, 0, 0, 2);
             }
           },
           shouldAnimate: shouldAnimate
@@ -280,49 +292,42 @@ IonicModule
       positionSecondaryButtons: 'right',
       transition: 'android',
 
-      transitionFn: function(enteringCtrl, leavingCtrl, direction, shouldAnimate) {
-
+      transitionFn: function(enteringHeaderBar, leavingHeaderBar, direction, shouldAnimate) {
         shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
 
-        function setStyles(ctrl, opacity, titleX, backTextX) {
+        function setStyles(ele, opacity, y, zIndex) {
           var css = {};
-          css[ionic.CSS.TRANSITION_DURATION] = (shouldAnimate ? '' : 0);
+          if (!shouldAnimate) {
+            css['transition-duration'] = 0;
+          }
           css.opacity = opacity;
-
-          ctrl.setCss('buttons-a', css);
-          ctrl.setCss('buttons-b', css);
-          ctrl.setCss('back-button', css);
-
-          css[ionic.CSS.TRANSFORM] = 'translate3d(' + titleX + 'px,0,0)';
-          ctrl.setCss('title', css);
-
-          css[ionic.CSS.TRANSFORM] = 'translate3d(' + backTextX + 'px,0,0)';
-          ctrl.setCss('back-text', css);
+          css['z-index'] = zIndex;
+          css.transform = 'translate3d(0,' + y + 'px,0)';
+          ionic.DomUtil.inlineStyles(ele, css);
         }
 
-        function enter(ctrlA, ctrlB, step) {
-          if (!ctrlA) return;
-          var titleX = (ctrlA.titleTextX() + ctrlA.titleWidth()) * (1 - step);
-          var backTextX = (ctrlB.titleTextX() - ctrlA.backButtonTextLeft()) * (1 - step);
-          setStyles(ctrlA, step, titleX, backTextX);
-        }
-
-        function leave(ctrlA, ctrlB, step) {
-          if (!ctrlA) return;
-          var titleX = (-(ctrlA.titleTextX() - ctrlB.backButtonTextLeft()) - (ctrlA.titleLeftRight())) * step;
-          setStyles(ctrlA, 1 - step, titleX, 0);
-        }
+        var startX = Math.max(window.innerHeight, screen.height) * 0.2;
 
         return {
           run: function(step) {
-            if (direction == 'back') {
-              leave(enteringCtrl, leavingCtrl, 1-step);
-              enter(leavingCtrl, enteringCtrl, 1-step);
+            var enteringEle = enteringHeaderBar.containerEle();
+            var leavingEle = leavingHeaderBar && leavingHeaderBar.containerEle();
+
+            if (direction == 'forward') {
+              setStyles(enteringEle, step, (1-step) * startX, 10);
+              setStyles(leavingEle, 1, 0, 9);
+
+            } else if (direction == 'back') {
+              setStyles(enteringEle, 1, 0, 9);
+              setStyles(leavingEle, (1-step), step * startX, 10);
+
             } else {
-              enter(enteringCtrl, leavingCtrl, step);
-              leave(leavingCtrl, enteringCtrl, step);
+              // swap, enter, exit
+              setStyles(enteringEle, 1, 0, 9);
+              setStyles(leavingEle, 0, 0, 10);
             }
-          }
+          },
+          shouldAnimate: shouldAnimate
         };
       }
     },

@@ -21,9 +21,9 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
   var headerBars = [];
   var navElementHtml = {};
   var titleText = '';
-  var previousTitleText;
   var isVisible = true;
   var navBarConfig = $ionicConfig.navBar;
+  var queuedTransitionStart, queuedTransitionEnd, latestTransitionId;
 
   $element.parent().data(DATA_NAV_BAR_CTRL, self);
 
@@ -43,11 +43,10 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
 
   self.createHeaderBar = function(isActive, navBarClass) {
     var containerEle = jqLite( '<div class="nav-bar-block">' );
-    if (isActive) {
-      containerEle.addClass('nav-bar-block-active');
-    }
+    ionic.DomUtil.cachedAttr(containerEle, 'nav-bar', isActive ? 'active' : 'cached');
+
     var headerBarEle = jqLite( '<ion-header-bar>' ).addClass($attrs.class);
-    var titleEle = jqLite('<div class="title">');
+    var titleEle = jqLite('<div class="title title-' + $ionicConfig.navBar.alignTitle() + '">');
     var navEle = {};
     var lastViewBtnsEle = {};
     var leftButtonsEle, rightButtonsEle;
@@ -128,8 +127,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
         headerBarCtrl.destroy();
         containerEle.scope().$destroy();
         containerEle = headerBarEle = titleEle = leftButtonsEle = rightButtonsEle = navEle[PRIMARY_BUTTONS] = navEle[SECONDARY_BUTTONS] = navEle[BACK_BUTTON] = null;
-      },
-      id: Math.random()
+      }
     };
 
     function positionButtons(btnsEle, buttonType, isInitialLoad) {
@@ -192,6 +190,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
   self.update = function(viewData) {
     var direction = viewData.direction;
     var showNavBar = !viewData.hasHeaderBar;
+    viewData.transition = $ionicConfig.navBar.transition();
 
     if (!showNavBar) {
       direction = 'none';
@@ -212,55 +211,73 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
     enteringHeaderBar.setButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
 
     // begin transition of entering and leaving header bars
-    self.transition(enteringHeaderBar, leavingHeaderBar, direction, viewData.shouldAnimate);
+    self.transition(enteringHeaderBar, leavingHeaderBar, direction, viewData.shouldAnimate, viewData.transitionId);
 
     self.isInitialized = true;
   };
 
 
-  self.transition = function(enteringHeaderBar, leavingHeaderBar, direction, shouldAnimate) {
+  self.transition = function(enteringHeaderBar, leavingHeaderBar, direction, shouldAnimate, transitionId) {
     var enteringHeaderBarCtrl = enteringHeaderBar.controller();
-    var leavingHeaderBarCtrl = leavingHeaderBar && leavingHeaderBar.controller();
-
     var transitionFn = navBarConfig.transitionFn();
 
     if (!self.isInitialized || !angular.isFunction(transitionFn)) {
       $timeout(function(){
         enteringHeaderBarCtrl.alignTitle().then(transitionComplete);
-      });
+      }, 16);
       return;
     }
 
-    enteringHeaderBarCtrl.stage(true);
+    navBarAttr(enteringHeaderBar, 'stage');
 
     enteringHeaderBarCtrl.resetBackButton();
 
-    var navBarTransition = transitionFn(enteringHeaderBarCtrl, leavingHeaderBarCtrl, direction, shouldAnimate);
+    var navBarTransition = transitionFn(enteringHeaderBar, leavingHeaderBar, direction, shouldAnimate);
 
     navBarTransition.run(0);
 
-    $timeout(function(){
-      enteringHeaderBarCtrl.alignTitle().then(function(){
-
-        enteringHeaderBarCtrl.stage(false);
-
-        navBarTransition.run(1);
-
-        transitionComplete();
-      });
-
-    }, 16);
+    $timeout(enteringHeaderBarCtrl.alignTitle, 16);
 
     function transitionComplete() {
+      if (latestTransitionId !== transitionId) return;
+
       for (var x=0; x<headerBars.length; x++) {
         headerBars[x].isActive = false;
       }
       enteringHeaderBar.isActive = true;
 
-      enteringHeaderBar.containerEle().addClass('nav-bar-block-active');
-      leavingHeaderBar && leavingHeaderBar.containerEle().removeClass('nav-bar-block-active');
+      navBarAttr(enteringHeaderBar, 'active');
+      navBarAttr(leavingHeaderBar, 'cached');
+
+      queuedTransitionEnd = null;
     }
 
+    queuedTransitionStart = function() {
+      if (latestTransitionId !== transitionId) return;
+
+      navBarAttr(enteringHeaderBar, 'entering');
+      navBarAttr(leavingHeaderBar, 'leaving');
+
+      navBarTransition.run(1);
+
+      queuedTransitionEnd = transitionComplete;
+
+      queuedTransitionStart = null;
+    };
+
+    queuedTransitionStart();
+
+  };
+
+
+  self.triggerTransitionStart = function(triggerTransitionId) {
+    latestTransitionId = triggerTransitionId;
+    queuedTransitionStart && queuedTransitionStart();
+  };
+
+
+  self.triggerTransitionEnd = function() {
+    queuedTransitionEnd && queuedTransitionEnd();
   };
 
 
@@ -302,7 +319,6 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
       newTitleText = newTitleText || '';
       headerBar = headerBar || getOnScreenHeaderBar();
       headerBar && headerBar.title(newTitleText);
-      previousTitleText = titleText;
       titleText = newTitleText;
     }
     return titleText;
@@ -327,6 +343,11 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
     for (var x=0; x<headerBars.length; x++) {
       if (!headerBars[x].isActive) return headerBars[x];
     }
+  }
+
+
+  function navBarAttr(ctrl, val) {
+    ctrl && ionic.DomUtil.cachedAttr(ctrl.containerEle(), 'nav-bar', val);
   }
 
 

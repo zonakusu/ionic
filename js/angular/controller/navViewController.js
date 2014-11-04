@@ -94,13 +94,12 @@ function($scope, $element, $attrs, $ionicNavBarDelegate, $ionicHistory, $ionicVi
   };
 
 
-  self.beforeEnter = function(transitionData) {
+  self.beforeEnter = function(transData) {
     if (isPrimary) {
       // only update this nav-view's nav-bar if this is the primary nav-view
-      transitionData.transition = $ionicConfig.navBar.transition();
-      navBarDelegate = transitionData.navBarDelegate;
+      navBarDelegate = transData.navBarDelegate;
       var associatedNavBarCtrl = getAssociatedNavBarCtrl();
-      associatedNavBarCtrl && associatedNavBarCtrl.update(transitionData);
+      associatedNavBarCtrl && associatedNavBarCtrl.update(transData);
     }
   };
 

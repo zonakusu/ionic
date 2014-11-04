@@ -272,13 +272,20 @@
       }
     },
 
-    cachedCss: function(ele, css) {
+    inlineStyles: function(ele, css) {
       ele = ele && ele.length && ele[0] || ele;
-      if (ele && ele.style) {
+      if (ele && ele.setAttribute) {
+        var styles = [];
         for (var prop in css) {
-          if (ele['$style-' + prop] !== css[prop]) {
-            ele.style[prop] = ele['$style-' + prop] = css[prop];
+          if (prop.indexOf('transform') === 0 || prop.indexOf('transition') === 0) {
+            styles.push( '-webkit-' + prop + ': ' + css[prop] );
           }
+          styles.push( prop + ': ' + css[prop] );
+        }
+        styles = styles.join('; ');
+        if (ele.$styles !== styles) {
+          ele.setAttribute('style', styles);
+          ele.$styles = styles;
         }
       }
     }

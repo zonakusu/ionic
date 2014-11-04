@@ -4,11 +4,11 @@ IonicModule
   '$scope',
   '$element',
   '$attrs',
-  '$animate',
   '$q',
+  '$timeout',
   '$ionicConfig',
   '$ionicHistory',
-function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
+function($scope, $element, $attrs, $q, $timeout, $ionicConfig, $ionicHistory) {
   var TITLE = 'title';
   var BACK_TEXT = 'back-text';
   var BACK_BUTTON = 'back-button';
@@ -85,11 +85,6 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
       ele = ele.parentElement;
     }
     return offsetLeft;
-  };
-
-
-  self.stage = function(val) {
-    $element[0].classList[ val ? 'add' : 'remove' ]('nav-bar-stage');
   };
 
 
@@ -271,20 +266,20 @@ function($scope, $element, $attrs, $animate, $q, $ionicConfig, $ionicHistory) {
       defaultTitle && defaultTitle.classList[ showPreviousTitle ? 'add' : 'remove'](HIDE);
     }
 
-    ionic.requestAnimationFrame(function(){
+    $timeout(function(){
       if (titleEle.offsetWidth < titleEle.scrollWidth) {
         titleRight = buttonsRight + 5;
         titleEle.style.right = titleRight ? titleRight + 'px' : '';
       }
       deferred.resolve();
-    });
+    }, 16);
 
     return deferred.promise;
   };
 
 
   self.setCss = function(elementClassname, css) {
-    ionic.DomUtil.cachedCss( getEle(elementClassname), css);
+    ionic.DomUtil.inlineStyles( getEle(elementClassname), css);
   };
 
 
