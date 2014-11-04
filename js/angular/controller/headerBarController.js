@@ -162,24 +162,31 @@ function($scope, $element, $attrs, $q, $timeout, $ionicConfig, $ionicHistory) {
 
         if (isBackShown && c === backBtnEle) {
 
-          for (y = 0; y < c.children.length; y++) {
-            b = c.children[y];
+          for (y = 0; y < c.childNodes.length; y++) {
+            b = c.childNodes[y];
 
-            if (b.classList.contains(BACK_TEXT)) {
-              for (z = 0; z < b.children.length; z++) {
-                d = b.children[z];
+            if (b.nodeType == 1) {
 
-                if (isPreviousTitle) {
-                  if ( d.classList.contains(DEFAULT_TITLE) ) continue;
-                  backButtonWidth += d.offsetWidth;
-                } else {
-                  if ( d.classList.contains(PREVIOUS_TITLE) ) continue;
-                  backButtonWidth += d.offsetWidth;
+              if (b.classList.contains(BACK_TEXT)) {
+                for (z = 0; z < b.children.length; z++) {
+                  d = b.children[z];
+
+                  if (isPreviousTitle) {
+                    if ( d.classList.contains(DEFAULT_TITLE) ) continue;
+                    backButtonWidth += d.offsetWidth;
+                  } else {
+                    if ( d.classList.contains(PREVIOUS_TITLE) ) continue;
+                    backButtonWidth += d.offsetWidth;
+                  }
                 }
+
+              } else {
+                backButtonWidth += b.offsetWidth;
               }
 
-            } else {
-              backButtonWidth += b.offsetWidth;
+            } else if (b.nodeType == 3 && b.nodeValue.trim()) {
+              bounds = ionic.DomUtil.getTextBounds(b);
+              backButtonWidth += bounds && bounds.width || 0;
             }
 
           }
