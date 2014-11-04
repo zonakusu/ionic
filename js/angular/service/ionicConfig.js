@@ -263,7 +263,7 @@ IonicModule
           ionic.DomUtil.inlineStyles(ele, css);
         }
 
-        var startX = Math.max(window.innerHeight, screen.height) * 0.2;
+        var startX = Math.max(window.innerHeight, screen.height) * 0.15;
 
         return {
           run: function(step) {
@@ -306,7 +306,7 @@ IonicModule
           ionic.DomUtil.inlineStyles(ele, css);
         }
 
-        var startX = Math.max(window.innerHeight, screen.height) * 0.2;
+        var startX = Math.max(window.innerHeight, screen.height) * 0.15;
 
         return {
           run: function(step) {
