@@ -111,6 +111,10 @@ $android-transition-timing-leaving:          cubic-bezier(0.4, 0, 1, 1) !default
 // Transition Settings
 // -------------------------------
 
+[nav-view="cached"] {
+  display: none;
+}
+
 [nav-view="stage"] {
   opacity: 0;
   @include transition-duration( 0 );
