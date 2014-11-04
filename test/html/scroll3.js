@@ -1,5 +1,6 @@
 /**
  * Created by perry on 10/28/14.
+ * Inspired by Aria Hidayat http://java.dzone.com/articles/javascript-kinetic-scrolling-0
  */
 var now = window.performance ?
   angular.bind(window.performance, window.performance.now) :
@@ -20,11 +21,11 @@ function setupScrollPolyfill(element) {
   element.on('touchmove scroll', onScroll);
 
   if(ionic.Platform.isIOS()){
-    if(ionic.Platform.version() < 8 || ionic.Platform.isWebView()){
+    //if(ionic.Platform.version() < 8 || ionic.Platform.isWebView()){
       self.virtualScrollEventsRequired = true;
       element.on('touchend', scrollPolyfill);
       console.log('binding scrollPolyfill');
-    }
+    //}
   }
 
   function onScroll() {
@@ -43,16 +44,18 @@ function setupScrollPolyfill(element) {
     var scrollTop = node.scrollTop;
 
     if(self.virtualScrollEventsRequired){
-      if(!self.velocity)self.velocity = 0;
+      self.velocity = 1;
       var elapsed, delta, v;
 
       elapsed = time - self.timestamp;
       self.timestamp = time;
       delta = scrollTop - self.frame;
       self.frame = scrollTop;
+      self.startDecelerationData = {Elapsed:elapsed, Delta: delta, pxPerSec: delta/elapsed};
+console.log(delta/elapsed);
 
       v = 1000 * delta / (1 + elapsed);
-      self.velocity = 0.8 * v + 0.2 * self.velocity;
+      self.velocity = 0.8 * v + 0.4 * self.velocity;
     }
 
     element.triggerHandler({type:'$scroll', scrollTop:node.scrollTop, element:element});
@@ -66,7 +69,10 @@ function setupScrollPolyfill(element) {
   }
 
   function scrollPolyfill() {
-    console.log(self.velocity, node.scrollTop, self.amplitude);
+    console.log('Velocity now: ', self.startDecelerationData.pxPerSec);
+    self.startVelocity = self.startDecelerationData.pxPerSec
+    //console.log('starting scrolltop', node.scrollTop);
+    self.startScrollTop  = node.scrollTop;
     if (velocity > 10 || velocity < -10) {
       self.amplitude = 0.8 * velocity;
       self.target = Math.round(node.scrollTop + self.amplitude);
@@ -82,11 +88,13 @@ function setupScrollPolyfill(element) {
     if (!!self.amplitude) {
       elapsed = Date.now() - self.timestamp;
       delta = -self.amplitude * Math.exp(-elapsed / self.timeConstant);
-      if (delta > 0.5 || delta < -0.5) {
-        console.log(self.velocity, node.scrollTop, self.amplitude);
+      if (delta > 1 || delta < -1) {
         requestAnimationFrame(scrollPolyfillLoop);
       } else {
-        console.log(target);
+        //console.log(target);
+
+        //console.log(self.startDecelerationData);
+        console.log('travelled: ', node.scrollTop - self.startScrollTop);
       }
     }
   }
