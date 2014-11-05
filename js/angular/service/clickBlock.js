@@ -4,7 +4,7 @@ IonicModule
   '$ionicBody',
   '$timeout',
 function($document, $ionicBody, $timeout) {
-  var fallbackTimer, isAttached, isShowing;
+  var fallbackTimer, isAttached;
   var CSS_HIDE = 'click-block-hide';
 
   var cb = $document[0].createElement('div');
@@ -12,18 +12,14 @@ function($document, $ionicBody, $timeout) {
 
   return {
     show: function() {
-      if (isShowing) return;
-
       // cancel the fallback timer
       $timeout.cancel( fallbackTimer );
 
       ionic.requestAnimationFrame(function(){
-        isShowing = true;
         if(isAttached) {
           cb.classList.remove(CSS_HIDE);
         } else {
           $ionicBody.append(cb);
-          isAttached = true;
         }
       });
 
@@ -32,15 +28,12 @@ function($document, $ionicBody, $timeout) {
       }, 750);
     },
     hide: function() {
-      if (!isShowing) return;
-
       // cancel the fallback timer
       $timeout.cancel( fallbackTimer );
 
       // should be a minimum time it should hide
       ionic.requestAnimationFrame(function(){
         cb.classList.add(CSS_HIDE);
-        isShowing = false;
       });
     }
   };

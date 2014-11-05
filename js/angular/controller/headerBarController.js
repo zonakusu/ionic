@@ -124,7 +124,7 @@ function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
       }
     }
 
-    return self.updatePositions(titleEle, widths.titleLeft, widths.titleRight, widths.buttonsRight, widths.css, widths.showPrevTitle);
+    return self.updatePositions(titleEle, widths.titleLeft, widths.titleRight, widths.buttonsLeft, widths.buttonsRight, widths.css, widths.showPrevTitle);
   };
 
 
@@ -245,7 +245,7 @@ function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
   };
 
 
-  self.updatePositions = function(titleEle, updateTitleLeft, updateTitleRight, buttonsRight, updateCss, showPreviousTitle) {
+  self.updatePositions = function(titleEle, updateTitleLeft, updateTitleRight, buttonsLeft, buttonsRight, updateCss, showPreviousTitle) {
     var deferred = $q.defer();
 
     // only make DOM updates when there are actual changes
@@ -273,9 +273,14 @@ function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
     }
 
     ionic.requestAnimationFrame(function(){
-      if (titleEle.offsetWidth < titleEle.scrollWidth) {
-        titleRight = buttonsRight + 5;
-        titleEle.style.right = titleRight + 'px';
+      if (titleEle.offsetWidth + 10 < titleEle.scrollWidth) {
+        var minRight = buttonsRight + 5;
+        var testRight = $element[0].offsetWidth - titleLeft - self.titleTextWidth() - 20;
+        updateTitleRight = testRight < minRight ? minRight : testRight;
+        if (updateTitleRight !== titleRight) {
+          titleEle.style.right = updateTitleRight + 'px';
+          titleRight = updateTitleRight;
+        }
       }
       deferred.resolve();
     });
