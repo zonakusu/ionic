@@ -63,8 +63,8 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
     navEle[SECONDARY_BUTTONS] = createNavElement(SECONDARY_BUTTONS);
 
     // append and position buttons
-    positionButtons(navEle[PRIMARY_BUTTONS], PRIMARY_BUTTONS, true && !isActive);
-    positionButtons(navEle[SECONDARY_BUTTONS], SECONDARY_BUTTONS, true && !isActive);
+    positionButtons(navEle[PRIMARY_BUTTONS], PRIMARY_BUTTONS);
+    positionButtons(navEle[SECONDARY_BUTTONS], SECONDARY_BUTTONS);
 
     // compile header and append to the DOM
     containerEle.append(headerBarEle);
@@ -130,7 +130,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
       }
     };
 
-    function positionButtons(btnsEle, buttonType, isInitialLoad) {
+    function positionButtons(btnsEle, buttonType) {
       if (!btnsEle) return;
 
       var appendToRight = (buttonType == SECONDARY_BUTTONS && navBarConfig.positionSecondaryButtons() != 'left') ||
@@ -140,9 +140,6 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
         // right side
         if (!rightButtonsEle) {
           rightButtonsEle = jqLite('<div class="buttons buttons-b">');
-          if (isInitialLoad) {
-            rightButtonsEle.css('opacity', 0);
-          }
           headerBarEle.append(rightButtonsEle);
         }
         if (buttonType == SECONDARY_BUTTONS) {
@@ -155,9 +152,6 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
         // left side
         if (!leftButtonsEle) {
           leftButtonsEle = jqLite('<div class="buttons buttons-a">');
-          if (isInitialLoad) {
-            leftButtonsEle.css('opacity', 0);
-          }
           if (navEle[BACK_BUTTON]) {
             navEle[BACK_BUTTON].after(leftButtonsEle);
           } else {
