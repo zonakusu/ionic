@@ -207,6 +207,7 @@
 
     &.back-button {
       display: block;
+      margin-right: 5px;
       padding: 0;
       opacity: 0.8;
       white-space: nowrap;
@@ -225,9 +226,7 @@
   }
 
   .button-bar + .button,
-  .button + .button-bar,
-  .back-button + .buttons,
-  .buttons + .back-button {
+  .button + .button-bar {
     margin-left: 5px;
   }
 
@@ -239,6 +238,12 @@
   }
   .buttons span {
     display: inline-block;
+  }
+  .buttons-a span {
+    margin-right: 5px;
+  }
+  .buttons-b span {
+    margin-left: 5px;
   }
 
   // Place the last button in a bar on the right of the bar
