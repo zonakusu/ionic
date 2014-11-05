@@ -48,7 +48,7 @@ function setupScrollPolyfill(element) {
       if(!self.velocity)self.velocity = 0;
       v = 1000 * self.delta / (1 + self.elapsed);
       self.velocity = 0.8 * v + 0.4 * self.velocity;
-      console.log(self.velocity, self.delta, self.elapsed)
+      //console.log(self.velocity, self.delta, self.elapsed)
     }
     element.triggerHandler({type:'$scroll', scrollTop:node.scrollTop, element:element});
     if (node.scrollTop !== self.lastScrollTop || time - self.lastScrollTime < 100) {
@@ -83,7 +83,7 @@ function setupScrollPolyfill(element) {
       } else {
         //console.log(target);
 
-        //console.log(self.startDecelerationData);
+        console.log('velocity: ',self.startVelocity);
         console.log('travelled: ', node.scrollTop - self.startScrollTop);
       }
     }
