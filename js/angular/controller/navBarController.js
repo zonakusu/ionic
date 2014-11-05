@@ -122,10 +122,19 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
       destroy: function() {
         headerBarInstance.removeButtons(PRIMARY_BUTTONS);
         headerBarInstance.removeButtons(SECONDARY_BUTTONS);
-        headerBarCtrl.removeData();
-        headerBarCtrl.destroy();
         containerEle.scope().$destroy();
-        containerEle = headerBarEle = titleEle = leftButtonsEle = rightButtonsEle = navEle[PRIMARY_BUTTONS] = navEle[SECONDARY_BUTTONS] = navEle[BACK_BUTTON] = null;
+        for (var n in navEle) {
+          if (navEle[n]) {
+            navEle[n].removeData();
+            navEle[n] = null;
+          }
+        }
+        leftButtonsEle && leftButtonsEle.removeData();
+        rightButtonsEle && rightButtonsEle.removeData();
+        titleEle.removeData();
+        headerBarEle.removeData();
+        containerEle.removeData();
+        containerEle = headerBarEle = titleEle = leftButtonsEle = rightButtonsEle = null;
       }
     };
 
@@ -352,6 +361,9 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
   $scope.$on('$destroy', function(){
     $scope.$parent.$hasHeader = false;
     $element.parent().removeData(DATA_NAV_BAR_CTRL);
+    for (var x = 0; x < headerBars.length; x++) {
+      headerBars[x].destroy();
+    }
     headerBars = null;
     deregisterInstance();
   });
