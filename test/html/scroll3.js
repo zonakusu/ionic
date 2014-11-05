@@ -17,6 +17,8 @@ function setupScrollPolyfill(element) {
   self.timestamp = null;
   self.virtualScrollEventsRequired = false;
   self.timeConstant = 325; // magic number
+  self.iterator = 0;
+  self.delta = 0;
 
   element.on('touchmove scroll', onScroll);
 
@@ -24,6 +26,7 @@ function setupScrollPolyfill(element) {
     //if(ionic.Platform.version() < 8 || ionic.Platform.isWebView()){
       self.virtualScrollEventsRequired = true;
       element.on('touchend', scrollPolyfill);
+      element.on('touchmove', updateVelocity);
       console.log('binding scrollPolyfill');
     //}
   }
@@ -31,7 +34,6 @@ function setupScrollPolyfill(element) {
   function onScroll() {
     self.lastScrollTime = +now();
     if (!scrolling) {
-
 
       element.triggerHandler({type:'$scrollstart', scrollTop:node.scrollTop});
       scrolling = true;
@@ -42,22 +44,12 @@ function setupScrollPolyfill(element) {
   function scrollLoop() {
     var time = +now();
     var scrollTop = node.scrollTop;
-
     if(self.virtualScrollEventsRequired){
-      self.velocity = 1;
-      var elapsed, delta, v;
-
-      elapsed = time - self.timestamp;
-      self.timestamp = time;
-      delta = scrollTop - self.frame;
-      self.frame = scrollTop;
-      self.startDecelerationData = {Elapsed:elapsed, Delta: delta, pxPerSec: delta/elapsed};
-console.log(delta/elapsed);
-
-      v = 1000 * delta / (1 + elapsed);
+      if(!self.velocity)self.velocity = 0;
+      v = 1000 * self.delta / (1 + self.elapsed);
       self.velocity = 0.8 * v + 0.4 * self.velocity;
+      console.log(self.velocity, self.delta, self.elapsed)
     }
-
     element.triggerHandler({type:'$scroll', scrollTop:node.scrollTop, element:element});
     if (node.scrollTop !== self.lastScrollTop || time - self.lastScrollTime < 100) {
       self.lastScrollTop = scrollTop;
@@ -69,11 +61,10 @@ console.log(delta/elapsed);
   }
 
   function scrollPolyfill() {
-    console.log('Velocity now: ', self.startDecelerationData.pxPerSec);
-    self.startVelocity = self.startDecelerationData.pxPerSec
-    //console.log('starting scrolltop', node.scrollTop);
+    //console.log(self.velocity);
+    self.startVelocity = self.delta/self.elapsed;
     self.startScrollTop  = node.scrollTop;
-    if (velocity > 10 || velocity < -10) {
+    if (self.velocity > 10 || self.velocity < -10) {
       self.amplitude = 0.8 * velocity;
       self.target = Math.round(node.scrollTop + self.amplitude);
       self.timestamp = Date.now();
@@ -83,8 +74,7 @@ console.log(delta/elapsed);
 
 
   function scrollPolyfillLoop() {
-    var elapsed, delta;
-
+    //console.log(self.amplitude);
     if (!!self.amplitude) {
       elapsed = Date.now() - self.timestamp;
       delta = -self.amplitude * Math.exp(-elapsed / self.timeConstant);
@@ -97,6 +87,14 @@ console.log(delta/elapsed);
         console.log('travelled: ', node.scrollTop - self.startScrollTop);
       }
     }
+  }
+
+  function updateVelocity(e){
+      var time = +now();
+      self.elapsed = time - self.timestamp;
+      self.timestamp = time;
+      self.delta = e.touches[0].screenX - self.frame;
+      self.frame = e.touches[0].screenX;
   }
 
 }

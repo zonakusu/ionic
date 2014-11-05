@@ -71,8 +71,14 @@
       //console.log(now(), scroller.scrollTop)
       //console.log(event.element);
     });
+    var touchmove
     scroller.addEventListener('touchend', function(){
-      console.log('RELEASED!')
+      console.log('TOUCHEND')
+      //console.log(touchmove.touches[0])
+    });
+    scroller.addEventListener('touchmove', function(e){
+      //console.log('TOUCHMOVE')
+      touchmove = e;
     });
 
     window.setInterval(updateCounter, 500);
