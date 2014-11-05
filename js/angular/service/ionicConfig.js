@@ -123,19 +123,17 @@ IonicModule
 
         function setStyles(ele, opacity, x, zIndex) {
           var css = {};
-          if (!shouldAnimate) {
-            css['transition-duration'] = 0;
-          }
+          css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
           css.opacity = opacity;
-          css['z-index'] = zIndex;
-          css.transform = 'translate3d(' + x + '%,0,0)';
-          ionic.DomUtil.inlineStyles(ele, css);
+          css.zIndex = zIndex;
+          css[ionic.CSS.TRANSFORM] = 'translate3d(' + x + '%,0,0)';
+          ionic.DomUtil.cachedStyles(ele, css);
         }
 
         return {
           run: function(step) {
             if (direction == 'forward') {
-              setStyles(enteringEle, 1, (1-step) * 98, 3); // starting at 98% prevents a flicker
+              setStyles(enteringEle, 1, (1-step) * 99, 3); // starting at 98% prevents a flicker
               setStyles(leavingEle, (1 - 0.1 * step), step * -33, 2);
 
             } else if (direction == 'back') {
@@ -165,20 +163,18 @@ IonicModule
 
         function setStyles(ctrl, opacity, titleX, backTextX) {
           var css = {};
-          if (!shouldAnimate) {
-            css['transition-duration'] = 0;
-          }
+          css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
           css.opacity = opacity;
 
           ctrl.setCss('buttons-a', css);
           ctrl.setCss('buttons-b', css);
           ctrl.setCss('back-button', css);
 
-          css.transform = 'translate3d(' + titleX + 'px,0,0)';
-          ctrl.setCss('title', css);
-
-          css.transform = 'translate3d(' + backTextX + 'px,0,0)';
+          css[ionic.CSS.TRANSFORM] = 'translate3d(' + backTextX + 'px,0,0)';
           ctrl.setCss('back-text', css);
+
+          css[ionic.CSS.TRANSFORM] = 'translate3d(' + titleX + 'px,0,0)';
+          ctrl.setCss('title', css);
         }
 
         function enter(ctrlA, ctrlB, step) {
@@ -254,13 +250,11 @@ IonicModule
 
         function setStyles(ele, opacity, y, zIndex) {
           var css = {};
-          if (!shouldAnimate) {
-            css['transition-duration'] = 0;
-          }
+          css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
           css.opacity = opacity;
-          css['z-index'] = zIndex;
-          css.transform = 'translate3d(0,' + y + 'px,0)';
-          ionic.DomUtil.inlineStyles(ele, css);
+          css.zIndex = zIndex;
+          css[ionic.CSS.TRANSFORM] = 'translate3d(0,' + y + 'px,0)';
+          ionic.DomUtil.cachedStyles(ele, css);
         }
 
         var startX = Math.max(window.innerHeight, screen.height) * 0.15;
@@ -297,13 +291,11 @@ IonicModule
 
         function setStyles(ele, opacity, y, zIndex) {
           var css = {};
-          if (!shouldAnimate) {
-            css['transition-duration'] = 0;
-          }
+          css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
           css.opacity = opacity;
-          css['z-index'] = zIndex;
-          css.transform = 'translate3d(0,' + y + 'px,0)';
-          ionic.DomUtil.inlineStyles(ele, css);
+          css.zIndex = zIndex;
+          css[ionic.CSS.TRANSFORM] = 'translate3d(0,' + y + 'px,0)';
+          ionic.DomUtil.cachedStyles(ele, css);
         }
 
         var startX = Math.max(window.innerHeight, screen.height) * 0.15;

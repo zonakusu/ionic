@@ -5,10 +5,9 @@ IonicModule
   '$element',
   '$attrs',
   '$q',
-  '$timeout',
   '$ionicConfig',
   '$ionicHistory',
-function($scope, $element, $attrs, $q, $timeout, $ionicConfig, $ionicHistory) {
+function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
   var TITLE = 'title';
   var BACK_TEXT = 'back-text';
   var BACK_BUTTON = 'back-button';
@@ -273,20 +272,20 @@ function($scope, $element, $attrs, $q, $timeout, $ionicConfig, $ionicHistory) {
       defaultTitle && defaultTitle.classList[ showPreviousTitle ? 'add' : 'remove'](HIDE);
     }
 
-    $timeout(function(){
+    ionic.requestAnimationFrame(function(){
       if (titleEle.offsetWidth < titleEle.scrollWidth) {
         titleRight = buttonsRight + 5;
-        titleEle.style.right = titleRight ? titleRight + 'px' : '';
+        titleEle.style.right = titleRight + 'px';
       }
       deferred.resolve();
-    }, 16);
+    });
 
     return deferred.promise;
   };
 
 
   self.setCss = function(elementClassname, css) {
-    ionic.DomUtil.inlineStyles( getEle(elementClassname), css);
+    ionic.DomUtil.cachedStyles( getEle(elementClassname), css);
   };
 
 
