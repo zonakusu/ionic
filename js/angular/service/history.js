@@ -48,6 +48,11 @@ function($rootScope, $state, $location, $document, $ionicPlatform, $ionicHistory
     }
   });
 
+  $rootScope.$ionicGoBack = function() {
+    var backView = $ionicHistory.backView();
+    backView && backView.go();
+  };
+
   // Set the document title when a new view is shown
   $rootScope.$on('viewState.viewEnter', function(e, data) {
     if (data && data.title) {
@@ -58,9 +63,10 @@ function($rootScope, $state, $location, $document, $ionicPlatform, $ionicHistory
   // Triggered when devices with a hardware back button (Android) is clicked by the user
   // This is a Cordova/Phonegap platform specifc method
   function onHardwareBackButton(e) {
-    if (viewHistory.backView) {
+    var backView = $ionicHistory.backView();
+    if (backView) {
       // there is a back view, go to it
-      viewHistory.backView.go();
+      backView.go();
     } else {
       // there is no back view, so close the app instead
       ionic.Platform.exitApp();

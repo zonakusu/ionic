@@ -6,10 +6,9 @@ IonicModule
   '$attrs',
   '$compile',
   '$timeout',
-  '$ionicHistory',
   '$ionicNavBarDelegate',
   '$ionicConfig',
-function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavBarDelegate, $ionicConfig) {
+function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $ionicConfig) {
 
   var CSS_HIDE = 'hide';
   var DATA_NAV_BAR_CTRL = '$ionNavBarController';
@@ -343,12 +342,6 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicHistory, $ionicNavB
   function navBarAttr(ctrl, val) {
     ctrl && ionic.DomUtil.cachedAttr(ctrl.containerEle(), 'nav-bar', val);
   }
-
-
-  $scope.$goBack = self.back = function() {
-    var backView = $ionicHistory.backView();
-    backView && backView.go();
-  };
 
 
   $scope.$on('ionHeaderBar.init', function(ev){
