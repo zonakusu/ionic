@@ -26,7 +26,6 @@ function setupScrollPolyfill(element) {
     //if(ionic.Platform.version() < 8 || ionic.Platform.isWebView()){
       self.virtualScrollEventsRequired = true;
       element.on('touchend', scrollPolyfill);
-      //element.on('touchmove', updateVelocity);
       console.log('binding scrollPolyfill');
     //}
   }
@@ -43,8 +42,8 @@ function setupScrollPolyfill(element) {
           var time = +now();
           self.elapsed = time - self.timestamp;
           self.timestamp = time;
-          self.delta = e.touches[0].screenX - self.frame;
-          self.frame = e.touches[0].screenX;
+          self.delta = node.scrollTop - self.frame;
+          self.frame = node.scrollTop;
         //}
       }
     }
