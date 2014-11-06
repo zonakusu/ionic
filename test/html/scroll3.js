@@ -26,18 +26,27 @@ function setupScrollPolyfill(element) {
     //if(ionic.Platform.version() < 8 || ionic.Platform.isWebView()){
       self.virtualScrollEventsRequired = true;
       element.on('touchend', scrollPolyfill);
-      element.on('touchmove', updateVelocity);
+      //element.on('touchmove', updateVelocity);
       console.log('binding scrollPolyfill');
     //}
   }
 
-  function onScroll() {
+  function onScroll(e) {
     self.lastScrollTime = +now();
     if (!scrolling) {
-
       element.triggerHandler({type:'$scrollstart', scrollTop:node.scrollTop});
       scrolling = true;
       scrollLoop();
+    }else{
+      if(e.touches && ionic.Platform.isIOS() && e.touches[0].screenX - self.frame != 0){
+        //if(ionic.Platform.version() < 8 || ionic.Platform.isWebView()){
+          var time = +now();
+          self.elapsed = time - self.timestamp;
+          self.timestamp = time;
+          self.delta = e.touches[0].screenX - self.frame;
+          self.frame = e.touches[0].screenX;
+        //}
+      }
     }
   }
 
@@ -45,9 +54,10 @@ function setupScrollPolyfill(element) {
     var time = +now();
     var scrollTop = node.scrollTop;
     if(self.virtualScrollEventsRequired){
-      if(!self.velocity)self.velocity = 0;
-      v = 1000 * self.delta / (1 + self.elapsed);
-      self.velocity = 0.8 * v + 0.4 * self.velocity;
+      self.velocity = 100 * self.delta / self.elapsed;
+      //if(!self.velocity)self.velocity = 0;
+      //v = 1000 * self.delta / (1 + self.elapsed);
+      //self.velocity = 0.8 * v + 0.4 * self.velocity;
       //console.log(self.velocity, self.delta, self.elapsed)
     }
     element.triggerHandler({type:'$scroll', scrollTop:node.scrollTop, element:element});
@@ -56,6 +66,7 @@ function setupScrollPolyfill(element) {
       ionic.requestAnimationFrame(scrollLoop);
     } else {
       element.triggerHandler({type:'$scrollend', scrollTop:node.scrollTop});
+      //console.log('stopping');
       scrolling = false;
     }
   }
@@ -65,36 +76,24 @@ function setupScrollPolyfill(element) {
     self.startVelocity = self.delta/self.elapsed;
     self.startScrollTop  = node.scrollTop;
     if (self.velocity > 10 || self.velocity < -10) {
-      self.amplitude = 0.8 * velocity;
-      self.target = Math.round(node.scrollTop + self.amplitude);
-      self.timestamp = Date.now();
+      self.amplitude = 0.8 * self.velocity;
+      //self.target = Math.round(node.scrollTop + self.amplitude);
+      //self.timestamp = Date.now();
       requestAnimationFrame(scrollPolyfillLoop);
     }
   }
 
-
   function scrollPolyfillLoop() {
-    //console.log(self.amplitude);
+    //console.log(self.amplitude, self.delta);
     if (!!self.amplitude) {
-      elapsed = Date.now() - self.timestamp;
-      delta = -self.amplitude * Math.exp(-elapsed / self.timeConstant);
-      if (delta > 1 || delta < -1) {
+      if ((self.delta > 1 || self.delta < -1) && scrolling) {
         requestAnimationFrame(scrollPolyfillLoop);
       } else {
-        //console.log(target);
-
-        console.log('velocity: ',self.startVelocity);
-        console.log('travelled: ', node.scrollTop - self.startScrollTop);
+        console.log(self.startVelocity+','+(node.scrollTop - self.startScrollTop));
+        //console.log('velocity: ',self.startVelocity);
+        //console.log('travelled: ', node.scrollTop - self.startScrollTop);
       }
     }
-  }
-
-  function updateVelocity(e){
-      var time = +now();
-      self.elapsed = time - self.timestamp;
-      self.timestamp = time;
-      self.delta = e.touches[0].screenX - self.frame;
-      self.frame = e.touches[0].screenX;
   }
 
 }
