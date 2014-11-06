@@ -17,6 +17,26 @@
 
 /**
  * @ngdoc method
+ * @name $ionicConfigProvider#scrolling.native
+ * @description Set whether to use Ionic's JS scrolling or native scrolling. Defaults to false
+ * (js) for iOS and true (native) for Android. Note: this may affect what ion-scroll,
+ * ion-content, and $ionicScrollDelegate methods are available to you.
+ * @param {boolean} Whether to use native Scrolling.
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#templates.prefetch
+ * @description Set whether Ionic should prefetch all templateUrls defined in
+ * $stateProvider.state. If set to false, the user will have to wait
+ * for a template to be fetched the first time when navigating to a new page. Default `true`.
+ * @param {boolean} shouldPrefetch Whether Ionic should prefetch templateUrls defined in
+ * `$stateProvider.state()`.
+ * @returns {boolean} Whether Ionic will prefetch templateUrls defined in $stateProvider.state.
+ */
+
+/**
+ * @ngdoc method
  * @name $ionicConfigProvider#views.transition
  * @description Animation style when transitioning between views. Default `platform`.
  *
@@ -58,16 +78,7 @@
  * @returns {boolean}
  */
 
-/**
- * @ngdoc method
- * @name $ionicConfigProvider#templates.prefetch
- * @description Set whether Ionic should prefetch all templateUrls defined in
- * $stateProvider.state. If set to false, the user will have to wait
- * for a template to be fetched the first time when navigating to a new page. Default `true`.
- * @param {boolean} shouldPrefetch Whether Ionic should prefetch templateUrls defined in
- * `$stateProvider.state()`.
- * @returns {boolean} Whether Ionic will prefetch templateUrls defined in $stateProvider.state.
- */
+
 
 IonicModule
 .provider('$ionicConfig', function() {
@@ -77,10 +88,11 @@ IonicModule
   var PLATFORM = 'platform';
 
   var configProperties = {
-    views: {
-      transition: PLATFORM,
-      maxCache: PLATFORM,
-      forwardCache: PLATFORM
+    backButton: {
+      enabled: PLATFORM,
+      icon: PLATFORM,
+      text: PLATFORM,
+      previousTitleText: PLATFORM
     },
     navBar: {
       alignTitle: PLATFORM,
@@ -89,20 +101,22 @@ IonicModule
       transition: PLATFORM,
       transitionFn: PLATFORM
     },
-    backButton: {
-      enabled: PLATFORM,
-      icon: PLATFORM,
-      text: PLATFORM,
-      previousTitleText: PLATFORM
-    },
+    platform: {},
     tabs: {
       position: PLATFORM,
       type: PLATFORM
     },
+    scrolling: {
+      native: PLATFORM
+    },
     templates: {
       prefetch: PLATFORM
     },
-    platform: {}
+    views: {
+      transition: PLATFORM,
+      maxCache: PLATFORM,
+      forwardCache: PLATFORM
+    }
   };
   createConfig(configProperties, provider, '');
 
@@ -111,10 +125,10 @@ IonicModule
   // Default
   // -------------------------
   setPlatformConfig('default', {
-    views: {
-      transition: 'ios-transition',
-      maxCache: 10,
-      forwardCache: false
+    backButton: {
+      icon: 'ion-ios7-arrow-back',
+      text: 'Back',
+      previousTitleText: true
     },
     navBar: {
       alignTitle: 'center',
@@ -172,10 +186,8 @@ IonicModule
       }
 
     },
-    backButton: {
-      icon: 'ion-ios7-arrow-back',
-      text: 'Back',
-      previousTitleText: true
+    scrolling: {
+      native: true
     },
     tabs: {
       position: '',
@@ -183,6 +195,11 @@ IonicModule
     },
     templates: {
       prefetch: true
+    },
+    views: {
+      transition: 'ios-transition',
+      maxCache: 10,
+      forwardCache: false
     }
   });
 
@@ -193,6 +210,9 @@ IonicModule
   setPlatformConfig('ios', {
     backButton: {
       icon: 'ion-ios7-arrow-back'
+    },
+    scrolling: {
+      native: false
     }
   });
 
@@ -201,8 +221,10 @@ IonicModule
   // Android
   // -------------------------
   setPlatformConfig('android', {
-    views: {
-      transition: 'android-transition'
+    backButton: {
+      icon: 'ion-android-arrow-back',
+      text: '',
+      previousTitleText: false
     },
     navBar: {
       alignTitle: 'left',
@@ -211,13 +233,14 @@ IonicModule
       transition: 'android-transition',
       transitionFn: 'none'
     },
-    backButton: {
-      icon: 'ion-android-arrow-back',
-      text: '',
-      previousTitleText: false
+    scrolling: {
+      native: true
     },
     tabs: {
       type: 'tabs-striped'
+    },
+    views: {
+      transition: 'android-transition'
     }
   });
 

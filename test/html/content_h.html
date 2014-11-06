@@ -127,6 +127,9 @@
           $scope.scrollView.resize();
         }, 1000);
       })
+      .config(function($ionicConfigProvider) {
+            $ionicConfigProvider.scrolling.native(false)
+      });
     </script>
   </body>
 </html>

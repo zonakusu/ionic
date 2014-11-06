@@ -45,7 +45,8 @@ IonicModule
   '$timeout',
   '$controller',
   '$ionicBind',
-function($timeout, $controller, $ionicBind) {
+  '$ionicConfig',
+function($timeout, $controller, $ionicBind, $ionicConfig) {
   return {
     restrict: 'E',
     require: '^?ionNavView',
@@ -105,10 +106,10 @@ function($timeout, $controller, $ionicBind) {
               (innerElement || $element).toggleClass('padding', !!newVal);
           });
         }
-
+        console.log('SCROLLING ',$ionicConfig.scrolling.native());
         if ($attr.scroll === "false") {
           //do nothing
-        } else if(attr.overflowScroll === "true") {
+        } else if(attr.overflowScroll === "true" || $ionicConfig.scrolling.native()) {
           $element.addClass('overflow-scroll');
         } else {
           var scrollViewOptions = {
