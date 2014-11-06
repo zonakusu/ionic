@@ -133,7 +133,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
         rightButtonsEle && rightButtonsEle.removeData();
         titleEle.removeData();
         headerBarEle.removeData();
-        containerEle.removeData();
+        containerEle.remove();
         containerEle = headerBarEle = titleEle = leftButtonsEle = rightButtonsEle = null;
       }
     };
@@ -366,6 +366,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
     }
     headerBars = null;
     deregisterInstance();
+    $element.remove();
   });
 
 }]);
