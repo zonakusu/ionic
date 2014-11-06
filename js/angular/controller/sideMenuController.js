@@ -10,6 +10,7 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody, $io
   var self = this;
   var rightShowing, leftShowing, isDragging;
   var startX, lastX, offsetX, isAsideExposed;
+  var enableMenuWithBackViews = true;
 
   self.$scope = $scope;
 
@@ -264,6 +265,13 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody, $io
     }
   };
 
+  self.enableMenuWithBackViews = function(val) {
+    if (arguments.length) {
+      enableMenuWithBackViews = !!val;
+    }
+    return enableMenuWithBackViews;
+  };
+
   self.isAsideExposed = function() {
     return !!isAsideExposed;
   };
@@ -336,6 +344,10 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody, $io
     return $scope.dragContent;
   };
 
+  $scope.$on('$ionicView.beforeEnter', function(ev, viewData){
+    console.log('before enter', viewData)
+  });
+
   self.edgeThreshold = 25;
   self.edgeThresholdEnabled = false;
   self.edgeDragThreshold = function(value) {
@@ -360,9 +372,12 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody, $io
       startX <= self.edgeThreshold ||
       startX >= self.content.element.offsetWidth - self.edgeThreshold;
 
+    var menuEnabled = self.enableMenuWithBackViews() ? true : !$ionicHistory.backView();
+
     return ($scope.dragContent || self.isOpen()) &&
       dragIsWithinBounds &&
       !e.gesture.srcEvent.defaultPrevented &&
+      menuEnabled &&
       !e.target.tagName.match(/input|textarea|select|object|embed/i) &&
       !e.target.isContentEditable &&
       !(e.target.dataset ? e.target.dataset.preventScroll : e.target.getAttribute('data-prevent-scroll') == 'true');

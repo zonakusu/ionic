@@ -25,6 +25,11 @@ function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
   var titleTextWidth = 0;
 
 
+  self.beforeEnter = function(viewData) {
+    $scope.$broadcast('$ionicView.beforeEnter', viewData);
+  };
+
+
   self.title = function(newTitleText) {
     if (arguments.length && newTitleText !== titleText) {
       getEle(TITLE).innerHTML = newTitleText;

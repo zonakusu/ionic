@@ -32,6 +32,9 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
 
 
   self.init = function() {
+    $element.addClass('nav-bar-container');
+    ionic.DomUtil.cachedAttr($element, 'nav-bar-transition', $ionicConfig.navBar.transition());
+
     // create two nav bar blocks which will trade out which one is shown
     self.createHeaderBar(false);
     self.createHeaderBar(true);
@@ -190,12 +193,11 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
 
 
   self.update = function(viewData) {
-    var direction = viewData.direction;
     var showNavBar = !viewData.hasHeaderBar;
     viewData.transition = $ionicConfig.navBar.transition();
 
     if (!showNavBar) {
-      direction = 'none';
+      viewData.direction = 'none';
     }
 
     self.enable(showNavBar);
@@ -213,15 +215,18 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
     enteringHeaderBar.setButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
 
     // begin transition of entering and leaving header bars
-    self.transition(enteringHeaderBar, leavingHeaderBar, direction, viewData.shouldAnimate, viewData.transitionId);
+    self.transition(enteringHeaderBar, leavingHeaderBar, viewData);
 
     self.isInitialized = true;
   };
 
 
-  self.transition = function(enteringHeaderBar, leavingHeaderBar, direction, shouldAnimate, transitionId) {
+  self.transition = function(enteringHeaderBar, leavingHeaderBar, viewData) {
     var enteringHeaderBarCtrl = enteringHeaderBar.controller();
     var transitionFn = navBarConfig.transitionFn();
+    var transitionId = viewData.transitionId;
+
+    enteringHeaderBarCtrl.beforeEnter(viewData);
 
     if (!self.isInitialized || !angular.isFunction(transitionFn)) {
       $timeout(function(){
@@ -234,7 +239,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
 
     enteringHeaderBarCtrl.resetBackButton();
 
-    var navBarTransition = transitionFn(enteringHeaderBar, leavingHeaderBar, direction, shouldAnimate);
+    var navBarTransition = transitionFn(enteringHeaderBar, leavingHeaderBar, viewData.direction, viewData.shouldAnimate);
 
     navBarTransition.run(0);
 
@@ -364,9 +369,9 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
     for (var x = 0; x < headerBars.length; x++) {
       headerBars[x].destroy();
     }
-    headerBars = null;
-    deregisterInstance();
     $element.remove();
+    $element = headerBars = null;
+    deregisterInstance();
   });
 
 }]);

@@ -72,7 +72,9 @@ IonicModule
       attr.$set('class', (attr['class'] || '') + ' view');
 
       return { pre: prelink };
-      function prelink($scope) {
+      function prelink($scope, $element, $attrs, ctrl) {
+
+        ctrl.enableMenuWithBackViews( $scope.$eval($attrs.enableMenuWithBackViews) );
 
         $scope.$on('$ionicExposeAside', function(evt, isAsideExposed){
           if(!$scope.$exposeAside) $scope.$exposeAside = {};

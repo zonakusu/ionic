@@ -70,19 +70,14 @@
  * ```
  */
 IonicModule
-.directive('ionNavBar', ['$ionicConfig', function($ionicConfig) {
+.directive('ionNavBar', function($ionicConfig) {
   return {
     restrict: 'E',
     controller: '$ionNavBar',
     scope: true,
-    compile: function(tElement) {
-      tElement.attr('class', 'nav-bar-container');
-      ionic.DomUtil.cachedAttr(tElement, 'nav-bar-transition', $ionicConfig.navBar.transition());
-
-      return function($scope, $element, $attr, navBarCtrl) {
-        navBarCtrl.init();
-      };
+    link: function($scope, $element, $attr, ctrl) {
+      ctrl.init();
     }
   };
-}]);
+});
 
