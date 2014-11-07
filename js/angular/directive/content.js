@@ -106,7 +106,7 @@ function($timeout, $controller, $ionicBind, $ionicConfig) {
               (innerElement || $element).toggleClass('padding', !!newVal);
           });
         }
-        console.log('SCROLLING ',$ionicConfig.scrolling.native());
+        console.log('Native SCROLLING ',$ionicConfig.scrolling.native());
         if ($attr.scroll === "false") {
           //do nothing
         } else if(attr.overflowScroll === "true" || $ionicConfig.scrolling.native()) {
