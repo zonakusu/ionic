@@ -38,7 +38,8 @@ IonicModule
   '$compile',
   '$ionicConfig',
   '$ionicBind',
-function($compile, $ionicConfig, $ionicBind) {
+  '$ionicViewSwitcher',
+function($compile, $ionicConfig, $ionicBind, $ionicViewSwitcher) {
 
   //Returns ' key="value"' if value exists
   function attrStr(k,v) {
@@ -135,7 +136,8 @@ function($compile, $ionicConfig, $ionicBind) {
               // tab should be selected and is NOT in the DOM
               // create a new scope and append it
               childScope = $scope.$new();
-              childElement = jqLite('<div class="tab-content pane nav-view-cache">');
+              childElement = jqLite('<div class="tab-content pane">');
+              $ionicViewSwitcher.viewEleIsActive(childElement, true);
               childElement.html(tabContent.innerHTML);
               tabsCtrl.$element.append( childElement );
               $compile(childElement)(childScope);
@@ -143,22 +145,20 @@ function($compile, $ionicConfig, $ionicBind) {
             }
 
             // remove the hide class so the tabs content shows up
-            childElement && childElement.removeClass('nav-view-cache');
+            $ionicViewSwitcher.viewEleIsActive(childElement, true);
 
           } else if (isTabContentAttached && childElement) {
             // this tab should NOT be selected, and it is already in the DOM
 
             if ( $ionicConfig.views.maxCache() > 0 ) {
               // keep the tabs in the DOM, only css hide it
-              childElement.addClass('nav-view-cache');
+              $ionicViewSwitcher.viewEleIsActive(childElement, false);
 
             } else {
               // do not keep tabs in the DOM
               childScope && childScope.$destroy();
-              childScope = null;
               childElement && childElement.remove();
-              childElement = null;
-              isTabContentAttached = false;
+              isTabContentAttached = childScope = childElement = null;
             }
 
           }
@@ -167,7 +167,8 @@ function($compile, $ionicConfig, $ionicBind) {
         $scope.$watch('$tabSelected', tabSelected);
 
         $scope.$on('$ionicView.afterEnter', function() {
-          childElement && childElement.removeClass('nav-view-cache');
+          $ionicViewSwitcher.viewEleIsActive(childElement, $scope.$tabSelected);
+          $ionicViewSwitcher.setActiveView($element.parent());
         });
 
       };

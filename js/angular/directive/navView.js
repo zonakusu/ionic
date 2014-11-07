@@ -97,7 +97,8 @@ function($state, $ionicConfig) {
     compile: function (tElement, tAttrs, transclude) {
 
       // a nav view element is a container for numerous views
-      tElement.addClass('view-container ' + $ionicConfig.views.transition());
+      tElement.addClass('view-container');
+      ionic.DomUtil.cachedAttr(tElement, 'nav-view-transition', $ionicConfig.views.transition());
 
       return function($scope, $element, $attr, navViewCtrl) {
         var latestLocals;

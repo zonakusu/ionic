@@ -33,7 +33,7 @@ describe('$ionicConfigProvider', function() {
     module('ionic', function($ionicConfigProvider) {});
     inject(function($ionicConfig) {
       ionic.Platform.setPlatform('whatever');
-      expect($ionicConfig.views.transition()).toBe('ios-transition');
+      expect($ionicConfig.views.transition()).toBe('ios');
     });
   });
 
@@ -41,7 +41,7 @@ describe('$ionicConfigProvider', function() {
     module('ionic', function($ionicConfigProvider) {});
     inject(function($ionicConfig) {
       ionic.Platform.setPlatform('ios');
-      expect($ionicConfig.views.transition()).toBe('ios-transition');
+      expect($ionicConfig.views.transition()).toBe('ios');
     });
   });
 
@@ -49,7 +49,7 @@ describe('$ionicConfigProvider', function() {
     module('ionic', function($ionicConfigProvider) {});
     inject(function($ionicConfig) {
       ionic.Platform.setPlatform('android');
-      expect($ionicConfig.views.transition()).toBe('android-transition');
+      expect($ionicConfig.views.transition()).toBe('android');
     });
   });
 
@@ -57,12 +57,12 @@ describe('$ionicConfigProvider', function() {
     module('ionic', function($ionicConfigProvider) {});
     inject(function($ionicConfig) {
       ionic.Platform.setPlatform('android');
-      expect($ionicConfig.views.transition()).toBe('android-transition');
+      expect($ionicConfig.views.transition()).toBe('android');
 
       $ionicConfig.platform.android.views.transition('android-whatnot');
 
       ionic.Platform.setPlatform('ios');
-      expect($ionicConfig.views.transition()).toBe('ios-transition');
+      expect($ionicConfig.views.transition()).toBe('ios');
 
       ionic.Platform.setPlatform('android');
       expect($ionicConfig.views.transition()).toBe('android-whatnot');
@@ -75,7 +75,7 @@ describe('$ionicConfigProvider', function() {
     });
     inject(function($ionicConfig) {
       ionic.Platform.setPlatform('ios');
-      expect($ionicConfig.navBar.transition()).toBe('ios-nav-bar');
+      expect($ionicConfig.navBar.transition()).toBe('ios');
 
       $ionicConfig.platform.ios.navBar.transition('ios-whatnot');
 
@@ -104,7 +104,7 @@ describe('$ionicConfigProvider', function() {
       });
     });
     inject(function($ionicConfig) {
-      expect($ionicConfig.views.transition()).toBe('ios-transition');
+      expect($ionicConfig.views.transition()).toBe('ios');
       expect($ionicConfig.navBar.alignTitle()).toBe('center');
 
       ionic.Platform.setPlatform('win32');

@@ -9,7 +9,7 @@ describe('Ionic View Switcher', function() {
 
   it('should get fallback transition', inject(function($ionicViewSwitcher) {
     var d = $ionicViewSwitcher.getTransitionData();
-    expect(d.transition).toEqual('ios-transition');
+    expect(d.transition).toEqual('ios');
   }));
 
   it('should get transition from $ionicConfig.views.transition()', inject(function($ionicViewSwitcher, $ionicConfig) {
@@ -104,8 +104,7 @@ describe('Ionic View Switcher', function() {
     var switcher = $ionicViewSwitcher.create(null, navViewElement, viewLocals, enteringView);
     switcher.loadViewElements();
     expect(switcher.enteringEle().hasClass('locals-template')).toBe(true);
-    expect(switcher.enteringEle().hasClass('nav-view-entering')).toBe(true);
-    expect(switcher.enteringEle().data('$ionicEleId')).toBe('STATE_ID');
+    expect(switcher.enteringEle().data('$eleId')).toBe('STATE_ID');
   }));
 
   it('should create a new entering element and set no cache data from view locals', inject(function($ionicViewSwitcher) {
@@ -123,7 +122,7 @@ describe('Ionic View Switcher', function() {
     };
     var switcher = $ionicViewSwitcher.create(null, navViewElement, viewLocals, enteringView);
     switcher.loadViewElements();
-    expect(switcher.enteringEle().data('$ionicNoCache')).toBe(true);
+    expect(switcher.enteringEle().data('$noCache')).toBe(true);
   }));
 
   it('should create a new entering element and set no cache data from cache-view=false attr', inject(function($ionicViewSwitcher) {
@@ -136,13 +135,13 @@ describe('Ionic View Switcher', function() {
     };
     var switcher = $ionicViewSwitcher.create(null, navViewElement, viewLocals, enteringView);
     switcher.loadViewElements();
-    expect(switcher.enteringEle().data('$ionicNoCache')).toBe(true);
+    expect(switcher.enteringEle().data('$noCache')).toBe(true);
   }));
 
   it('should get an existing entering element within navViewElement by state id', inject(function($ionicViewSwitcher) {
     var navViewElement = angular.element('<div class="view-container">');
     var enteringEle = angular.element('<div class="existing">');
-    enteringEle.data('$ionicEleId', 'STATE_ID');
+    enteringEle.data('$eleId', 'STATE_ID');
     navViewElement.append(enteringEle);
 
     var enteringView = {
@@ -152,13 +151,13 @@ describe('Ionic View Switcher', function() {
     var switcher = $ionicViewSwitcher.create(null, navViewElement, {}, enteringView);
     switcher.loadViewElements();
     expect(switcher.enteringEle().hasClass('existing')).toBe(true);
-    expect(switcher.enteringEle().data('$ionicEleId')).toBe('STATE_ID');
+    expect(switcher.enteringEle().data('$eleId')).toBe('STATE_ID');
   }));
 
   it('should get an existing entering element within navViewElement by view id', inject(function($ionicViewSwitcher) {
     var navViewElement = angular.element('<div class="view-container">');
     var enteringEle = angular.element('<div class="existing">');
-    enteringEle.data('$ionicEleId', 'VIEW_ID');
+    enteringEle.data('$eleId', 'VIEW_ID');
     navViewElement.append(enteringEle);
 
     var enteringView = {
@@ -167,13 +166,13 @@ describe('Ionic View Switcher', function() {
     var switcher = $ionicViewSwitcher.create(null, navViewElement, {}, enteringView);
     switcher.loadViewElements();
     expect(switcher.enteringEle().hasClass('existing')).toBe(true);
-    expect(switcher.enteringEle().data('$ionicEleId')).toBe('VIEW_ID');
+    expect(switcher.enteringEle().data('$eleId')).toBe('VIEW_ID');
   }));
 
   it('should get an existing entering element within navViewElement by abstract state name', inject(function($ionicViewSwitcher) {
     var navViewElement = angular.element('<div class="view-container">');
     var enteringEle = angular.element('<div class="existing">');
-    enteringEle.data('$ionicEleId', 'ABSTRACT_STATE');
+    enteringEle.data('$eleId', 'ABSTRACT_STATE');
     navViewElement.append(enteringEle);
 
     var viewLocals = {
@@ -191,19 +190,7 @@ describe('Ionic View Switcher', function() {
     var switcher = $ionicViewSwitcher.create(null, navViewElement, viewLocals, enteringView);
     switcher.loadViewElements();
     expect(switcher.enteringEle().hasClass('existing')).toBe(true);
-    expect(switcher.enteringEle().data('$ionicEleId')).toBe('ABSTRACT_STATE');
-  }));
-
-  it('should get an existing leaving element within navViewElement by nav-view-active class', inject(function($ionicViewSwitcher) {
-    var navViewElement = angular.element('<div class="view-container">');
-    var leavingEle = angular.element('<div class="nav-view-active">');
-    navViewElement.append(leavingEle);
-    navViewElement.append(angular.element('<div class="nav-view-cache">'));
-    navViewElement.append(angular.element('<div class="nav-view-cache">'));
-
-    var switcher = $ionicViewSwitcher.create(null, navViewElement);
-    switcher.loadViewElements();
-    expect(switcher.leavingEle().hasClass('nav-view-active')).toBe(true);
+    expect(switcher.enteringEle().data('$eleId')).toBe('ABSTRACT_STATE');
   }));
 
   it('should append the new entering element to the navViewElement', inject(function($ionicViewSwitcher, $rootScope) {
@@ -213,9 +200,9 @@ describe('Ionic View Switcher', function() {
     switcher.loadViewElements();
     switcher.render(function(){});
     expect(switcher.enteringEle().length).toBe(1);
-    expect(switcher.enteringEle().hasClass('nav-view-entering')).toBe(true);
+    expect(switcher.enteringEle().attr('nav-view')).toBe('stage');
     expect(switcher.enteringEle().parent().hasClass('view-container')).toBe(true);
-    expect(switcher.enteringEle().data('$ionicAccessed')).toBeDefined();
+    expect(switcher.enteringEle().data('$accessed')).toBeDefined();
   }));
 
 });
