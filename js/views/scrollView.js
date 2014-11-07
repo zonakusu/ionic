@@ -991,7 +991,7 @@ ionic.views.Scroll = ionic.views.View.inherit({
       if (height !== self.__indicatorY.size) {
         ionic.requestAnimationFrame(function(){
           self.__indicatorY.indicator.style.height = height + 'px';
-        })
+        });
       }
       self.__indicatorY.size = height;
       self.__indicatorY.minScale = self.options.minScrollbarSizeY / height;
