@@ -106,6 +106,9 @@ IonicModule
       text: PLATFORM,
       previousTitleText: PLATFORM
     },
+    scrolling:{
+      native:PLATFORM
+    },
     tabs: {
       style: PLATFORM,
       position: PLATFORM
@@ -222,6 +225,9 @@ IonicModule
       text: 'Back',
       previousTitleText: true
     },
+    scrolling:{
+      native:true
+    },
 
     tabs: {
       style: 'standard',
@@ -242,6 +248,9 @@ IonicModule
 
     backButton: {
       icon: 'ion-ios7-arrow-back'
+    },
+    scrolling:{
+      native:false
     }
 
   });
@@ -338,6 +347,9 @@ IonicModule
       icon: 'ion-android-arrow-back',
       text: false,
       previousTitleText: false
+    },
+    scrolling:{
+      native:true
     },
 
     tabs: {
