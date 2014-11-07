@@ -972,7 +972,9 @@ ionic.views.Scroll = ionic.views.View.inherit({
         width = 0;
       }
       if (width !== self.__indicatorX.size) {
-        self.__indicatorX.indicator.style.width = width + 'px';
+        ionic.requestAnimationFrame(function(){
+          self.__indicatorX.indicator.style.width = width + 'px';
+        });
       }
       self.__indicatorX.size = width;
       self.__indicatorX.minScale = self.options.minScrollbarSizeX / width;
@@ -987,7 +989,9 @@ ionic.views.Scroll = ionic.views.View.inherit({
         height = 0;
       }
       if (height !== self.__indicatorY.size) {
-        self.__indicatorY.indicator.style.height = height + 'px';
+        ionic.requestAnimationFrame(function(){
+          self.__indicatorY.indicator.style.height = height + 'px';
+        })
       }
       self.__indicatorY.size = height;
       self.__indicatorY.minScale = self.options.minScrollbarSizeY / height;
