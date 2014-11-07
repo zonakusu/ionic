@@ -143,10 +143,13 @@ body.grade-c {
     opacity: 0;
   }
 }
+.platform-android .scroll-bar-indicator {
+  // android doesn't have rounded ends on scrollbar
+  border-radius: 0;
+}
 .grade-b .scroll-bar-indicator,
 .grade-c .scroll-bar-indicator {
   // disable rgba background and border radius for low end devices
-  border-radius: 0;
   background: #aaa;
 
   &.scroll-bar-fade-out {
