@@ -215,6 +215,7 @@ describe('tabs', function() {
 
 
     it('should $hasTabs and $hasTabsTop', function() {
+      TestUtil.setPlatform('ios');
       var el = setup();
       var scope = el.scope();
       expect(scope.$hasTabs).toBe(true);
@@ -234,34 +235,6 @@ describe('tabs', function() {
       expect(el[0].querySelector('.tabs .content')).toBeTruthy();
     });
 
-    describe('platform Styles', function() {
-      describe('iOS', function() {
-        beforeEach(module('ionic', function($provide) {
-          TestUtil.setPlatform('ios');
-          $provide.constant('$ionicTabsConfig', {
-            type: ''
-          });
-        }));
-
-        it('should set iOS style', function() {
-          var el = setup();
-          expect(el.hasClass('tabs-striped')).not.toBe(true);
-        });
-      });
-      describe('android', function() {
-        beforeEach(module('ionic', function($provide) {
-          TestUtil.setPlatform('android');
-          $provide.constant('$ionicTabsConfig', {
-            type: 'tabs-striped'
-          });
-        }));
-
-        it('should set Android style', function() {
-          var el = setup();
-          expect(el.hasClass('tabs-striped')).toBe(true);
-        });
-      });
-    });
   });
 
   describe('ionicTab controller', function() {
@@ -544,8 +517,8 @@ describe('tabs', function() {
     }
 
     it('should set tabs css from $ionicConfig', inject(function($rootScope, $compile, $ionicConfig){
-      $ionicConfig.tabs.type('tabs-striped');
-      $ionicConfig.tabs.position('tabs-top');
+      $ionicConfig.tabs.position('top');
+      $ionicConfig.tabs.style('striped');
       var scope = $rootScope.$new();
       var element = angular.element('<ion-tabs></ion-tabs>');
       element = $compile(element)(scope);
