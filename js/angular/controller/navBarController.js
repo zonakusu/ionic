@@ -15,6 +15,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
   var PRIMARY_BUTTONS = 'primaryButtons';
   var SECONDARY_BUTTONS = 'secondaryButtons';
   var BACK_BUTTON = 'backButton';
+  var BUTTON_TYPES = 'primaryButtons secondaryButtons leftButtons rightButtons'.split(' ');
 
   var self = this;
   var headerBars = [];
@@ -60,13 +61,12 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
     // append title in the header, this is the rock to where buttons append
     headerBarEle.append(titleEle);
 
-    // create default button elements
-    navEle[PRIMARY_BUTTONS] = createNavElement(PRIMARY_BUTTONS);
-    navEle[SECONDARY_BUTTONS] = createNavElement(SECONDARY_BUTTONS);
-
-    // append and position buttons
-    positionButtons(navEle[PRIMARY_BUTTONS], PRIMARY_BUTTONS);
-    positionButtons(navEle[SECONDARY_BUTTONS], SECONDARY_BUTTONS);
+    forEach(BUTTON_TYPES, function(buttonType){
+      // create default button elements
+      navEle[buttonType] = createNavElement(buttonType);
+      // append and position buttons
+      positionButtons(navEle[buttonType], buttonType);
+    });
 
     // compile header and append to the DOM
     containerEle.append(headerBarEle);
@@ -115,16 +115,18 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
         return headerBarEle;
       },
       afterLeave: function() {
-        headerBarInstance.removeButtons(PRIMARY_BUTTONS);
-        headerBarInstance.removeButtons(SECONDARY_BUTTONS);
+        forEach(BUTTON_TYPES, function(buttonType){
+          headerBarInstance.removeButtons(buttonType);
+        });
         headerBarCtrl.resetBackButton();
       },
       controller: function() {
         return headerBarCtrl;
       },
       destroy: function() {
-        headerBarInstance.removeButtons(PRIMARY_BUTTONS);
-        headerBarInstance.removeButtons(SECONDARY_BUTTONS);
+        forEach(BUTTON_TYPES, function(buttonType){
+          headerBarInstance.removeButtons(buttonType);
+        });
         containerEle.scope().$destroy();
         for (var n in navEle) {
           if (navEle[n]) {
@@ -144,13 +146,14 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
     function positionButtons(btnsEle, buttonType) {
       if (!btnsEle) return;
 
-      var appendToRight = (buttonType == SECONDARY_BUTTONS && navBarConfig.positionSecondaryButtons() != 'left') ||
+      var appendToRight = (buttonType == 'rightButtons') ||
+                          (buttonType == SECONDARY_BUTTONS && navBarConfig.positionSecondaryButtons() != 'left') ||
                           (buttonType == PRIMARY_BUTTONS && navBarConfig.positionPrimaryButtons() == 'right');
 
       if (appendToRight) {
         // right side
         if (!rightButtonsEle) {
-          rightButtonsEle = jqLite('<div class="buttons buttons-b">');
+          rightButtonsEle = jqLite('<div class="buttons buttons-right">');
           headerBarEle.append(rightButtonsEle);
         }
         if (buttonType == SECONDARY_BUTTONS) {
@@ -162,7 +165,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
       } else {
         // left side
         if (!leftButtonsEle) {
-          leftButtonsEle = jqLite('<div class="buttons buttons-a">');
+          leftButtonsEle = jqLite('<div class="buttons buttons-left">');
           if (navEle[BACK_BUTTON]) {
             navEle[BACK_BUTTON].after(leftButtonsEle);
           } else {
@@ -211,8 +214,11 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
     self.title(viewData.title, enteringHeaderBar);
 
     // update the buttons, depending if the view has their own or not
-    enteringHeaderBar.setButtons(viewData.primaryButtons, PRIMARY_BUTTONS);
-    enteringHeaderBar.setButtons(viewData.secondaryButtons, SECONDARY_BUTTONS);
+    if (viewData.buttons) {
+      forEach(BUTTON_TYPES, function(buttonType){
+        enteringHeaderBar.setButtons(viewData.buttons[buttonType], buttonType);
+      });
+    }
 
     // begin transition of entering and leaving header bars
     self.transition(enteringHeaderBar, leavingHeaderBar, viewData);

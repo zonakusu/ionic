@@ -344,10 +344,6 @@ function($scope, $attrs, $ionicSideMenuDelegate, $ionicPlatform, $ionicBody, $io
     return $scope.dragContent;
   };
 
-  $scope.$on('$ionicView.beforeEnter', function(ev, viewData){
-    console.log('before enter', viewData)
-  });
-
   self.edgeThreshold = 25;
   self.edgeThresholdEnabled = false;
   self.edgeDragThreshold = function(value) {

@@ -55,6 +55,11 @@ function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) 
 
       $ionicHistory.currentTitle( $attrs.title );
 
+      var buttons = {};
+      for (var n in navElementHtml) {
+        buttons[n] = generateButton(navElementHtml[n]);
+      }
+
       navViewCtrl.beforeEnter({
         title: $attrs.title,
         direction: transData.direction,
@@ -62,8 +67,7 @@ function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) 
         transitionId: transData.transitionId,
         shouldAnimate: transData.shouldAnimate,
         showBack: transData.showBack && !$attrs.hideBackButton,
-        primaryButtons: generateButton(navElementHtml.primaryButtons),
-        secondaryButtons: generateButton(navElementHtml.secondaryButtons),
+        buttons: buttons,
         navBarDelegate: navBarDelegateHandle,
         hasHeaderBar: hasViewHeaderBar
       });

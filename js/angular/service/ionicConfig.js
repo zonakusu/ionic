@@ -166,8 +166,8 @@ IonicModule
           css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
           css.opacity = opacity;
 
-          ctrl.setCss('buttons-a', css);
-          ctrl.setCss('buttons-b', css);
+          ctrl.setCss('buttons-left', css);
+          ctrl.setCss('buttons-right', css);
           ctrl.setCss('back-button', css);
 
           css[ionic.CSS.TRANSFORM] = 'translate3d(' + backTextX + 'px,0,0)';

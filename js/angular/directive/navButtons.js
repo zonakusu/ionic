@@ -36,7 +36,7 @@
  * ```
  *
  * @param {string} side The side to place the buttons on in the parent
- * {@link ionic.directive:ionNavBar}. Available: 'primary' or 'secondary'.
+ * {@link ionic.directive:ionNavBar}. Available: `primary`, `secondary`, `left`, and `right`.
  */
 IonicModule
 .directive('ionNavButtons', ['$document', function($document) {
@@ -44,18 +44,17 @@ IonicModule
     require: '^ionNavBar',
     restrict: 'E',
     compile: function(tElement, tAttrs) {
-      var spanEle = $document[0].createElement('span');
-      var navElementType;
+      var side = 'left';
 
-      if (tAttrs.side == 'secondary' || tAttrs.side == 'right') {
-        spanEle.className = 'secondary-buttons';
-        navElementType = 'secondaryButtons';
-      } else {
-        spanEle.className = 'primary-buttons';
-        navElementType = 'primaryButtons';
+      if (/^primary|secondary|right$/i.test(tAttrs.side || '')) {
+        side = tAttrs.side.toLowerCase();
       }
 
+      var spanEle = $document[0].createElement('span');
+      spanEle.className = side + '-buttons';
       spanEle.innerHTML = tElement.html();
+
+      var navElementType = side + 'Buttons';
 
       tElement.attr('class', 'hide');
       tElement.empty();
