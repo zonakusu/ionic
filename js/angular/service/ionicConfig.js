@@ -97,8 +97,8 @@ IonicModule
       previousTitleText: PLATFORM
     },
     tabs: {
-      position: PLATFORM,
-      type: PLATFORM
+      style: PLATFORM,
+      position: PLATFORM
     },
     templates: {
       prefetch: PLATFORM
@@ -214,8 +214,8 @@ IonicModule
     },
 
     tabs: {
-      position: '',
-      type: ''
+      style: 'standard',
+      position: 'bottom'
     },
 
     templates: {
@@ -331,7 +331,8 @@ IonicModule
     },
 
     tabs: {
-      type: 'tabs-striped'
+      style: 'striped',
+      position: 'top'
     }
 
   });

@@ -59,8 +59,8 @@ function($ionicTabsDelegate, $ionicConfig) {
       innerElement.append(tElement.contents());
 
       tElement.append(innerElement)
-              .addClass( $ionicConfig.tabs.position() )
-              .addClass( $ionicConfig.tabs.type() );
+              .addClass( 'tabs-' + $ionicConfig.tabs.position() )
+              .addClass( 'tabs-' + $ionicConfig.tabs.style() );
 
       return { pre: prelink, post: postLink };
       function prelink($scope, $element, $attr, tabsCtrl) {
