@@ -70,7 +70,7 @@ IonicModule
   }
   return {
     restrict: 'E',
-    require: ['^$ionicScroll', 'ionInfiniteScroll'],
+    require: ['?^$ionicScroll', 'ionInfiniteScroll'],
     template: '<i class="icon {{icon()}} icon-refreshing"></i>',
     scope: true,
     controller: ['$scope', '$attrs', function($scope, $attrs) {
@@ -79,12 +79,30 @@ IonicModule
       this.getMaxScroll = function() {
         var distance = ($attrs.distance || '2.5%').trim();
         var isPercent = distance.indexOf('%') !== -1;
-        var maxValues = this.scrollView.getScrollMax();
+        var maxValues = {};
+        if(this.jsScrolling){
+          maxValues = this.scrollView.getScrollMax();
+          return {
+            left: this.scrollView.options.scrollingX ?
+              calculateMaxValue(distance, maxValues.left, isPercent) :
+              -1,
+            top: this.scrollView.options.scrollingY ?
+              calculateMaxValue(distance, maxValues.top, isPercent) :
+              -1
+          };
+        }
+
+        // native scrolling
+        maxValues = {
+          left:this.scrollEl.scrollWidth - this.scrollEl.clientWidth,
+          top: this.scrollEl.scrollHeight - this.scrollEl.clientHeight
+        };
+        var computedStyle = window.getComputedStyle(this.scrollEl);
         return {
-          left: this.scrollView.options.scrollingX ?
+          left: computedStyle.overflowX == 'scroll' || computedStyle.overflowX == 'auto' ?
             calculateMaxValue(distance, maxValues.left, isPercent) :
             -1,
-          top: this.scrollView.options.scrollingY ?
+          top: computedStyle.overflowY == 'scroll' || computedStyle.overflowY == 'auto' ?
             calculateMaxValue(distance, maxValues.top, isPercent) :
             -1
         };
@@ -93,7 +111,17 @@ IonicModule
     link: function($scope, $element, $attrs, ctrls) {
       var scrollCtrl = ctrls[0];
       var infiniteScrollCtrl = ctrls[1];
-      var scrollView = infiniteScrollCtrl.scrollView = scrollCtrl.scrollView;
+      var jsScrolling = infiniteScrollCtrl.jsScrolling = !!scrollCtrl;
+      if(jsScrolling){
+        var scrollView = infiniteScrollCtrl.scrollView = scrollCtrl.scrollView;
+      }else{
+        var scrollEl = ionic.DomUtil.getParentOrSelfWithClass($element[0].parentNode,'overflow-scroll');
+        infiniteScrollCtrl.scrollEl = scrollEl;
+        if(!scrollEl) {
+          console.error('Infinite scroll must be used inside a scrollable div');
+          return;
+        }
+      }
 
       $scope.icon = function() {
         return angular.isDefined($attrs.icon) ? $attrs.icon : 'ion-loading-d';
@@ -107,10 +135,12 @@ IonicModule
 
       var finishInfiniteScroll = function() {
         $element[0].classList.remove('active');
+
         $timeout(function() {
-          scrollView.resize();
+          if(jsScrolling)scrollView.resize();
           checkBounds();
         }, 0, false);
+
         infiniteScrollCtrl.isLoading = false;
       };
 
@@ -120,23 +150,34 @@ IonicModule
 
       $scope.$on('$destroy', function() {
         if(scrollCtrl && scrollCtrl.$element)scrollCtrl.$element.off('scroll', checkBounds);
+        if(scrollEl && scrollEl.removeEventListener)scrollEl.removeEventListener('scroll', checkBounds);
       });
 
       var checkBounds = ionic.animationFrameThrottle(checkInfiniteBounds);
 
       //Check bounds on start, after scrollView is fully rendered
       setTimeout(checkBounds);
-      scrollCtrl.$element.on('scroll', checkBounds);
+      if(jsScrolling){
+        scrollCtrl.$element.on('scroll', checkBounds);
+      }else{
+        infiniteScrollCtrl.scrollEl.addEventListener('scroll', checkBounds);
+      }
 
       function checkInfiniteBounds() {
         if (infiniteScrollCtrl.isLoading) return;
-
-        var scrollValues = scrollView.getValues();
         var maxScroll = infiniteScrollCtrl.getMaxScroll();
 
-        if ((maxScroll.left !== -1 && scrollValues.left >= maxScroll.left) ||
+        if(jsScrolling){
+          var scrollValues = scrollView.getValues();
+          if ((maxScroll.left !== -1 && scrollValues.left >= maxScroll.left) ||
             (maxScroll.top !== -1 && scrollValues.top >= maxScroll.top)) {
-          onInfinite();
+            onInfinite();
+          }
+        }else{
+          if ((maxScroll.left !== -1 && scrollEl.scrollLeft >= maxScroll.left) ||
+            (maxScroll.top !== -1 && scrollEl.scrollTop >= maxScroll.top)) {
+            onInfinite();
+          }
         }
       }
     }
