@@ -232,28 +232,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
     var transitionFn = navBarConfig.transitionFn();
     var transitionId = viewData.transitionId;
 
-    enteringHeaderBarCtrl.beforeEnter(viewData);
-
-    if (!self.isInitialized || !angular.isFunction(transitionFn)) {
-      $timeout(function(){
-        enteringHeaderBarCtrl.alignTitle().then(transitionComplete);
-      }, 16);
-      return;
-    }
-
-    navBarAttr(enteringHeaderBar, 'stage');
-
-    enteringHeaderBarCtrl.resetBackButton();
-
-    var navBarTransition = transitionFn(enteringHeaderBar, leavingHeaderBar, viewData.direction, viewData.shouldAnimate);
-
-    navBarTransition.run(0);
-
-    $timeout(enteringHeaderBarCtrl.alignTitle, 16);
-
     function transitionComplete() {
-      if (latestTransitionId !== transitionId) return;
-
       for (var x=0; x<headerBars.length; x++) {
         headerBars[x].isActive = false;
       }
@@ -265,6 +244,35 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
       queuedTransitionEnd = null;
     }
 
+    function noAnimation() {
+      $timeout(function(){
+        enteringHeaderBarCtrl.alignTitle().then(transitionComplete);
+      }, 1600);
+    }
+
+    enteringHeaderBarCtrl.beforeEnter(viewData);
+
+    if (!self.isInitialized || !angular.isFunction(transitionFn)) {
+      return noAnimation();
+    }
+
+    var navBarTransition = transitionFn(enteringHeaderBar, leavingHeaderBar, viewData.direction, viewData.shouldAnimate);
+
+    if (!navBarTransition.shouldAnimate) {
+      return noAnimation();
+    }
+
+    ionic.DomUtil.cachedAttr($element, 'nav-bar-transition', $ionicConfig.navBar.transition());
+    ionic.DomUtil.cachedAttr($element, 'nav-bar-direction', viewData.direction);
+
+    navBarAttr(enteringHeaderBar, 'stage');
+
+    enteringHeaderBarCtrl.resetBackButton();
+
+    navBarTransition.run(0);
+
+    $timeout(enteringHeaderBarCtrl.alignTitle, 16);
+
     queuedTransitionStart = function() {
       if (latestTransitionId !== transitionId) return;
 
@@ -273,7 +281,11 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
 
       navBarTransition.run(1);
 
-      queuedTransitionEnd = transitionComplete;
+      queuedTransitionEnd = function() {
+        if (latestTransitionId == transitionId) {
+          transitionComplete();
+        }
+      };
 
       queuedTransitionStart = null;
     };

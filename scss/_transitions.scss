@@ -23,6 +23,17 @@ $ios-transition-container-bg-color:    #000 !default;
     background-color: $ios-transition-container-bg-color;
   }
 
+  [nav-view="active"],
+  &[nav-view-direction="forward"] [nav-view="entering"],
+  &[nav-view-direction="back"] [nav-view="leaving"] {
+    z-index: $z-index-view-above;
+  }
+
+  &[nav-view-direction="back"] [nav-view="entering"],
+  &[nav-view-direction="forward"] [nav-view="leaving"] {
+    z-index: $z-index-view-below;
+  }
+
 }
 
 
@@ -78,6 +89,25 @@ $android-transition-timing-leaving:          cubic-bezier(0.4, 0, 1, 1) !default
     @include transition-timing-function( $android-transition-timing-leaving );
   }
 
+  [nav-view="active"],
+  &[nav-view-direction="forward"] [nav-view="entering"],
+  &[nav-view-direction="back"] [nav-view="leaving"] {
+    z-index: $z-index-view-above;
+  }
+
+  &[nav-view-direction="back"] [nav-view="entering"],
+  &[nav-view-direction="forward"] [nav-view="leaving"] {
+    z-index: $z-index-view-below;
+  }
+
+  .tabs-top > .view-container > .history-after-root {
+    z-index: $z-index-tabs + 1;
+  }
+
+  .history-after-root > .has-tabs-top {
+    top: $bar-height;
+  }
+
 }
 
 
@@ -104,6 +134,12 @@ $android-transition-timing-leaving:          cubic-bezier(0.4, 0, 1, 1) !default
     display: none;
   }
 
+  [nav-bar="active"],
+  &[nav-bar-direction="forward"] [nav-bar="entering"],
+  &[nav-bar-direction="back"] [nav-bar="leaving"] {
+    z-index: $z-index-bar-above;
+  }
+
 }
 
 
@@ -119,7 +155,6 @@ $android-transition-timing-leaving:          cubic-bezier(0.4, 0, 1, 1) !default
   opacity: 0;
   @include transition-duration( 0 );
 }
-
 
 [nav-bar="stage"] {
   .title,

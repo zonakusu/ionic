@@ -103,13 +103,13 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionic
 
       var switcher = {
 
-        init: function(callback) {
+        init: function(registerData, callback) {
           ionicViewSwitcher.isTransitioning(true);
 
           $ionicClickBlock.show();
           switcher.loadViewElements();
 
-          switcher.render(function(){
+          switcher.render(registerData, function(){
             callback && callback();
           });
         },
@@ -154,7 +154,7 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionic
           navViewElement.data(DATA_ACTIVE_ELE_IDENTIFIER, enteringEleIdentifier);
         },
 
-        render: function(callback) {
+        render: function(registerData, callback) {
           if ( alreadyInDom ) {
             // it was already found in the dom, just reconnect the scope
             ionic.Utils.reconnectScope( enteringEle.scope() );
@@ -167,6 +167,8 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionic
             var link = $compile(enteringEle);
 
             navViewAttr(enteringEle, VIEW_STATUS_STAGED);
+
+            enteringEle.addClass('history-' + (registerData.isHistoryRoot ? 'root' : 'after-root'));
 
             // append the entering element to the DOM
             navViewElement.append(enteringEle);

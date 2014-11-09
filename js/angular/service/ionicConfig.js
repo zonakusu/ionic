@@ -121,11 +121,10 @@ IonicModule
       transitionFn: function(enteringEle, leavingEle, direction, shouldAnimate) {
         shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
 
-        function setStyles(ele, opacity, x, zIndex) {
+        function setStyles(ele, opacity, x) {
           var css = {};
           css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
           css.opacity = opacity;
-          css.zIndex = zIndex;
           css[ionic.CSS.TRANSFORM] = 'translate3d(' + x + '%,0,0)';
           ionic.DomUtil.cachedStyles(ele, css);
         }
@@ -133,17 +132,17 @@ IonicModule
         return {
           run: function(step) {
             if (direction == 'forward') {
-              setStyles(enteringEle, 1, (1-step) * 99, 3); // starting at 98% prevents a flicker
-              setStyles(leavingEle, (1 - 0.1 * step), step * -33, 2);
+              setStyles(enteringEle, 1, (1-step) * 99); // starting at 98% prevents a flicker
+              setStyles(leavingEle, (1 - 0.1 * step), step * -33);
 
             } else if (direction == 'back') {
-              setStyles(enteringEle, (1 - 0.1 * (1-step)), (1-step) * -33, 2);
-              setStyles(leavingEle, 1, step * 100, 3);
+              setStyles(enteringEle, (1 - 0.1 * (1-step)), (1-step) * -33);
+              setStyles(leavingEle, 1, step * 100);
 
             } else {
               // swap, enter, exit
-              setStyles(enteringEle, 1, 0, 3);
-              setStyles(leavingEle, 0, 0, 2);
+              setStyles(enteringEle, 1, 0);
+              setStyles(leavingEle, 0, 0);
             }
           },
           shouldAnimate: shouldAnimate
@@ -248,11 +247,10 @@ IonicModule
       transitionFn: function(enteringEle, leavingEle, direction, shouldAnimate) {
         shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
 
-        function setStyles(ele, opacity, y, zIndex) {
+        function setStyles(ele, opacity, y) {
           var css = {};
           css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
           css.opacity = opacity;
-          css.zIndex = zIndex;
           css[ionic.CSS.TRANSFORM] = 'translate3d(0,' + y + 'px,0)';
           ionic.DomUtil.cachedStyles(ele, css);
         }
@@ -262,17 +260,17 @@ IonicModule
         return {
           run: function(step) {
             if (direction == 'forward') {
-              setStyles(enteringEle, step, (1-step) * startX, 3);
-              setStyles(leavingEle, 1, 0, 2);
+              setStyles(enteringEle, step, (1-step) * startX);
+              setStyles(leavingEle, 1, 0);
 
             } else if (direction == 'back') {
-              setStyles(enteringEle, 1, 0, 2);
-              setStyles(leavingEle, (1-step), step * startX, 3);
+              setStyles(enteringEle, 1, 0);
+              setStyles(leavingEle, (1-step), step * startX);
 
             } else {
               // swap, enter, exit
-              setStyles(enteringEle, 1, 0, 3);
-              setStyles(leavingEle, 0, 0, 2);
+              setStyles(enteringEle, 1, 0);
+              setStyles(leavingEle, 0, 0);
             }
           },
           shouldAnimate: shouldAnimate
@@ -289,11 +287,10 @@ IonicModule
       transitionFn: function(enteringHeaderBar, leavingHeaderBar, direction, shouldAnimate) {
         shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
 
-        function setStyles(ele, opacity, y, zIndex) {
+        function setStyles(ele, opacity, y) {
           var css = {};
           css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
           css.opacity = opacity;
-          css.zIndex = zIndex;
           css[ionic.CSS.TRANSFORM] = 'translate3d(0,' + y + 'px,0)';
           ionic.DomUtil.cachedStyles(ele, css);
         }

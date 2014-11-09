@@ -40,7 +40,7 @@ function($scope, $element, $attrs, $ionicNavBarDelegate, $ionicHistory, $ionicVi
     self.update(registerData);
 
     // begin rendering and transitioning
-    self.render(registerData.viewId, viewLocals, registerData);
+    self.render(registerData, viewLocals);
   };
 
 
@@ -76,15 +76,15 @@ function($scope, $element, $attrs, $ionicNavBarDelegate, $ionicHistory, $ionicVi
   };
 
 
-  self.render = function(viewId, viewLocals, registerData) {
-    var enteringView = $ionicHistory.getViewById(viewId) || {};
+  self.render = function(registerData, viewLocals) {
+    var enteringView = $ionicHistory.getViewById(registerData.viewId) || {};
 
     // register the view and figure out where it lives in the various
     // histories and nav stacks, along with how views should enter/leave
     var switcher = $ionicViewSwitcher.create($scope, $element, viewLocals, enteringView);
 
     // init the rendering of views for this navView directive
-    switcher.init(function(){
+    switcher.init(registerData, function(){
       // the view is now compiled, in the dom and linked, now lets transition the views.
       // this uses a callback incase THIS nav-view has a nested nav-view, and after the NESTED
       // nav-view links, the NESTED nav-view would update which direction THIS nav-view should use
