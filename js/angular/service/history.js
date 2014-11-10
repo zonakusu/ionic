@@ -455,10 +455,12 @@ function($rootScope, $state, $location, $window) {
     },
 
     currentTitle: function(val) {
-      if (arguments.length) {
-        viewHistory.currentView.title = val;
+      if (viewHistory.currentView) {
+        if (arguments.length) {
+          viewHistory.currentView.title = val;
+        }
+        return viewHistory.currentView.title;
       }
-      return viewHistory.currentView.title;
     },
 
     backView: function() {

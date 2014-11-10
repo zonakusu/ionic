@@ -50,10 +50,12 @@ function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) 
   self.beforeEnter = function(ev, transData) {
     // this event was emitted, starting at intial ion-view, then bubbles up
     // only the first ion-view should do something with it, parent ion-views should ignore
-    if (!transData.viewNotified) {
+    if (transData && !transData.viewNotified) {
       transData.viewNotified = true;
 
-      $ionicHistory.currentTitle( $attrs.title );
+      var viewTitle = $attrs.viewTitle || $attrs.title;
+
+      $ionicHistory.currentTitle(viewTitle);
 
       var buttons = {};
       for (var n in navElementHtml) {
@@ -61,15 +63,15 @@ function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) 
       }
 
       navViewCtrl.beforeEnter({
-        title: $attrs.title,
+        title: viewTitle,
         direction: transData.direction,
         transition: transData.transition,
         transitionId: transData.transitionId,
         shouldAnimate: transData.shouldAnimate,
         showBack: transData.showBack && !$attrs.hideBackButton,
         buttons: buttons,
-        navBarDelegate: navBarDelegateHandle,
-        hasHeaderBar: hasViewHeaderBar
+        navBarDelegate: navBarDelegateHandle || null,
+        hasHeaderBar: !!hasViewHeaderBar
       });
     }
   };

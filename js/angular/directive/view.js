@@ -15,7 +15,7 @@
  * ```html
  * <ion-nav-bar></ion-nav-bar>
  * <ion-nav-view class="slide-left-right">
- *   <ion-view title="My Page">
+ *   <ion-view view-title="My Page">
  *     <ion-content>
  *       Hello!
  *     </ion-content>
@@ -23,7 +23,7 @@
  * </ion-nav-view>
  * ```
  *
- * @param {string=} title The title to display on the parent {@link ionic.directive:ionNavBar}.
+ * @param {string=} view-title The title to display on the parent {@link ionic.directive:ionNavBar}.
  * @param {boolean=} hide-back-button Whether to hide the back button on the parent
  * {@link ionic.directive:ionNavBar} by default.
  * @param {boolean=} hide-nav-bar Whether to hide the parent
@@ -37,6 +37,7 @@ IonicModule
     controller: '$ionView',
     compile: function(tElement) {
       tElement.addClass('pane');
+      tElement[0].removeAttribute('title');
       return function link($scope, $element, $attrs, viewCtrl) {
         viewCtrl.init();
       };
