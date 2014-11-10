@@ -100,11 +100,11 @@ $android-transition-timing-leaving:          cubic-bezier(0.4, 0, 1, 1) !default
     z-index: $z-index-view-below;
   }
 
-  .tabs-top > .view-container > .history-after-root {
+  .tabs-top > .view-container > [history-cursor="after-root"] {
     z-index: $z-index-tabs + 1;
   }
 
-  .history-after-root > .has-tabs-top {
+  [history-cursor="after-root"] > .has-tabs-top {
     top: $bar-height;
   }
 

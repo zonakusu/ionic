@@ -232,40 +232,14 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
     var transitionFn = navBarConfig.transitionFn();
     var transitionId = viewData.transitionId;
 
-    function transitionComplete() {
-      for (var x=0; x<headerBars.length; x++) {
-        headerBars[x].isActive = false;
-      }
-      enteringHeaderBar.isActive = true;
-
-      navBarAttr(enteringHeaderBar, 'active');
-      navBarAttr(leavingHeaderBar, 'cached');
-
-      queuedTransitionEnd = null;
-    }
-
-    function noAnimation() {
-      $timeout(function(){
-        enteringHeaderBarCtrl.alignTitle().then(transitionComplete);
-      }, 1600);
-    }
-
     enteringHeaderBarCtrl.beforeEnter(viewData);
 
-    if (!self.isInitialized || !angular.isFunction(transitionFn)) {
-      return noAnimation();
-    }
-
-    var navBarTransition = transitionFn(enteringHeaderBar, leavingHeaderBar, viewData.direction, viewData.shouldAnimate);
-
-    if (!navBarTransition.shouldAnimate) {
-      return noAnimation();
-    }
+    var navBarTransition = transitionFn(enteringHeaderBar, leavingHeaderBar, viewData.direction, viewData.shouldAnimate && self.isInitialized);
 
     ionic.DomUtil.cachedAttr($element, 'nav-bar-transition', $ionicConfig.navBar.transition());
     ionic.DomUtil.cachedAttr($element, 'nav-bar-direction', viewData.direction);
 
-    navBarAttr(enteringHeaderBar, 'stage');
+    navBarAttr(enteringHeaderBar, navBarTransition.shouldAnimate ? 'stage' : 'entering');
 
     enteringHeaderBarCtrl.resetBackButton();
 
@@ -282,8 +256,16 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
       navBarTransition.run(1);
 
       queuedTransitionEnd = function() {
-        if (latestTransitionId == transitionId) {
-          transitionComplete();
+        if (latestTransitionId == transitionId || !navBarTransition.shouldAnimate) {
+          for (var x=0; x<headerBars.length; x++) {
+            headerBars[x].isActive = false;
+          }
+          enteringHeaderBar.isActive = true;
+
+          navBarAttr(enteringHeaderBar, 'active');
+          navBarAttr(leavingHeaderBar, 'cached');
+
+          queuedTransitionEnd = null;
         }
       };
 

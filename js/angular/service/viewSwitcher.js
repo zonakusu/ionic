@@ -20,6 +20,9 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionic
   var DATA_VIEW_ACCESSED = '$accessed';
   var DATA_FALLBACK_TIMER = '$fallbackTimer';
   var NAV_VIEW_ATTR = 'nav-view';
+  var HISTORY_CURSOR_ATTR = 'history-cursor';
+  var HISTORY_ROOT = 'root';
+  var HISTORY_AFTER_ROOT = 'after-root';
   var VIEW_STATUS_ACTIVE = 'active';
   var VIEW_STATUS_CACHED = 'cached';
   var VIEW_STATUS_STAGED = 'stage';
@@ -86,9 +89,12 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionic
     };
   }
 
-
   function navViewAttr(ele, value) {
     ionic.DomUtil.cachedAttr(ele, NAV_VIEW_ATTR, value);
+  }
+
+  function historyCursorAttr(ele, value) {
+    ionic.DomUtil.cachedAttr(ele, HISTORY_CURSOR_ATTR, value);
   }
 
 
@@ -142,13 +148,6 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionic
 
             // existing elements in the DOM are looked up by their state name and state id
             enteringEle.data(DATA_ELE_IDENTIFIER, enteringEleIdentifier);
-
-            // add the DATA_NO_CACHE data
-            // if the current state has cache:false
-            // or the element has cache-view="false" attribute
-            if ( viewState(viewLocals).cache === false || enteringEle.attr('cache-view') == 'false' ) {
-              enteringEle.data(DATA_NO_CACHE, true);
-            }
           }
 
           navViewElement.data(DATA_ACTIVE_ELE_IDENTIFIER, enteringEleIdentifier);
@@ -168,7 +167,13 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionic
 
             navViewAttr(enteringEle, VIEW_STATUS_STAGED);
 
-            enteringEle.addClass('history-' + (registerData.isHistoryRoot ? 'root' : 'after-root'));
+            historyCursorAttr(enteringEle, registerData.isHistoryRoot ? HISTORY_ROOT : HISTORY_AFTER_ROOT);
+
+            // if the current state has cache:false
+            // or the element has cache-view="false" attribute
+            if ( viewState(viewLocals).cache === false || enteringEle.attr('cache-view') == 'false' ) {
+              enteringEle.data(DATA_NO_CACHE, true);
+            }
 
             // append the entering element to the DOM
             navViewElement.append(enteringEle);
@@ -218,6 +223,10 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionic
 
           // 3) stage entering element, opacity 0, no transition duration
           navViewAttr(enteringEle, VIEW_STATUS_STAGED);
+
+          if (transData.direction == 'swap') {
+            historyCursorAttr(enteringEle, HISTORY_ROOT);
+          }
 
           // 4) place the elements in the correct step to begin
           viewTransition.run(0);
@@ -341,16 +350,29 @@ function($timeout, $compile, $controller, $ionicClickBlock, $ionicConfig, $ionic
       var viewElementsLength = viewElements.length;
       var navViewActiveEleId = navViewElement.data(DATA_ACTIVE_ELE_IDENTIFIER);
       var x, viewElement;
+      var isHistoryRoot;
 
       for (x=0; x<viewElementsLength; x++) {
         viewElement = viewElements.eq(x);
 
         if (viewElement.data(DATA_ELE_IDENTIFIER) === navViewActiveEleId) {
           navViewAttr(viewElement, VIEW_STATUS_ACTIVE);
+          isHistoryRoot = ionic.DomUtil.cachedAttr(viewElement, HISTORY_CURSOR_ATTR) === HISTORY_ROOT;
 
         } else if (ionic.DomUtil.cachedAttr(viewElement, NAV_VIEW_ATTR) === 'leaving' ||
                   (ionic.DomUtil.cachedAttr(viewElement, NAV_VIEW_ATTR) === VIEW_STATUS_ACTIVE && viewElement.data(DATA_ELE_IDENTIFIER) !== navViewActiveEleId) ) {
           navViewAttr(viewElement, VIEW_STATUS_CACHED);
+        }
+      }
+
+      if (isHistoryRoot) {
+        for (x=0; x<viewElementsLength; x++) {
+          viewElement = viewElements.eq(x);
+
+          if (ionic.DomUtil.cachedAttr(viewElement, HISTORY_CURSOR_ATTR) === HISTORY_ROOT &&
+              ionic.DomUtil.cachedAttr(viewElement, NAV_VIEW_ATTR) !== VIEW_STATUS_ACTIVE) {
+            historyCursorAttr(viewElement, HISTORY_AFTER_ROOT);
+          }
         }
       }
     },
