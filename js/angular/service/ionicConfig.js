@@ -200,7 +200,8 @@ IonicModule
               enter(enteringHeaderCtrl, leavingHeaderCtrl, step);
               leave(leavingHeaderCtrl, enteringHeaderCtrl, step);
             }
-          }
+          },
+          shouldAnimate: shouldAnimate
         };
       }
 
