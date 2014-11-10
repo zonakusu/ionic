@@ -194,7 +194,7 @@ function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
             }
 
           }
-          childSize = backButtonWidth;
+          childSize = backButtonWidth || c.offsetWidth;
 
         } else {
           // not the title, not the back button, not a hidden element

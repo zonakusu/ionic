@@ -1,12 +1,14 @@
-xdescribe('ionNavBackButton directive', function() {
+describe('ionNavBackButton directive', function() {
   beforeEach(module('ionic'));
-  var navBackButtonEle, buttonIconEle;
+  var navBackButtonEle, buttonIconEle, outputEle;
 
   function setup(attr, content) {
     inject(function($compile, $rootScope) {
       navBackButtonEle = angular.element('<ion-nav-back-button '+(attr||'')+'>'+(content||'')+'</ion-nav-back-button>');
       navBackButtonEle.data('$ionNavBarController', {
-        navElement: jasmine.createSpy('navElement'),
+        navElement: function(buttonType, buttonHtml) {
+          outputEle = angular.element(buttonHtml);
+        }
       });
       navBackButtonEle = $compile(navBackButtonEle)($rootScope.$new());
       $rootScope.$apply();
@@ -26,28 +28,39 @@ xdescribe('ionNavBackButton directive', function() {
     expect(navBackButtonEle.html()).toBe('');
   });
 
-  it('should navElement', inject(function($compile, $rootScope, $ionicConfig) {
+  it('should create nav element and send its HTML to its navBarController', inject(function($compile, $rootScope, $ionicConfig) {
     $ionicConfig.backButton.icon('none');
     setup();
-    expect( navBackButtonEle.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<button class="button back-button"></button>', 'backButton'
-    );
+    expect( outputEle[0].tagName ).toBe('BUTTON');
+    expect( outputEle.hasClass('button') ).toBe(true);
+    expect( outputEle.hasClass('back-button') ).toBe(true);
+    expect( outputEle.hasClass('hide') ).toBe(true);
+    expect( outputEle.hasClass('buttons') ).toBe(true);
   }));
 
-  it('should navElement with attributes', inject(function($compile, $rootScope, $ionicConfig) {
+  it('should add ng-click if one wasnt provided', inject(function($compile, $rootScope, $ionicConfig) {
     $ionicConfig.backButton.icon('none');
-    setup('ng-click="myClick()" class="my-class" id="yup"');
-    expect( navBackButtonEle.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<button ngclick="myClick()" class="my-class button back-button" id="yup"></button>', 'backButton'
-    );
+    setup();
+    expect( outputEle.attr('ng-click') ).toBe('$ionicGoBack($event)');
   }));
 
-  it('should navElement with content', inject(function($compile, $rootScope, $ionicConfig) {
+  it('should add custom ng-click that was provided', inject(function($compile, $rootScope, $ionicConfig) {
+    $ionicConfig.backButton.icon('none');
+    setup('ng-click="myClick()"');
+    expect( outputEle.attr('ng-click') ).toBe('myClick()');
+  }));
+
+  it('should create nav element w/ custom attributes and send its HTML to its navBarController', inject(function($compile, $rootScope, $ionicConfig) {
+    setup('class="my-class other-class" id="yup"');
+    expect( outputEle.attr('id') ).toBe('yup');
+    expect( outputEle.hasClass('my-class') ).toBe(true);
+    expect( outputEle.hasClass('other-class') ).toBe(true);
+  }));
+
+  it('should create nav element with custom content and no back icon', inject(function($compile, $rootScope, $ionicConfig) {
     $ionicConfig.backButton.icon('none');
     setup('', 'Back');
-    expect( navBackButtonEle.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<button class="button back-button">Back</button>', 'backButton'
-    );
+    expect( outputEle.html() ).toBe('Back');
   }));
 
   it('should not set a default nested back button icon if ion- classname exists', inject(function($ionicConfig) {
@@ -56,34 +69,50 @@ xdescribe('ionNavBackButton directive', function() {
     expect(buttonIconEle.length).toBe(0);
   }));
 
-  it('should not set default nested back button icon if "ion-" child exists', inject(function($ionicConfig) {
+  it('should not set default nested back button icon if "ion-" child element exists', inject(function($ionicConfig) {
     setup('', '<i class="ion-superstar"></i>');
-    expect( navBackButtonEle.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<button class="button back-button"><i class="ion-superstar"></i></button>', 'backButton'
-    );
+    expect(outputEle.children().eq(0).hasClass('ion-superstar')).toBe(true);
   }));
 
   it('should not set default nested back button icon if "icon" child exists', inject(function($ionicConfig) {
     setup('', '<i class="icon"></i>');
-    expect( navBackButtonEle.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<button class="button back-button"><i class="icon"></i></button>', 'backButton'
-    );
+    expect(outputEle.children().eq(0).hasClass('icon')).toBe(true);
   }));
 
   it('should set default back button icon from $ionicConfig, but no inner text', inject(function($ionicConfig) {
-    $ionicConfig.backButton.icon('ion-ios7-arrow-back');
+    $ionicConfig.backButton.icon('ion-my-arrow-back');
     setup();
-    expect( navBackButtonEle.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<button class="button back-button button-clear"><i class="icon ion-ios7-arrow-back"></i> </button>', 'backButton'
-    );
+    expect(outputEle.children().eq(0).hasClass('icon')).toBe(true);
+    expect(outputEle.children().eq(0).hasClass('ion-my-arrow-back')).toBe(true);
+    expect(outputEle.hasClass('button-clear')).toBe(true);
   }));
 
   it('should set default back button icon from $ionicConfig, but with inner text', inject(function($ionicConfig) {
-    $ionicConfig.backButton.icon('ion-ios7-arrow-back');
+    $ionicConfig.backButton.icon('ion-my-arrow-back');
     setup('', 'Back');
-    expect( navBackButtonEle.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<button ng-click="$goBack()" class="button back-button hide buttons button-clear"><i class="icon ion-ios7-arrow-back"></i> Back<span class="button-text">Back</span><span class="previous-title"></span></button>', 'backButton'
-    );
+    expect(outputEle.children().eq(0).hasClass('icon')).toBe(true);
+    expect(outputEle.children().eq(0).hasClass('ion-my-arrow-back')).toBe(true);
+    expect(outputEle.text()).toBe(' Back');
+  }));
+
+  it('should set default back-text element when no provided inner text', inject(function($ionicConfig) {
+    setup();
+    expect(outputEle.children().eq(1).hasClass('back-text')).toBe(true);
+  }));
+
+  it('should set default-title element when no provided inner text, but has backButton text config', inject(function($ionicConfig) {
+    $ionicConfig.backButton.text('Go Back!')
+    setup();
+    expect(outputEle.children().eq(1).hasClass('back-text')).toBe(true);
+    expect(outputEle.children().eq(1).children().eq(0).hasClass('default-title')).toBe(true);
+    expect(outputEle.children().eq(1).children().eq(0).text()).toBe('Go Back!');
+  }));
+
+  it('should set previous-title element when no provided inner text, but has backButton previousTitleText config', inject(function($ionicConfig) {
+    $ionicConfig.backButton.previousTitleText(true)
+    setup();
+    expect(outputEle.children().eq(1).hasClass('back-text')).toBe(true);
+    expect(outputEle.children().eq(1).children().eq(0).hasClass('previous-title')).toBe(true);
   }));
 
 });

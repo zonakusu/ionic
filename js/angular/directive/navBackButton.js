@@ -51,14 +51,12 @@ IonicModule
 
       // clone the back button, but as a <div>
       var buttonEle = $document[0].createElement('button');
-      for (var n in tAttrs) {
-        if (isString(tAttrs[n])) {
-          buttonEle.setAttribute(n, tAttrs[n]);
-        }
+      for (var n in tAttrs.$attr) {
+        buttonEle.setAttribute(tAttrs.$attr[n], tAttrs[n]);
       }
 
-      if (!tElement.attr('ng-click')) {
-        buttonEle.setAttribute('ng-click', '$ionicGoBack()');
+      if (!tAttrs.ngClick) {
+        buttonEle.setAttribute('ng-click', '$ionicGoBack($event)');
       }
 
       buttonEle.className = 'button back-button hide buttons ' + (tElement.attr('class') || '');
