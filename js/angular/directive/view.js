@@ -34,7 +34,7 @@ IonicModule
   return {
     restrict: 'EA',
     priority: 1000,
-    controller: '$ionView',
+    controller: '$ionicView',
     compile: function(tElement) {
       tElement.addClass('pane');
       tElement[0].removeAttribute('title');

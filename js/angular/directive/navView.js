@@ -58,7 +58,7 @@
  * ```html
  * <script id="home" type="text/ng-template">
  *   <!-- The title of the ion-view will be shown on the navbar -->
- *   <ion-view title="Home">
+ *   <ion-view view-title="Home">
  *     <ion-content ng-controller="HomeCtrl">
  *       <!-- The content of the page -->
  *       <a href="#/music">Go to music page!</a>
@@ -93,7 +93,7 @@ function($state, $ionicConfig) {
     terminal: true,
     priority: 2000,
     transclude: true,
-    controller: '$ionNavView',
+    controller: '$ionicNavView',
     compile: function (tElement, tAttrs, transclude) {
 
       // a nav view element is a container for numerous views

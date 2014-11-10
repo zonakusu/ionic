@@ -1,6 +1,6 @@
 IonicModule
 
-.controller('$ionNavBar', [
+.controller('$ionicNavBar', [
   '$scope',
   '$element',
   '$attrs',
@@ -20,7 +20,6 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
   var self = this;
   var headerBars = [];
   var navElementHtml = {};
-  var titleText = '';
   var isVisible = true;
   var navBarConfig = $ionicConfig.navBar;
   var queuedTransitionStart, queuedTransitionEnd, latestTransitionId;
@@ -318,6 +317,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
   self.showBackButton = function(show, headerBar) {
     headerBar = headerBar || getOnScreenHeaderBar();
     headerBar && headerBar.showBack(show);
+    $scope.$isBackButtonShown = !!show;
   };
 
 
@@ -326,9 +326,9 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
       newTitleText = newTitleText || '';
       headerBar = headerBar || getOnScreenHeaderBar();
       headerBar && headerBar.title(newTitleText);
-      titleText = newTitleText;
+      $scope.$title = newTitleText;
     }
-    return titleText;
+    return $scope.$title;
   };
 
 

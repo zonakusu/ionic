@@ -1,5 +1,5 @@
 IonicModule
-.controller('$ionView', [
+.controller('$ionicView', [
   '$scope',
   '$element',
   '$attrs',
