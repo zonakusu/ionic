@@ -70,12 +70,17 @@ function($compile, $ionicConfig, $ionicBind, $ionicViewSwitcher) {
       //Remove the contents of the element so we can compile them later, if tab is selected
       var tabContent = document.createElement('div');
       tabContent.innerHTML = element.html();
+      var childElementCount = tabContent.childElementCount;
       element.empty();
 
-      var navViewName;
-      if (tabContent.children.length && tabContent.children[0].tagName === 'ION-NAV-VIEW') {
+      var navViewName, innerHtml;
+      if (childElementCount && tabContent.children[0].tagName === 'ION-NAV-VIEW') {
         navViewName = tabContent.children[0].getAttribute('name');
+        innerHtml = tabContent.children[0].outerHTML;
+      } else {
+        innerHtml = tabContent.innerHTML;
       }
+      tabContent = null;
 
       return function link($scope, $element, $attr, ctrls) {
         var childScope;
@@ -127,7 +132,7 @@ function($compile, $ionicConfig, $ionicBind, $ionicViewSwitcher) {
 
 
         function tabSelected(isSelected) {
-          if (isSelected && tabContent.childElementCount) {
+          if (isSelected && childElementCount) {
             // this tab is being selected
 
             // check if the tab is already in the DOM
@@ -136,9 +141,8 @@ function($compile, $ionicConfig, $ionicBind, $ionicViewSwitcher) {
               // tab should be selected and is NOT in the DOM
               // create a new scope and append it
               childScope = $scope.$new();
-              childElement = jqLite('<div class="tab-content pane">');
+              childElement = jqLite(innerHtml);
               $ionicViewSwitcher.viewEleIsActive(childElement, true);
-              childElement.html(tabContent.innerHTML);
               tabsCtrl.$element.append( childElement );
               $compile(childElement)(childScope);
               isTabContentAttached = true;

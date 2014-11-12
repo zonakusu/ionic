@@ -425,14 +425,15 @@ function($rootScope, $state, $location, $window) {
 
       hist.cursor = viewHistory.currentView.index;
 
-      console.log('VIEW:', viewId, (viewHistory.views[viewId] && viewHistory.views[viewId].url), '  history:', historyId, '  action:', action, '  direction:', direction);
+      console.log('VIEW:', viewId, (viewHistory.views[viewId] && viewHistory.views[viewId].url), '  history:', historyId, '  action:', action, '  direction:', direction, '  ishistoryRoot:', viewHistory.currentView.index === 0);
 
       return {
         viewId: viewId,
         action: action,
         direction: direction,
         historyId: historyId,
-        showBack: !!(viewHistory.backView && viewHistory.backView.historyId === viewHistory.currentView.historyId)
+        showBack: !!(viewHistory.backView && viewHistory.backView.historyId === viewHistory.currentView.historyId),
+        isHistoryRoot: (viewHistory.currentView.index === 0)
       };
     },
 
@@ -454,10 +455,12 @@ function($rootScope, $state, $location, $window) {
     },
 
     currentTitle: function(val) {
-      if (arguments.length) {
-        viewHistory.currentView.title = val;
+      if (viewHistory.currentView) {
+        if (arguments.length) {
+          viewHistory.currentView.title = val;
+        }
+        return viewHistory.currentView.title;
       }
-      return viewHistory.currentView.title;
     },
 
     backView: function() {

@@ -468,17 +468,16 @@ describe('tabs', function() {
 
       spyOn(tab, '$broadcast');
 
-      var tabContent = tabsEl.find('.pane');
+      var tabContent = tabsEl.find('.inside-content');
       expect(tabContent.length).toBe(1);
       expect(tabContent.attr('nav-view')).toBe('cached');
 
       tab.$apply('$tabSelected = true');
 
-      tabContent = tabsEl.find('.pane');
+      tabContent = tabsEl.find('.inside-content');
       expect(tabContent.parent()[0]).toBe(tabsCtrl.$element[0]);
       var contentScope = tabContent.scope();
       expect(tabContent.length).toBe(1);
-      expect(tabContent.find('.inside-content').length).toBe(1);
 
       spyOn(tabContent, 'remove');
       spyOn(contentScope, '$destroy');

@@ -122,13 +122,13 @@ function headerFooterBarDirective(isHeader) {
   return [function() {
     return {
       restrict: 'E',
-      controller: '$ionHeaderBar',
+      controller: '$ionicHeaderBar',
       compile: function(tElement, $attr) {
         tElement.addClass(isHeader ? 'bar bar-header' : 'bar bar-footer');
         if (tElement[0].parentNode.querySelector('.tabs-top')) tElement.addClass('has-tabs-top');
 
         return { pre: prelink };
-        function prelink($scope, $element, $attr) {
+        function prelink($scope, $element, $attr, ctrl) {
           if (isHeader) {
             $scope.$watch(function() { return $element[0].className; }, function(value) {
               var isShown = value.indexOf('ng-hide') === -1;
@@ -140,6 +140,7 @@ function headerFooterBarDirective(isHeader) {
               delete $scope.$hasHeader;
               delete $scope.$hasSubheader;
             });
+            ctrl.alignTitle();
             $scope.$emit('ionHeaderBar.init');
 
           } else {

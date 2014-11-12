@@ -1,6 +1,6 @@
 IonicModule
 
-.controller('$ionHeaderBar', [
+.controller('$ionicHeaderBar', [
   '$scope',
   '$element',
   '$attrs',
@@ -194,7 +194,7 @@ function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
             }
 
           }
-          childSize = backButtonWidth;
+          childSize = backButtonWidth || c.offsetWidth;
 
         } else {
           // not the title, not the back button, not a hidden element
@@ -221,14 +221,18 @@ function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
       if (buttonsLeft) {
         updateTitleLeft = buttonsLeft + 15;
       }
-      updateTitleRight = buttonsRight + 15;
-
-    } else if (align == 'right') {
-      updateCss = 'title-right';
       if (buttonsRight) {
         updateTitleRight = buttonsRight + 15;
       }
-      updateTitleLeft = buttonsLeft + 15;
+
+    } else if (align == 'right') {
+      updateCss = 'title-right';
+      if (buttonsLeft) {
+        updateTitleLeft = buttonsLeft + 15;
+      }
+      if (buttonsRight) {
+        updateTitleRight = buttonsRight + 15;
+      }
 
     } else {
       // center the default
@@ -254,19 +258,21 @@ function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
     var deferred = $q.defer();
 
     // only make DOM updates when there are actual changes
-    if (updateTitleLeft !== titleLeft) {
-      titleEle.style.left = updateTitleLeft ? updateTitleLeft + 'px' : '';
-      titleLeft = updateTitleLeft;
-    }
-    if (updateTitleRight !== titleRight) {
-      titleEle.style.right = updateTitleRight ? updateTitleRight + 'px' : '';
-      titleRight = updateTitleRight;
-    }
+    if (titleEle) {
+      if (updateTitleLeft !== titleLeft) {
+        titleEle.style.left = updateTitleLeft ? updateTitleLeft + 'px' : '';
+        titleLeft = updateTitleLeft;
+      }
+      if (updateTitleRight !== titleRight) {
+        titleEle.style.right = updateTitleRight ? updateTitleRight + 'px' : '';
+        titleRight = updateTitleRight;
+      }
 
-    if (updateCss !== titleCss) {
-      updateCss && titleEle.classList.add(updateCss);
-      titleCss && titleEle.classList.remove(titleCss);
-      titleCss = updateCss;
+      if (updateCss !== titleCss) {
+        updateCss && titleEle.classList.add(updateCss);
+        titleCss && titleEle.classList.remove(titleCss);
+        titleCss = updateCss;
+      }
     }
 
     if ($ionicConfig.backButton.previousTitleText()) {
@@ -278,7 +284,7 @@ function($scope, $element, $attrs, $q, $ionicConfig, $ionicHistory) {
     }
 
     ionic.requestAnimationFrame(function(){
-      if (titleEle.offsetWidth + 10 < titleEle.scrollWidth) {
+      if (titleEle && titleEle.offsetWidth + 10 < titleEle.scrollWidth) {
         var minRight = buttonsRight + 5;
         var testRight = $element[0].offsetWidth - titleLeft - self.titleTextWidth() - 20;
         updateTitleRight = testRight < minRight ? minRight : testRight;

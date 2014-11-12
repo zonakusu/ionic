@@ -1,4 +1,4 @@
-describe('$ionNavBar controller', function() {
+describe('$ionicNavBar controller', function() {
   beforeEach(module('ionic'));
   var scope;
 
@@ -6,7 +6,7 @@ describe('$ionNavBar controller', function() {
     var ctrl;
     inject(function($rootScope, $controller, $ionicHistory, $ionicViewSwitcher) {
       scope = $rootScope.$new();
-      ctrl = $controller('$ionNavBar', {
+      ctrl = $controller('$ionicNavBar', {
         $scope: scope,
         $element: angular.element('<div>'),
         $attrs: { class: css },

@@ -1,4 +1,5 @@
-xdescribe('ionNavButtons directive', function() {
+describe('ionNavButtons directive', function() {
+  var outputEle;
 
   beforeEach(module('ionic', function($compileProvider) {
     $compileProvider.directive('needsScroll', function() {
@@ -17,7 +18,9 @@ xdescribe('ionNavButtons directive', function() {
     inject(function($compile, $rootScope) {
       el = angular.element('<ion-nav-buttons side="'+(side)+'">'+(content||'')+'</ion-nav-buttons>');
       el.data('$ionNavBarController', {
-        navElement: jasmine.createSpy('navElement'),
+        navElement: function(buttonType, buttonHtml) {
+          outputEle = angular.element(buttonHtml);
+        }
       });
       el = $compile(el)($rootScope.$new());
       $rootScope.$apply();
@@ -37,39 +40,36 @@ xdescribe('ionNavButtons directive', function() {
     expect(el.html()).toBe('');
   });
 
-  it('should add buttons to primary side by default', function() {
+  it('should default to left-buttons class and add inner element', function() {
     var el = setup(null, '<button>');
-    expect( el.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<span class="primary-buttons"><button></button></span>', 'primaryButtons'
-    );
+    expect(outputEle.hasClass('left-buttons'));
+    expect(outputEle.children().eq(0)[0].tagName).toBe('BUTTON');
   });
 
-  it('should add buttons to primary side when given primary side attr', function() {
-    var el = setup('primary', '<button>');
-    expect( el.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<span class="primary-buttons"><button></button></span>', 'primaryButtons'
-    );
+  it('should default to left-buttons class with unknown side', function() {
+    var el = setup('whatever', '<button>');
+    expect(outputEle.hasClass('left-buttons'));
+    expect(outputEle.children().eq(0)[0].tagName).toBe('BUTTON');
   });
 
-  it('should add buttons to primary side when given left side attr', function() {
+  it('should set left-buttons class', function() {
     var el = setup('left', '<button>');
-    expect( el.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<span class="primary-buttons"><button></button></span>', 'primaryButtons'
-    );
+    expect(outputEle.hasClass('left-buttons'));
   });
 
-  it('should add buttons to secondary side when given secondary side attr', function() {
-    var el = setup('secondary', '<button>');
-    expect( el.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<span class="secondary-buttons"><button></button></span>', 'secondaryButtons'
-    );
-  });
-
-  it('should add buttons to secondary side when given right side attr', function() {
+  it('should set right-buttons class', function() {
     var el = setup('right', '<button>');
-    expect( el.controller('ionNavBar').navElement ).toHaveBeenCalledWith(
-      '<span class="secondary-buttons"><button></button></span>', 'secondaryButtons'
-    );
+    expect(outputEle.hasClass('right-buttons'));
+  });
+
+  it('should set primary-buttons class', function() {
+    var el = setup('primary', '<button>');
+    expect(outputEle.hasClass('primary-buttons'));
+  });
+
+  it('should set secondary-buttons class', function() {
+    var el = setup('secondary', '<button>');
+    expect(outputEle.hasClass('secondary-buttons'));
   });
 
 });

@@ -1,4 +1,4 @@
-describe('$ionNavView controller', function() {
+describe('$ionicNavView controller', function() {
   beforeEach(module('ionic'));
 
   it('should associate nav-bar with sibling nav-view', inject(function($rootScope, $compile) {

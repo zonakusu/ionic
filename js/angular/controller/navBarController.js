@@ -1,6 +1,6 @@
 IonicModule
 
-.controller('$ionNavBar', [
+.controller('$ionicNavBar', [
   '$scope',
   '$element',
   '$attrs',
@@ -20,7 +20,6 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
   var self = this;
   var headerBars = [];
   var navElementHtml = {};
-  var titleText = '';
   var isVisible = true;
   var navBarConfig = $ionicConfig.navBar;
   var queuedTransitionStart, queuedTransitionEnd, latestTransitionId;
@@ -234,36 +233,18 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
 
     enteringHeaderBarCtrl.beforeEnter(viewData);
 
-    if (!self.isInitialized || !angular.isFunction(transitionFn)) {
-      $timeout(function(){
-        enteringHeaderBarCtrl.alignTitle().then(transitionComplete);
-      }, 16);
-      return;
-    }
+    var navBarTransition = transitionFn(enteringHeaderBar, leavingHeaderBar, viewData.direction, viewData.shouldAnimate && self.isInitialized);
 
-    navBarAttr(enteringHeaderBar, 'stage');
+    ionic.DomUtil.cachedAttr($element, 'nav-bar-transition', $ionicConfig.navBar.transition());
+    ionic.DomUtil.cachedAttr($element, 'nav-bar-direction', viewData.direction);
+
+    navBarAttr(enteringHeaderBar, navBarTransition.shouldAnimate ? 'stage' : 'entering');
 
     enteringHeaderBarCtrl.resetBackButton();
-
-    var navBarTransition = transitionFn(enteringHeaderBar, leavingHeaderBar, viewData.direction, viewData.shouldAnimate);
 
     navBarTransition.run(0);
 
     $timeout(enteringHeaderBarCtrl.alignTitle, 16);
-
-    function transitionComplete() {
-      if (latestTransitionId !== transitionId) return;
-
-      for (var x=0; x<headerBars.length; x++) {
-        headerBars[x].isActive = false;
-      }
-      enteringHeaderBar.isActive = true;
-
-      navBarAttr(enteringHeaderBar, 'active');
-      navBarAttr(leavingHeaderBar, 'cached');
-
-      queuedTransitionEnd = null;
-    }
 
     queuedTransitionStart = function() {
       if (latestTransitionId !== transitionId) return;
@@ -273,7 +254,19 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
 
       navBarTransition.run(1);
 
-      queuedTransitionEnd = transitionComplete;
+      queuedTransitionEnd = function() {
+        if (latestTransitionId == transitionId || !navBarTransition.shouldAnimate) {
+          for (var x=0; x<headerBars.length; x++) {
+            headerBars[x].isActive = false;
+          }
+          enteringHeaderBar.isActive = true;
+
+          navBarAttr(enteringHeaderBar, 'active');
+          navBarAttr(leavingHeaderBar, 'cached');
+
+          queuedTransitionEnd = null;
+        }
+      };
 
       queuedTransitionStart = null;
     };
@@ -324,6 +317,7 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
   self.showBackButton = function(show, headerBar) {
     headerBar = headerBar || getOnScreenHeaderBar();
     headerBar && headerBar.showBack(show);
+    $scope.$isBackButtonShown = !!show;
   };
 
 
@@ -332,9 +326,9 @@ function($scope, $element, $attrs, $compile, $timeout, $ionicNavBarDelegate, $io
       newTitleText = newTitleText || '';
       headerBar = headerBar || getOnScreenHeaderBar();
       headerBar && headerBar.title(newTitleText);
-      titleText = newTitleText;
+      $scope.$title = newTitleText;
     }
-    return titleText;
+    return $scope.$title;
   };
 
 

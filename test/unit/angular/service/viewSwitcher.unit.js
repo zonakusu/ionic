@@ -107,7 +107,7 @@ describe('Ionic View Switcher', function() {
     expect(switcher.enteringEle().data('$eleId')).toBe('STATE_ID');
   }));
 
-  it('should create a new entering element and set no cache data from view locals', inject(function($ionicViewSwitcher) {
+  it('should create a new entering element and set no cache data from view locals', inject(function($rootScope, $ionicViewSwitcher) {
     var navViewElement = angular.element('<div class="view-container">');
     var viewLocals = {
       $template: '<div class="locals-template"></div>',
@@ -120,12 +120,13 @@ describe('Ionic View Switcher', function() {
     var enteringView = {
       stateId: 'STATE_ID'
     };
-    var switcher = $ionicViewSwitcher.create(null, navViewElement, viewLocals, enteringView);
+    var switcher = $ionicViewSwitcher.create($rootScope, navViewElement, viewLocals, enteringView);
     switcher.loadViewElements();
+    switcher.render({});
     expect(switcher.enteringEle().data('$noCache')).toBe(true);
   }));
 
-  it('should create a new entering element and set no cache data from cache-view=false attr', inject(function($ionicViewSwitcher) {
+  it('should create a new entering element and set no cache data from cache-view=false attr', inject(function($rootScope, $ionicViewSwitcher) {
     var navViewElement = angular.element('<div class="view-container">');
     var viewLocals = {
       $template: '<div class="locals-template" cache-view="false"></div>'
@@ -133,8 +134,9 @@ describe('Ionic View Switcher', function() {
     var enteringView = {
       stateId: 'STATE_ID'
     };
-    var switcher = $ionicViewSwitcher.create(null, navViewElement, viewLocals, enteringView);
+    var switcher = $ionicViewSwitcher.create($rootScope, navViewElement, viewLocals, enteringView);
     switcher.loadViewElements();
+    switcher.render({});
     expect(switcher.enteringEle().data('$noCache')).toBe(true);
   }));
 

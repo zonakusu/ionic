@@ -55,10 +55,9 @@
  *
  *
  * ```html
- * <ion-view title="myTitle">
+ * <ion-view view-title="myTitle">
  *   <ion-nav-bar class="bar-positive">
  *     <ion-nav-back-button>
- *       Back
  *     </ion-nav-back-button>
  *     <div class="buttons primary-buttons">
  *       <button class="button">
@@ -70,10 +69,10 @@
  * ```
  */
 IonicModule
-.directive('ionNavBar', function($ionicConfig) {
+.directive('ionNavBar', function() {
   return {
     restrict: 'E',
-    controller: '$ionNavBar',
+    controller: '$ionicNavBar',
     scope: true,
     link: function($scope, $element, $attr, ctrl) {
       ctrl.init();

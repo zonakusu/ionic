@@ -113,14 +113,6 @@ IonicModule
   'zoomBy',
   /**
    * @ngdoc method
-   * @name $ionicScrollDelegate#getScrollPosition
-   * @returns {object} The scroll position of this view, with the following properties:
-   *  - `{number}` `left` The distance the user has scrolled from the left (starts at 0).
-   *  - `{number}` `top` The distance the user has scrolled from the top (starts at 0).
-   */
-  'getScrollPosition',
-  /**
-   * @ngdoc method
    * @name $ionicScrollDelegate#anchorScroll
    * @description Tell the scrollView to scroll to the element with an id
    * matching window.location.hash.
