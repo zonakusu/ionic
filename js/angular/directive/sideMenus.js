@@ -29,6 +29,7 @@ IonicModule
  *
  * - {@link ionic.directive:ionSideMenuContent}
  * - {@link ionic.directive:ionSideMenu}
+ * - {@link ionic.directive:menuToggle}
  * - {@link ionic.directive:menuClose}
  * - {@link ionic.directive:exposeAsideWhen}
  *
@@ -60,6 +61,11 @@ IonicModule
  * }
  * ```
  *
+ * @param {bool=} enable-menu-with-back-views Determines if the side menu is enabled when the
+ * back button is showing. When set to `false`, any {@link ionic.directive:menuToggle} will
+ * be hidden, and the user cannot swipe to open the menu. When going back to the root page of the
+ * side menu (the page without a back button visible), then any menuToggle buttons will show
+ * again, and menus are enabled again.
  * @param {string=} delegate-handle The handle used to identify this side menu
  * with {@link ionic.service:$ionicSideMenuDelegate}.
  *
@@ -74,15 +80,15 @@ IonicModule
       return { pre: prelink };
       function prelink($scope, $element, $attrs, ctrl) {
 
-        ctrl.enableMenuWithBackViews( $scope.$eval($attrs.enableMenuWithBackViews) );
+        ctrl.enableMenuWithBackViews($scope.$eval($attrs.enableMenuWithBackViews));
 
-        $scope.$on('$ionicExposeAside', function(evt, isAsideExposed){
-          if(!$scope.$exposeAside) $scope.$exposeAside = {};
+        $scope.$on('$ionicExposeAside', function(evt, isAsideExposed) {
+          if (!$scope.$exposeAside) $scope.$exposeAside = {};
           $scope.$exposeAside.active = isAsideExposed;
           $ionicBody.enableClass(isAsideExposed, 'aside-open');
         });
 
-        $scope.$on('$destroy', function(){
+        $scope.$on('$destroy', function() {
           $ionicBody.removeClass('menu-open', 'aside-open');
         });
 

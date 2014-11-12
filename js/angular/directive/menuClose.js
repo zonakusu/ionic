@@ -22,12 +22,14 @@ IonicModule
   return {
     restrict: 'AC',
     link: function($scope, $element, $attr) {
-      $element.bind('click', function(){
-        // lower priority than navAnimation which allows navAnimation
-        // to override this directives nextAnimation() call
-        $ionicViewSwitcher.nextTransition('none');
+      $element.bind('click', function() {
         var sideMenuCtrl = $element.inheritedData('$ionSideMenusController');
-        sideMenuCtrl && sideMenuCtrl.close();
+        if (sideMenuCtrl) {
+          // lower priority than navAnimation which allows navTransition
+          // to override this directive's nextTransition() call
+          $ionicViewSwitcher.nextTransition('none');
+          sideMenuCtrl.close();
+        }
       });
     }
   };

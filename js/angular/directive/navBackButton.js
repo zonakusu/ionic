@@ -7,14 +7,26 @@
  * @description
  * Creates a back button inside an {@link ionic.directive:ionNavBar}.
  *
- * Will show up when the user is able to go back in the current navigation stack.
+ * Will show up when the user is able to go back in the current navigation stack. By default,
+ * the inner HTML of the back button is automatically built using platform defaults (iOS back button
+ * icon on iOS, and Android icon on Android).
  *
- * By default, will go back when clicked.  If you wish for more advanced behavior, see the
- * examples below.
+ * Additionally, it's click behavior is automatically wired up to `$ionicGoBack()`.By default the
+ * app will navigation back one view when the back button is clicked.  If you wish for more
+ * advanced behavior, see the examples below.
  *
  * @usage
  *
- * With default click action:
+ * Recommended markup for default settings:
+ *
+ * ```html
+ * <ion-nav-bar>
+ *   <ion-nav-back-button>
+ *   </ion-nav-back-button>
+ * </ion-nav-bar>
+ * ```
+ *
+ * With custom inner markup, and automatically adds a default click action:
  *
  * ```html
  * <ion-nav-bar>
@@ -24,19 +36,19 @@
  * </ion-nav-bar>
  * ```
  *
- * With custom click action, using {@link ionic.service:$ionicNavBarDelegate}:
+ * With custom inner markup and custom click action, using {@link ionic.service:$ionicNavBarDelegate}:
  *
  * ```html
  * <ion-nav-bar ng-controller="MyCtrl">
  *   <ion-nav-back-button class="button-clear"
- *     ng-click="goBack()">
+ *     ng-click="myGoBack()">
  *     <i class="ion-arrow-left-c"></i> Back
  *   </ion-nav-back-button>
  * </ion-nav-bar>
  * ```
  * ```js
  * function MyCtrl($scope, $ionicNavBarDelegate) {
- *   $scope.goBack = function() {
+ *   $scope.myGoBack = function() {
  *     $ionicNavBarDelegate.back();
  *   };
  * }

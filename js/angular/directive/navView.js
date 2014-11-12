@@ -10,7 +10,7 @@
  * navigation history. By knowing their history, transitions between views
  * correctly enter and exit using the platform's transition style. An additional
  * benefit to Ionic's navigation system is its ability to manage multiple
- * histories.
+ * histories. For example, each tab can have it's own navigation history stack.
  *
  * Ionic uses the AngularUI Router module so app interfaces can be organized
  * into various "states". Like Angular's core $route service, URLs can be used
@@ -94,7 +94,7 @@ function($state, $ionicConfig) {
     priority: 2000,
     transclude: true,
     controller: '$ionicNavView',
-    compile: function (tElement, tAttrs, transclude) {
+    compile: function(tElement, tAttrs, transclude) {
 
       // a nav view element is a container for numerous views
       tElement.addClass('view-container');
@@ -104,8 +104,8 @@ function($state, $ionicConfig) {
         var latestLocals;
 
         // Put in the compiled initial view
-        transclude($scope, function(clone){
-          $element.append( clone );
+        transclude($scope, function(clone) {
+          $element.append(clone);
         });
 
         var viewData = navViewCtrl.init();
@@ -142,4 +142,3 @@ function($state, $ionicConfig) {
     }
   };
 }]);
-

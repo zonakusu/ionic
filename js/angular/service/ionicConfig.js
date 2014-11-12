@@ -10,29 +10,9 @@
  * var myApp = angular.module('reallyCoolApp', ['ionic']);
  *
  * myApp.config(function($ionicConfigProvider) {
- *   $ionicConfigProvider.templates.prefetch(false);
+ *   $ionicConfigProvider.templates.maxPrefetch(10);
  * });
  * ```
- */
-
-/**
- * @ngdoc method
- * @name $ionicConfigProvider#scrolling.native
- * @description Set whether to use Ionic's JS scrolling or native scrolling. Defaults to false
- * (js) for iOS and true (native) for Android. Note: this may affect what ion-scroll,
- * ion-content, and $ionicScrollDelegate methods are available to you.
- * @param {boolean} Whether to use native Scrolling.
- */
-
-/**
- * @ngdoc method
- * @name $ionicConfigProvider#templates.prefetch
- * @description Set whether Ionic should prefetch all templateUrls defined in
- * $stateProvider.state. If set to false, the user will have to wait
- * for a template to be fetched the first time when navigating to a new page. Default `true`.
- * @param {boolean} shouldPrefetch Whether Ionic should prefetch templateUrls defined in
- * `$stateProvider.state()`.
- * @returns {boolean} Whether Ionic will prefetch templateUrls defined in $stateProvider.state.
  */
 
 /**
@@ -45,8 +25,8 @@
  * * `platform`: Dynamically choose the correct transition style depending on
  *               the platform the app is running from. If the platform is
  *               not `ios` or `android` then it will default to `ios-transition`.
- * * `ios-transition`: iOS style transition.
- * * `android-transition`: Android style transition.
+ * * `ios`: iOS style transition.
+ * * `android`: Android style transition.
  * * `none`: Do not preform animated transitions.
  *
  * @returns {string} View animation.
@@ -56,9 +36,10 @@
  * @ngdoc method
  * @name $ionicConfigProvider#views.maxCache
  * @description Maximum number of view elements to cache in the DOM. When the max number is
- * exceeded, the `viewRemovePolicy` determines which view to remove. Views which stay in the
- * DOM essentially caches the view's scope, current state and scroll position. When the
- * maximum cached is `0`, then after each view transition, the view's element will
+ * exceeded, the view with the longest time period since it was accessed is removed. Views
+ * which stay in the DOM essentially caches the view's scope, current state and scroll position.
+ * However, the scope is disconnected from the cycle when it is cached, and reconnected when it enters again.
+ * When the maximum cached is `0`, then after each view transition, the leaving view's element will
  * be removed from the DOM, and the next time the same view is shown it will have to
  * re-compile, attach to the DOM, and link the element again.
  * @param {number} maxNumber Maximum number of views to retain. Default `10`.
@@ -72,12 +53,63 @@
  * are cached, and the same data and DOM elements are referenced when navigating back. However,
  * when navigating back in the history, the "forward" view is removed so its not cached. If
  * you navigate forward to the same view again it'll create a new DOM element, re-compiled and
- * linked. Basically any forward views are reset each time. Set this config to `true` to have
- * forward views are cached and not reset on each load.
+ * link. Basically any forward views are reset each time. Set this config to `true` to have
+ * forward views cached and not reset on each load.
  * @param {boolean} value `false`.
  * @returns {boolean}
  */
 
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#backButton.icon
+ * @description Back button icon.
+ * @param {string} classname
+ * @returns {string}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#backButton.text
+ * @description Back button text.
+ * @param {string} text
+ * @returns {string}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#backButton.previousTitleText
+ * @description If the previous title text should become the back button text. This
+ * is the default for iOS.
+ * @param {boolean} previousTitleText
+ * @returns {boolean}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#tabs.style
+ * @description Tab style.
+ * @param {string} style
+ * @returns {string}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#tabs.position
+ * @description Tab position.
+ * @param {string} position
+ * @returns {string}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#templates.prefetch
+ * @description Set whether Ionic should prefetch all templateUrls defined in
+ * $stateProvider.state. If set to false, the user will have to wait
+ * for a template to be fetched the first time when navigating to a new page. Default `true`.
+ * @param {boolean} shouldPrefetch Whether Ionic should prefetch templateUrls defined in
+ * `$stateProvider.state()`.
+ * @returns {boolean} Whether Ionic will prefetch templateUrls defined in $stateProvider.state.
+ */
 
 IonicModule
 .provider('$ionicConfig', function() {
@@ -101,20 +133,16 @@ IonicModule
       transitionFn: PLATFORM
     },
     backButton: {
-      enabled: PLATFORM,
       icon: PLATFORM,
       text: PLATFORM,
       previousTitleText: PLATFORM
-    },
-    scrolling:{
-      native:PLATFORM
     },
     tabs: {
       style: PLATFORM,
       position: PLATFORM
     },
     templates: {
-      prefetch: PLATFORM
+      maxPrefetch: PLATFORM
     },
     platform: {}
   };
@@ -145,11 +173,11 @@ IonicModule
         return {
           run: function(step) {
             if (direction == 'forward') {
-              setStyles(enteringEle, 1, (1-step) * 99); // starting at 98% prevents a flicker
+              setStyles(enteringEle, 1, (1 - step) * 99); // starting at 98% prevents a flicker
               setStyles(leavingEle, (1 - 0.1 * step), step * -33);
 
             } else if (direction == 'back') {
-              setStyles(enteringEle, (1 - 0.1 * (1-step)), (1-step) * -33);
+              setStyles(enteringEle, (1 - 0.1 * (1 - step)), (1 - step) * -33);
               setStyles(leavingEle, 1, step * 100);
 
             } else {
@@ -207,8 +235,8 @@ IonicModule
             var enteringHeaderCtrl = enteringHeaderBar.controller();
             var leavingHeaderCtrl = leavingHeaderBar && leavingHeaderBar.controller();
             if (direction == 'back') {
-              leave(enteringHeaderCtrl, leavingHeaderCtrl, 1-step);
-              enter(leavingHeaderCtrl, enteringHeaderCtrl, 1-step);
+              leave(enteringHeaderCtrl, leavingHeaderCtrl, 1 - step);
+              enter(leavingHeaderCtrl, enteringHeaderCtrl, 1 - step);
             } else {
               enter(enteringHeaderCtrl, leavingHeaderCtrl, step);
               leave(leavingHeaderCtrl, enteringHeaderCtrl, step);
@@ -225,9 +253,6 @@ IonicModule
       text: 'Back',
       previousTitleText: true
     },
-    scrolling:{
-      native:true
-    },
 
     tabs: {
       style: 'standard',
@@ -235,25 +260,16 @@ IonicModule
     },
 
     templates: {
-      prefetch: true
+      maxPrefetch: 30
     }
 
   });
 
 
 
-  // iOS
+  // iOS (it is the default already)
   // -------------------------
-  setPlatformConfig('ios', {
-
-    backButton: {
-      icon: 'ion-ios7-arrow-back'
-    },
-    scrolling:{
-      native:false
-    }
-
-  });
+  setPlatformConfig('ios', {});
 
 
 
@@ -280,12 +296,12 @@ IonicModule
         return {
           run: function(step) {
             if (direction == 'forward') {
-              setStyles(enteringEle, step, (1-step) * startX);
+              setStyles(enteringEle, step, (1 - step) * startX);
               setStyles(leavingEle, 1, 0);
 
             } else if (direction == 'back') {
               setStyles(enteringEle, 1, 0);
-              setStyles(leavingEle, (1-step), step * startX);
+              setStyles(leavingEle, (1 - step), step * startX);
 
             } else {
               // swap, enter, exit
@@ -323,12 +339,12 @@ IonicModule
             var leavingEle = leavingHeaderBar && leavingHeaderBar.containerEle();
 
             if (direction == 'forward') {
-              setStyles(enteringEle, step, (1-step) * startX, 10);
+              setStyles(enteringEle, step, (1 - step) * startX, 10);
               setStyles(leavingEle, 1, 0, 9);
 
             } else if (direction == 'back') {
               setStyles(enteringEle, 1, 0, 9);
-              setStyles(leavingEle, (1-step), step * startX, 10);
+              setStyles(leavingEle, (1 - step), step * startX, 10);
 
             } else {
               // swap, enter, exit
@@ -346,9 +362,6 @@ IonicModule
       text: false,
       previousTitleText: false
     },
-    scrolling:{
-      native:true
-    },
 
     tabs: {
       style: 'striped',
@@ -358,8 +371,7 @@ IonicModule
   });
 
 
-
-
+  // private: used to set platform configs
   function setPlatformConfig(platformName, platformConfigs) {
     configProperties.platform[platformName] = platformConfigs;
     provider.platform[platformName] = {};
@@ -369,16 +381,18 @@ IonicModule
     createConfig(configProperties.platform[platformName], provider.platform[platformName], '');
   }
 
+
+  // private: used to recursively add new platform configs
   function addConfig(configObj, platformObj) {
     for (var n in configObj) {
       if (n != PLATFORM && configObj.hasOwnProperty(n)) {
-        if ( angular.isObject(configObj[n]) ) {
+        if (angular.isObject(configObj[n])) {
           if (!isDefined(platformObj[n])) {
             platformObj[n] = {};
           }
           addConfig(configObj[n], platformObj[n]);
 
-        } else if( !isDefined(platformObj[n]) ) {
+        } else if (!isDefined(platformObj[n])) {
           platformObj[n] = null;
         }
       }
@@ -388,7 +402,7 @@ IonicModule
 
   // private: create methods for each config to get/set
   function createConfig(configObj, providerObj, platformPath) {
-    forEach(configObj, function(value, namespace){
+    forEach(configObj, function(value, namespace) {
 
       if (angular.isObject(configObj[namespace])) {
         // recursively drill down the config object so we can create a method for each one
@@ -396,7 +410,7 @@ IonicModule
         createConfig(configObj[namespace], providerObj[namespace], platformPath + '.' + namespace);
 
       } else {
-        // create a method for both the provider and config methods that will be exposed
+        // create a method for the provider/config methods that will be exposed
         providerObj[namespace] = function(newValue) {
           if (arguments.length) {
             configObj[namespace] = newValue;
@@ -420,7 +434,7 @@ IonicModule
   function stringObj(obj, str) {
     str = str.split(".");
     for (var i = 0; i < str.length; i++) {
-      if ( obj && isDefined(obj[str[i]]) ) {
+      if (obj && isDefined(obj[str[i]])) {
         obj = obj[str[i]];
       } else {
         return null;

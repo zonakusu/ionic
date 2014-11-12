@@ -17,6 +17,12 @@
  * For Android however, both groups of buttons are on the far right of the header,
  * with the header title aligned left.
  *
+ * Recommendation is to always use `primary` and `secondary` so buttons correctly map
+ * to the side familiar to users of a platform. However, in cases where buttons should
+ * always be on an exact side, both `left` and `right` sides are still available. For
+ * example, a toggle button for a left side menu should be on the left side, in this case
+ * we'd recommend uses `side="left"` so it's always on the left, no matter what platform.
+ *
  * @usage
  * ```html
  * <ion-nav-bar>
@@ -35,8 +41,8 @@
  * </ion-nav-view>
  * ```
  *
- * @param {string} side The side to place the buttons on in the parent
- * {@link ionic.directive:ionNavBar}. Available: `primary`, `secondary`, `left`, and `right`.
+ * @param {string} side The side to place the buttons in the
+ * {@link ionic.directive:ionNavBar}. Available sides: `primary`, `secondary`, `left`, and `right`.
  */
 IonicModule
 .directive('ionNavButtons', ['$document', function($document) {

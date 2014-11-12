@@ -1,21 +1,12 @@
 describe('$ionicConfigProvider', function() {
 
-  it('should give default true', function() {
-    module('ionic', function($ionicConfigProvider) {
-      expect($ionicConfigProvider.templates.prefetch()).toBe(true);
-    });
-    inject(function($ionicConfig) {
-      expect($ionicConfig.templates.prefetch()).toBe(true);
-    });
-  });
-
   it('should allow setting', function() {
     module('ionic', function($ionicConfigProvider) {
-      $ionicConfigProvider.templates.prefetch(false);
-      expect($ionicConfigProvider.templates.prefetch()).toBe(false);
+      $ionicConfigProvider.templates.maxPrefetch(0);
+      expect($ionicConfigProvider.templates.maxPrefetch()).toBe(0);
     });
     inject(function($ionicConfig) {
-      expect($ionicConfig.templates.prefetch()).toBe(false);
+      expect($ionicConfig.templates.maxPrefetch()).toBe(0);
     });
   });
 
