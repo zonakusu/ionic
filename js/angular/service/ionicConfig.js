@@ -17,33 +17,63 @@
 
 /**
  * @ngdoc method
- * @name $ionicConfigProvider#views.transition
- * @description Animation style when transitioning between views. Default `platform`.
- *
- * @param {string} transition Which style of view transitioning to use.
- *
- * * `platform`: Dynamically choose the correct transition style depending on
- *               the platform the app is running from. If the platform is
- *               not `ios` or `android` then it will default to `ios-transition`.
- * * `ios`: iOS style transition.
- * * `android`: Android style transition.
- * * `none`: Do not preform animated transitions.
- *
- * @returns {string} View animation.
+ * @name $ionicConfigProvider#backButton.icon
+ * @description Back button icon.
+ * @param {string} classname
+ * @returns {string}
  */
 
 /**
  * @ngdoc method
- * @name $ionicConfigProvider#views.maxCache
- * @description Maximum number of view elements to cache in the DOM. When the max number is
- * exceeded, the view with the longest time period since it was accessed is removed. Views
- * which stay in the DOM essentially caches the view's scope, current state and scroll position.
- * However, the scope is disconnected from the cycle when it is cached, and reconnected when it enters again.
- * When the maximum cached is `0`, then after each view transition, the leaving view's element will
- * be removed from the DOM, and the next time the same view is shown it will have to
- * re-compile, attach to the DOM, and link the element again.
- * @param {number} maxNumber Maximum number of views to retain. Default `10`.
- * @returns {number} How many views Ionic will hold onto until the a view is removed.
+ * @name $ionicConfigProvider#backButton.previousTitleText
+ * @description If the previous title text should become the back button text. This
+ * is the default for iOS.
+ * @param {boolean} previousTitleText
+ * @returns {boolean}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#backButton.text
+ * @description Back button text.
+ * @param {string} text
+ * @returns {string}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#scrolling.native
+ * @description Set whether to use Ionic's JS scrolling or native scrolling. Defaults to false
+ * (js) for iOS and true (native) for Android. Note: this may affect what ion-scroll,
+ * ion-content, and $ionicScrollDelegate methods are available to you.
+ * @param {boolean} Whether to use native Scrolling.
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#tabs.position
+ * @description Tab position.
+ * @param {string} position
+ * @returns {string}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#tabs.style
+ * @description Tab style.
+ * @param {string} style
+ * @returns {string}
+ */
+
+/**
+ * @ngdoc method
+ * @name $ionicConfigProvider#templates.prefetch
+ * @description Set whether Ionic should prefetch all templateUrls defined in
+ * $stateProvider.state. If set to false, the user will have to wait
+ * for a template to be fetched the first time when navigating to a new page. Default `true`.
+ * @param {boolean} shouldPrefetch Whether Ionic should prefetch templateUrls defined in
+ * `$stateProvider.state()`.
+ * @returns {boolean} Whether Ionic will prefetch templateUrls defined in $stateProvider.state.
  */
 
 /**
@@ -61,54 +91,32 @@
 
 /**
  * @ngdoc method
- * @name $ionicConfigProvider#backButton.icon
- * @description Back button icon.
- * @param {string} classname
- * @returns {string}
+ * @name $ionicConfigProvider#views.maxCache
+ * @description Maximum number of view elements to cache in the DOM. When the max number is
+ * exceeded, the view with the longest time period since it was accessed is removed. Views
+ * which stay in the DOM essentially caches the view's scope, current state and scroll position.
+ * However, the scope is disconnected from the cycle when it is cached, and reconnected when it enters again.
+ * When the maximum cached is `0`, then after each view transition, the leaving view's element will
+ * be removed from the DOM, and the next time the same view is shown it will have to
+ * re-compile, attach to the DOM, and link the element again.
+ * @param {number} maxNumber Maximum number of views to retain. Default `10`.
+ * @returns {number} How many views Ionic will hold onto until the a view is removed.
  */
-
 /**
  * @ngdoc method
- * @name $ionicConfigProvider#backButton.text
- * @description Back button text.
- * @param {string} text
- * @returns {string}
- */
-
-/**
- * @ngdoc method
- * @name $ionicConfigProvider#backButton.previousTitleText
- * @description If the previous title text should become the back button text. This
- * is the default for iOS.
- * @param {boolean} previousTitleText
- * @returns {boolean}
- */
-
-/**
- * @ngdoc method
- * @name $ionicConfigProvider#tabs.style
- * @description Tab style.
- * @param {string} style
- * @returns {string}
- */
-
-/**
- * @ngdoc method
- * @name $ionicConfigProvider#tabs.position
- * @description Tab position.
- * @param {string} position
- * @returns {string}
- */
-
-/**
- * @ngdoc method
- * @name $ionicConfigProvider#templates.prefetch
- * @description Set whether Ionic should prefetch all templateUrls defined in
- * $stateProvider.state. If set to false, the user will have to wait
- * for a template to be fetched the first time when navigating to a new page. Default `true`.
- * @param {boolean} shouldPrefetch Whether Ionic should prefetch templateUrls defined in
- * `$stateProvider.state()`.
- * @returns {boolean} Whether Ionic will prefetch templateUrls defined in $stateProvider.state.
+ * @name $ionicConfigProvider#views.transition
+ * @description Animation style when transitioning between views. Default `platform`.
+ *
+ * @param {string} transition Which style of view transitioning to use.
+ *
+ * * `platform`: Dynamically choose the correct transition style depending on
+ *               the platform the app is running from. If the platform is
+ *               not `ios` or `android` then it will default to `ios-transition`.
+ * * `ios`: iOS style transition.
+ * * `android`: Android style transition.
+ * * `none`: Do not preform animated transitions.
+ *
+ * @returns {string} View animation.
  */
 
 IonicModule
@@ -119,11 +127,10 @@ IonicModule
   var PLATFORM = 'platform';
 
   var configProperties = {
-    views: {
-      maxCache: PLATFORM,
-      forwardCache: PLATFORM,
-      transition: PLATFORM,
-      transitionFn: PLATFORM
+    backButton: {
+      icon: PLATFORM,
+      text: PLATFORM,
+      previousTitleText: PLATFORM
     },
     navBar: {
       alignTitle: PLATFORM,
@@ -132,10 +139,9 @@ IonicModule
       transition: PLATFORM,
       transitionFn: PLATFORM
     },
-    backButton: {
-      icon: PLATFORM,
-      text: PLATFORM,
-      previousTitleText: PLATFORM
+    platform: {},
+    scrolling: {
+      native: PLATFORM
     },
     tabs: {
       style: PLATFORM,
@@ -144,7 +150,12 @@ IonicModule
     templates: {
       maxPrefetch: PLATFORM
     },
-    platform: {}
+    views: {
+      maxCache: PLATFORM,
+      forwardCache: PLATFORM,
+      transition: PLATFORM,
+      transitionFn: PLATFORM
+    }
   };
   createConfig(configProperties, provider, '');
 
@@ -153,44 +164,11 @@ IonicModule
   // Default
   // -------------------------
   setPlatformConfig('default', {
-
-    views: {
-      maxCache: 10,
-      forwardCache: false,
-      transition: 'ios',
-
-      transitionFn: function(enteringEle, leavingEle, direction, shouldAnimate) {
-        shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
-
-        function setStyles(ele, opacity, x) {
-          var css = {};
-          css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
-          css.opacity = opacity;
-          css[ionic.CSS.TRANSFORM] = 'translate3d(' + x + '%,0,0)';
-          ionic.DomUtil.cachedStyles(ele, css);
-        }
-
-        return {
-          run: function(step) {
-            if (direction == 'forward') {
-              setStyles(enteringEle, 1, (1 - step) * 99); // starting at 98% prevents a flicker
-              setStyles(leavingEle, (1 - 0.1 * step), step * -33);
-
-            } else if (direction == 'back') {
-              setStyles(enteringEle, (1 - 0.1 * (1 - step)), (1 - step) * -33);
-              setStyles(leavingEle, 1, step * 100);
-
-            } else {
-              // swap, enter, exit
-              setStyles(enteringEle, 1, 0);
-              setStyles(leavingEle, 0, 0);
-            }
-          },
-          shouldAnimate: shouldAnimate
-        };
-      }
+    backButton: {
+      icon: 'ion-ios7-arrow-back',
+      text: 'Back',
+      previousTitleText: true
     },
-
     navBar: {
       alignTitle: 'center',
       positionPrimaryButtons: 'left',
@@ -245,13 +223,9 @@ IonicModule
           shouldAnimate: shouldAnimate
         };
       }
-
     },
-
-    backButton: {
-      icon: 'ion-ios7-arrow-back',
-      text: 'Back',
-      previousTitleText: true
+    scrolling: {
+      native: false
     },
 
     tabs: {
@@ -261,8 +235,43 @@ IonicModule
 
     templates: {
       maxPrefetch: 30
-    }
+    },
+    views: {
+      maxCache: 10,
+      forwardCache: false,
+      transition: 'ios',
 
+      transitionFn: function(enteringEle, leavingEle, direction, shouldAnimate) {
+        shouldAnimate = shouldAnimate && (direction == 'forward' || direction == 'back');
+
+        function setStyles(ele, opacity, x) {
+          var css = {};
+          css[ionic.CSS.TRANSITION_DURATION] = shouldAnimate ? '' : 0;
+          css.opacity = opacity;
+          css[ionic.CSS.TRANSFORM] = 'translate3d(' + x + '%,0,0)';
+          ionic.DomUtil.cachedStyles(ele, css);
+        }
+
+        return {
+          run: function(step) {
+            if (direction == 'forward') {
+              setStyles(enteringEle, 1, (1 - step) * 99); // starting at 98% prevents a flicker
+              setStyles(leavingEle, (1 - 0.1 * step), step * -33);
+
+            } else if (direction == 'back') {
+              setStyles(enteringEle, (1 - 0.1 * (1 - step)), (1 - step) * -33);
+              setStyles(leavingEle, 1, step * 100);
+
+            } else {
+              // swap, enter, exit
+              setStyles(enteringEle, 1, 0);
+              setStyles(leavingEle, 0, 0);
+            }
+          },
+          shouldAnimate: shouldAnimate
+        };
+      }
+    }
   });
 
 
