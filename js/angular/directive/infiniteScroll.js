@@ -108,8 +108,8 @@ IonicModule
                 computedStyle.overflowX === 'auto' ||
                 self.scrollEl.style['overflow-x'] === 'scroll' ? // for unit tests
             calculateMaxValue(distance, maxValues.left, isPercent) : -1,
-          top: computedStyle['overflowY'] === 'scroll' ||
-               computedStyle['overflowY'] === 'auto' ||
+          top: computedStyle.overflowY === 'scroll' ||
+               computedStyle.overflowY === 'auto' ||
                self.scrollEl.style['overflow-y'] === 'scroll' ? // for unit tests
             calculateMaxValue(distance, maxValues.top, isPercent) : -1
         };

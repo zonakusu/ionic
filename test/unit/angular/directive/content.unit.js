@@ -130,7 +130,7 @@ describe('Ionic Content directive', function() {
   });
 
   it('Should allow native scrolling to be set by $ionicConfig ', function() {
-    ionicConfig.scrolling.native(true);
+    ionicConfig.scrolling.jsScrolling(false);
     var element = compile('<ion-content></ion-content>')(scope);
     expect(element.hasClass('overflow-scroll')).toBe(true);
   });
