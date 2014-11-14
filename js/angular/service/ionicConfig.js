@@ -141,7 +141,7 @@ IonicModule
     },
     platform: {},
     scrolling: {
-      native: PLATFORM
+      jsScrolling: PLATFORM
     },
     tabs: {
       style: PLATFORM,
@@ -225,7 +225,7 @@ IonicModule
       }
     },
     scrolling: {
-      native: false
+      jsScrolling: true
     },
 
     tabs: {

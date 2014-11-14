@@ -63,6 +63,7 @@
  */
 IonicModule
 .directive('ionInfiniteScroll', ['$timeout', function($timeout) {
+  // determine pixel refresh distance based on % or value
   function calculateMaxValue(distance, maximum, isPercent) {
     return isPercent ?
       maximum * (1 - parseFloat(distance) / 100) :
@@ -77,6 +78,8 @@ IonicModule
       var self = this;
       self.isLoading = false;
       self.scrollView = null; //given by link function
+      // determine the threshold at which we should fire an infinite scroll
+      // note: this gets processed every scroll event, can it be cached?
       self.getMaxScroll = function() {
         var distance = ($attrs.distance || '2.5%').trim();
         var isPercent = distance.indexOf('%') !== -1;
@@ -93,7 +96,7 @@ IonicModule
           };
         }
 
-        // native scrolling
+        // otherwise, native scrolling
         maxValues = {
           left: self.scrollEl.scrollWidth,
           top:  self.scrollEl.scrollHeight
@@ -101,28 +104,29 @@ IonicModule
         var computedStyle = window.getComputedStyle(self.scrollEl) || {};
 
         return {
-          left: computedStyle['overflowX'] == 'scroll' ||
-                computedStyle['overflowX'] == 'auto' ||
-                self.scrollEl.style['overflow-x'] == 'scroll' ? // for unit tests
-            calculateMaxValue(distance, maxValues.left, isPercent) :
-            -1,
-          top: computedStyle['overflowY'] == 'scroll' ||
-               computedStyle['overflowY'] == 'auto' ||
-               self.scrollEl.style['overflow-y'] == 'scroll' ? // for unit tests
-            calculateMaxValue(distance, maxValues.top, isPercent) :
-            -1
+          left: computedStyle.overflowX === 'scroll' ||
+                computedStyle.overflowX === 'auto' ||
+                self.scrollEl.style['overflow-x'] === 'scroll' ? // for unit tests
+            calculateMaxValue(distance, maxValues.left, isPercent) : -1,
+          top: computedStyle['overflowY'] === 'scroll' ||
+               computedStyle['overflowY'] === 'auto' ||
+               self.scrollEl.style['overflow-y'] === 'scroll' ? // for unit tests
+            calculateMaxValue(distance, maxValues.top, isPercent) : -1
         };
       };
     }],
     link: function($scope, $element, $attrs, ctrls) {
       var scrollCtrl = ctrls[0];
       var infiniteScrollCtrl = ctrls[1];
+      // if this view is not beneath a scrollCtrl, it can't be injected, proceed w/ native scrolling
       var jsScrolling = infiniteScrollCtrl.jsScrolling = !!scrollCtrl;
       if (jsScrolling) {
         var scrollView = infiniteScrollCtrl.scrollView = scrollCtrl.scrollView;
       } else {
+        // grabbing the scrollable element, to determine dimensions, and current scroll pos
         var scrollEl = ionic.DomUtil.getParentOrSelfWithClass($element[0].parentNode,'overflow-scroll');
         infiniteScrollCtrl.scrollEl = scrollEl;
+        // if there's no scroll controller, and no overflow scroll div, infinite scroll wont work
         if (!scrollEl) {
           throw 'Infinite scroll must be used inside a scrollable div';
         }
@@ -155,16 +159,19 @@ IonicModule
         if (scrollCtrl && scrollCtrl.$element) scrollCtrl.$element.off('scroll', checkBounds);
         if (scrollEl && scrollEl.removeEventListener) scrollEl.removeEventListener('scroll', checkBounds);
       });
+      // debounce checking infinite scroll events per animation frame
       var checkBounds = ionic.animationFrameThrottle(checkInfiniteBounds);
 
       //Check bounds on start, after scrollView is fully rendered
       setTimeout(checkBounds);
+      //bind to appropriate scroll event
       if (jsScrolling) {
         scrollCtrl.$element.on('scroll', checkBounds);
       } else {
         infiniteScrollCtrl.scrollEl.addEventListener('scroll', checkBounds);
       }
 
+      // check if we've scrolled far enough to trigger an infinite scroll
       function checkInfiniteBounds() {
         if (infiniteScrollCtrl.isLoading) return;
         var maxScroll = infiniteScrollCtrl.getMaxScroll();
@@ -176,8 +183,13 @@ IonicModule
             onInfinite();
           }
         } else {
-          if ((maxScroll.left !== -1 && infiniteScrollCtrl.scrollEl.scrollLeft >= maxScroll.left - infiniteScrollCtrl.scrollEl.clientWidth) ||
-            (maxScroll.top !== -1 && infiniteScrollCtrl.scrollEl.scrollTop >= maxScroll.top - infiniteScrollCtrl.scrollEl.clientHeight)) {
+          if ((
+              maxScroll.left !== -1 &&
+              infiniteScrollCtrl.scrollEl.scrollLeft >= maxScroll.left - infiniteScrollCtrl.scrollEl.clientWidth
+            ) || (
+              maxScroll.top !== -1 &&
+              infiniteScrollCtrl.scrollEl.scrollTop >= maxScroll.top - infiniteScrollCtrl.scrollEl.clientHeight
+            )) {
             onInfinite();
           }
         }

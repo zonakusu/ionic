@@ -109,7 +109,8 @@ function($timeout, $controller, $ionicBind, $ionicConfig) {
 
         if ($attr.scroll === "false") {
           //do nothing
-        } else if (attr.overflowScroll === "true" || $ionicConfig.scrolling.native()) {
+        } else if (attr.overflowScroll === "true" || !$ionicConfig.scrolling.jsScrolling()) {
+          // use native scrolling
           $element.addClass('overflow-scroll');
         } else {
           var scrollViewOptions = {

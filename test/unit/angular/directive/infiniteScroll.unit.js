@@ -57,7 +57,7 @@ describe('ionicInfiniteScroll directive', function() {
 
       $compile(element)(scope);
       ctrl = element.controller('ionInfiniteScroll');
-      // set scrollEl properties since they can't be faked if we're passing in scroll data
+      // create a fake scrollEl since they can't be faked if we're passing in scroll data
       if (options) {
         ctrl.scrollEl = {style:{
           'overflow-x':'hidden',
