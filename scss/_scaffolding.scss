@@ -286,7 +286,9 @@ ion-infinite-scroll {
 
   }
 }
-body:not(.platform-ios) ion-infinite-scroll:not(.active) .icon:before{
+// removing the animation when the spinner isn't shown
+// this breaks up animations on iOS, so they are left with unnecessary reflows
+body:not(.platform-ios) ion-infinite-scroll:not(.active) .icon{
   -webkit-animation: none;
   animation:none;
 }

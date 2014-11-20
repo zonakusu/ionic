@@ -54,17 +54,21 @@ describe('ionicInfiniteScroll directive', function() {
       if (options && !!options.scrollingY) parent[0].style['overflow-y'] ='scroll';
       element = parent.find('ion-infinite-scroll');
       ionic.animationFrameThrottle = function(cb) { return function() { cb(); }; };
-
-      (!!options.scrollingX)? parent[0].style['overflow-x'] ='scroll' : parent[0].style['overflow-x'] ='hidden';
-      (!!options.scrollingY)? parent[0].style['overflow-y'] ='scroll' : parent[0].style['overflow-x'] ='hidden';
-      parent[0].clientWidth = parent[0].scrollLeft = scrollLeftValue;
-      parent[0].clientHeight = parent[0].scrollTop = scrollTopValue;
-      parent[0].scrollWidth = scrollLeftMaxValue;
-      parent[0].scrollHeight = scrollTopMaxValue;
-
-      angular.element('body').append(parent);
       $compile(element)(scope);
       ctrl = element.controller('ionInfiniteScroll');
+      // create a fake scrollEl since they can't be faked if we're passing in scroll data
+      if (options) {
+        ctrl.scrollEl = {style:{
+          'overflow-x':'hidden',
+          'overflow-y':'hidden'
+        }};
+        if (!!options.scrollingX) ctrl.scrollEl.style['overflow-x'] ='scroll';
+        if (!!options.scrollingY) ctrl.scrollEl.style['overflow-y'] ='scroll';
+        ctrl.scrollEl.clientWidth = ctrl.scrollEl.scrollLeft = scrollLeftValue;
+        ctrl.scrollEl.clientHeight = ctrl.scrollEl.scrollTop = scrollTopValue;
+        ctrl.scrollEl.scrollWidth = scrollLeftMaxValue;
+        ctrl.scrollEl.scrollHeight = scrollTopMaxValue;
+      }
 
       scope.$apply();
     });
@@ -131,8 +135,8 @@ describe('ionicInfiniteScroll directive', function() {
     ].forEach(function(opts) {
 
       describe('with scrollingX=' + opts.scrollingX + ', scrollingY=' + opts.scrollingY, function() {
-        iit('should default to 2.5%', function() {
-          var el = setupJS('', {}, opts);
+        it('should default to 2.5%', function() {
+          setupJS('', {}, opts);
           expect(ctrl.getJSMaxScroll()).toEqual({
             left: opts.scrollingX ? scrollLeftMaxValue * 0.975 : -1,
             top: opts.scrollingY ? scrollTopMaxValue * 0.975 : -1
@@ -146,28 +150,28 @@ describe('ionicInfiniteScroll directive', function() {
         });
 
         it('should use attr.distance as number', function() {
-          var el = setupJS('distance=3', {}, opts);
-          expect(ctrl.getMaxScroll()).toEqual({
+          setupJS('distance=3', {}, opts);
+          expect(ctrl.getJSMaxScroll()).toEqual({
             left: opts.scrollingX ? scrollLeftMaxValue - 3 : -1,
             top: opts.scrollingY ? scrollTopMaxValue - 3 : -1
           });
 
-          var el = setupNative('distance=3', {}, opts);
-          expect(ctrl.getMaxScroll()).toEqual({
+          setupNative('distance=3', {}, opts);
+          expect(ctrl.getNativeMaxScroll()).toEqual({
             left: opts.scrollingX ? scrollLeftMaxValue - 3 : -1,
             top: opts.scrollingY ? scrollTopMaxValue - 3 : -1
           });
         });
 
         it('should use attr.distance as percent', function() {
-          var el = setupJS('distance=5%', {}, opts);
-          expect(ctrl.getMaxScroll()).toEqual({
+          setupJS('distance=5%', {}, opts);
+          expect(ctrl.getJSMaxScroll()).toEqual({
             left: opts.scrollingX ? scrollLeftMaxValue * 0.95 : -1,
             top: opts.scrollingY ? scrollTopMaxValue * 0.95 : -1
           });
 
-          var el = setupNative('distance=5%', {}, opts);
-          expect(ctrl.getMaxScroll()).toEqual({
+          setupNative('distance=5%', {}, opts);
+          expect(ctrl.getNativeMaxScroll()).toEqual({
             left: opts.scrollingX ? scrollLeftMaxValue * 0.95 : -1,
             top: opts.scrollingY ? scrollTopMaxValue * 0.95 : -1
           });
@@ -206,7 +210,7 @@ describe('ionicInfiniteScroll directive', function() {
 
       scrollTopValue = scrollTopMaxValue;
       var el = setupNative('on-infinite="foo=1"', {}, { scrollingX: true, scrollingY: true });
-      ctrl._checkBounds();
+      ctrl.checkBounds();
       expect(el.hasClass('active')).toBe(true);
       expect(ctrl.isLoading).toBe(true);
       expect(el.scope().foo).toBe(1);
@@ -222,7 +226,7 @@ describe('ionicInfiniteScroll directive', function() {
 
       scrollLeftValue = scrollLeftMaxValue;
       var el = setupNative('on-infinite="foo=1"', {}, { scrollingX: true, scrollingY: true });
-      ctrl._checkBounds();
+      ctrl.checkBounds();
 
       expect(el.hasClass('active')).toBe(true);
       expect(ctrl.isLoading).toBe(true);
