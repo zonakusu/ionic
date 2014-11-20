@@ -45,7 +45,7 @@ describe('ionicInfiniteScroll directive', function() {
 
   function setupNative(attrs, scopeProps, options) {
     var element, parent;
-    inject(function($rootScope, $compile) {
+    inject(function($rootScope, $compile, $document) {
       var scope = $rootScope.$new();
       angular.extend(scope, scopeProps || {});
       parent = angular.element('<ion-content class="overflow-scroll"><ion-infinite-scroll ' + (attrs || '') +
@@ -55,21 +55,17 @@ describe('ionicInfiniteScroll directive', function() {
       element = parent.find('ion-infinite-scroll');
       ionic.animationFrameThrottle = function(cb) { return function() { cb(); }; };
 
+      (!!options.scrollingX)? parent[0].style['overflow-x'] ='scroll' : parent[0].style['overflow-x'] ='hidden';
+      (!!options.scrollingY)? parent[0].style['overflow-y'] ='scroll' : parent[0].style['overflow-x'] ='hidden';
+      parent[0].clientWidth = parent[0].scrollLeft = scrollLeftValue;
+      parent[0].clientHeight = parent[0].scrollTop = scrollTopValue;
+      parent[0].scrollWidth = scrollLeftMaxValue;
+      parent[0].scrollHeight = scrollTopMaxValue;
+
+      angular.element('body').append(parent);
       $compile(element)(scope);
       ctrl = element.controller('ionInfiniteScroll');
-      // create a fake scrollEl since they can't be faked if we're passing in scroll data
-      if (options) {
-        ctrl.scrollEl = {style:{
-          'overflow-x':'hidden',
-          'overflow-y':'hidden'
-        }};
-        if (!!options.scrollingX) ctrl.scrollEl.style['overflow-x'] ='scroll';
-        if (!!options.scrollingY) ctrl.scrollEl.style['overflow-y'] ='scroll';
-        ctrl.scrollEl.clientWidth = ctrl.scrollEl.scrollLeft = scrollLeftValue;
-        ctrl.scrollEl.clientHeight = ctrl.scrollEl.scrollTop = scrollTopValue;
-        ctrl.scrollEl.scrollWidth = scrollLeftMaxValue;
-        ctrl.scrollEl.scrollHeight = scrollTopMaxValue;
-      }
+
       scope.$apply();
     });
 
@@ -135,15 +131,15 @@ describe('ionicInfiniteScroll directive', function() {
     ].forEach(function(opts) {
 
       describe('with scrollingX=' + opts.scrollingX + ', scrollingY=' + opts.scrollingY, function() {
-        it('should default to 2.5%', function() {
+        iit('should default to 2.5%', function() {
           var el = setupJS('', {}, opts);
-          expect(ctrl.getMaxScroll()).toEqual({
+          expect(ctrl.getJSMaxScroll()).toEqual({
             left: opts.scrollingX ? scrollLeftMaxValue * 0.975 : -1,
             top: opts.scrollingY ? scrollTopMaxValue * 0.975 : -1
           });
 
           setupNative('', {}, opts);
-          expect(ctrl.getMaxScroll()).toEqual({
+          expect(ctrl.getNativeMaxScroll()).toEqual({
             left: opts.scrollingX ? scrollLeftMaxValue * 0.975 : -1,
             top: opts.scrollingY ? scrollTopMaxValue * 0.975 : -1
           });

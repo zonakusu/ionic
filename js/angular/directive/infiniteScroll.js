@@ -63,16 +63,10 @@
  */
 IonicModule
 .directive('ionInfiniteScroll', ['$timeout', function($timeout) {
-  // determine pixel refresh distance based on % or value
-  function calculateMaxValue(distance, maximum, isPercent) {
-    return isPercent ?
-      maximum * (1 - parseFloat(distance) / 100) :
-      maximum - parseFloat(distance);
-  }
   return {
     restrict: 'E',
     require: ['?^$ionicScroll', 'ionInfiniteScroll'],
-    template: '<i class="icon {{icon()}} icon-refreshing"></i>',
+    template: '<i class="icon {{icon()}} icon-refreshing {{scrollingType}}"></i>',
     scope: true,
     controller: ['$scope', '$attrs', '$element', function($scope, $attrs,  $element) {
       var self = this;
@@ -88,21 +82,23 @@ IonicModule
 
       $scope.$on('$destroy', function() {
         if (self.scrollCtrl && self.scrollCtrl.$element) self.scrollCtrl.$element.off('scroll', self.checkBounds);
-        if (self.scrollEl && self.scrollEl.removeEventListener) self.scrollEl.removeEventListener('scroll', self.checkBounds);
+        if (self.scrollEl && self.scrollEl.removeEventListener) {
+          self.scrollEl.removeEventListener('scroll', self.checkBounds);
+        }
       });
 
-      // debounce checking infinite scroll events per animation frame
-      self.checkBounds = ionic.animationFrameThrottle(checkInfiniteBounds);
+      // debounce checking infinite scroll events
+      self.checkBounds = ionic.Utils.throttle(checkInfiniteBounds, 300);
 
-      var onInfinite = function() {
+      function onInfinite() {
         ionic.requestAnimationFrame(function() {
           $element[0].classList.add('active');
         });
         self.isLoading = true;
         $scope.$parent && $scope.$parent.$apply($attrs.onInfinite || '');
-      };
+      }
 
-      var finishInfiniteScroll = function() {
+      function finishInfiniteScroll() {
         ionic.requestAnimationFrame(function() {
           $element[0].classList.remove('active');
         });
@@ -111,20 +107,22 @@ IonicModule
           self.checkBounds();
         }, 0, false);
         self.isLoading = false;
-      };
+      }
 
       // check if we've scrolled far enough to trigger an infinite scroll
       function checkInfiniteBounds() {
         if (self.isLoading) return;
-        var maxScroll = self.getMaxScroll();
+        var maxScroll = {};
 
         if (self.jsScrolling) {
+          maxScroll = self.getJSMaxScroll();
           var scrollValues = self.scrollView.getValues();
           if ((maxScroll.left !== -1 && scrollValues.left >= maxScroll.left) ||
             (maxScroll.top !== -1 && scrollValues.top >= maxScroll.top)) {
             onInfinite();
           }
         } else {
+          maxScroll = self.getNativeMaxScroll();
           if ((
             maxScroll.left !== -1 &&
             self.scrollEl.scrollLeft >= maxScroll.left - self.scrollEl.clientWidth
@@ -137,44 +135,44 @@ IonicModule
         }
       }
 
-
       // determine the threshold at which we should fire an infinite scroll
       // note: this gets processed every scroll event, can it be cached?
-      self.getMaxScroll = function() {
-        var distance = ($attrs.distance || '2.5%').trim();
-        var isPercent = distance.indexOf('%') !== -1;
-        var maxValues = {};
-        if (self.jsScrolling) {
-          maxValues = self.scrollView.getScrollMax();
-          return {
-            left: self.scrollView.options.scrollingX ?
-              calculateMaxValue(distance, maxValues.left, isPercent) :
-              -1,
-            top: self.scrollView.options.scrollingY ?
-              calculateMaxValue(distance, maxValues.top, isPercent) :
-              -1
-          };
-        }
+      self.getJSMaxScroll = function() {
+        var maxValues = self.scrollView.getScrollMax();
+        return {
+          left: self.scrollView.options.scrollingX ?
+            calculateMaxValue(maxValues.left) :
+            -1,
+          top: self.scrollView.options.scrollingY ?
+            calculateMaxValue(maxValues.top) :
+            -1
+        };
+      };
 
-        // otherwise, native scrolling
-        maxValues = {
+      self.getNativeMaxScroll = function() {
+        var maxValues = {
           left: self.scrollEl.scrollWidth,
           top:  self.scrollEl.scrollHeight
         };
         var computedStyle = window.getComputedStyle(self.scrollEl) || {};
-
         return {
           left: computedStyle.overflowX === 'scroll' ||
-                computedStyle.overflowX === 'auto' ||
-                self.scrollEl.style['overflow-x'] === 'scroll' ? // for unit tests
-            calculateMaxValue(distance, maxValues.left, isPercent) : -1,
+                computedStyle.overflowX === 'auto' ?
+            calculateMaxValue(maxValues.left) : -1,
           top: computedStyle.overflowY === 'scroll' ||
-               computedStyle.overflowY === 'auto' ||
-               self.scrollEl.style['overflow-y'] === 'scroll' ? // for unit tests
-            calculateMaxValue(distance, maxValues.top, isPercent) : -1
+               computedStyle.overflowY === 'auto' ?
+            calculateMaxValue(maxValues.top) : -1
         };
       };
 
+      // determine pixel refresh distance based on % or value
+      function calculateMaxValue(maximum) {
+        distance = ($attrs.distance || '2.5%').trim();
+        isPercent = distance.indexOf('%') !== -1;
+        return isPercent ?
+        maximum * (1 - parseFloat(distance) / 100) :
+        maximum - parseFloat(distance);
+      }
 
     }],
     link: function($scope, $element, $attrs, ctrls) {
@@ -195,6 +193,7 @@ IonicModule
       }
       //bind to appropriate scroll event
       if (jsScrolling) {
+        $scope.scrollingType = 'js-scrolling';
         scrollCtrl.$element.on('scroll', infiniteScrollCtrl.checkBounds);
       } else {
         infiniteScrollCtrl.scrollEl.addEventListener('scroll', infiniteScrollCtrl.checkBounds);
