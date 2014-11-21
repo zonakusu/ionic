@@ -220,6 +220,9 @@ IonicModule
       text: PLATFORM,
       previousTitleText: PLATFORM
     },
+    scrolling: {
+      jsScrolling: PLATFORM
+    },
     tabs: {
       style: PLATFORM,
       position: PLATFORM
@@ -253,6 +256,10 @@ IonicModule
       icon: 'ion-ios7-arrow-back',
       text: 'Back',
       previousTitleText: true
+    },
+
+    scrolling: {
+      jsScrolling: true
     },
 
     tabs: {
