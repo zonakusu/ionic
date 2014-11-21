@@ -4,14 +4,14 @@ IonicModule
   '$element',
   '$attrs',
   '$compile',
-  '$ionicHistory',
   '$ionicViewSwitcher',
-function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) {
+function($scope, $element, $attrs, $compile, $ionicViewSwitcher) {
   var self = this;
   var navElementHtml = {};
   var navViewCtrl;
   var navBarDelegateHandle;
   var hasViewHeaderBar;
+  var deregisters = [];
 
   var deregIonNavBarInit = $scope.$on('ionNavBar.init', function(ev, delegateHandle){
     // this view has its own ion-nav-bar, remember the navBarDelegateHandle for this view
@@ -19,16 +19,9 @@ function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) 
     navBarDelegateHandle = delegateHandle;
   });
 
-  var deregIonHeaderBarInit = $scope.$on('ionHeaderBar.init', function(ev){
-    // this view has its own ion-header-bar, remember it should trump other nav bars
-    ev.stopPropagation();
-    hasViewHeaderBar = true;
-  });
-
 
   self.init = function() {
     deregIonNavBarInit();
-    deregIonHeaderBarInit();
 
     var modalCtrl = $element.inheritedData('$ionModalController');
     navViewCtrl = $element.inheritedData('$ionNavViewController');
@@ -38,13 +31,8 @@ function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) 
 
     // add listeners for when this view changes
     $scope.$on('$ionicView.beforeEnter', self.beforeEnter);
-    $scope.$on('$ionicView.afterEnter', self.afterEnter);
-
-    // watch to see if the hideNavBar attribute changes
-    var hideNavAttr = isDefined($attrs.hideNavBar) ? $attrs.hideNavBar : 'false';
-    $scope.$watch(hideNavAttr, function(value) {
-      navViewCtrl.showBar(!value);
-    });
+    $scope.$on('$ionicView.afterEnter', afterEnter);
+    $scope.$on('$ionicView.beforeLeave', deregisterFns);
   };
 
   self.beforeEnter = function(ev, transData) {
@@ -54,8 +42,6 @@ function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) 
       transData.viewNotified = true;
 
       var viewTitle = $attrs.viewTitle || $attrs.title;
-
-      $ionicHistory.currentTitle(viewTitle);
 
       var buttons = {};
       for (var n in navElementHtml) {
@@ -68,13 +54,51 @@ function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) 
         transition: transData.transition,
         transitionId: transData.transitionId,
         shouldAnimate: transData.shouldAnimate,
-        showBack: transData.showBack && !$attrs.hideBackButton,
+        enableBack: transData.enableBack,
+        showBack: !attrTrue('hideBackButton'),
         buttons: buttons,
         navBarDelegate: navBarDelegateHandle || null,
+        showNavBar: !attrTrue('hideNavBar'),
         hasHeaderBar: !!hasViewHeaderBar
       });
+
+      // make sure any existing observers are cleaned up
+      deregisterFns();
     }
   };
+
+
+  function afterEnter() {
+    // only listen for title updates after it has entered
+    // but also deregister the observe before it leaves
+    var viewTitleAttr = isDefined($attrs.viewTitle) && 'viewTitle' || isDefined($attrs.title) && 'title';
+    if (viewTitleAttr) {
+      deregisters.push($attrs.$observe(viewTitleAttr, function(val) {
+        navViewCtrl.title(val);
+      }));
+    }
+
+    if (isDefined($attrs.hideBackButton)) {
+      deregisters.push($scope.$watch($attrs.hideBackButton, function(val) {
+        navViewCtrl.showBackButton(!val);
+      }));
+    }
+
+    if (isDefined($attrs.hideNavBar)) {
+      deregisters.push($scope.$watch($attrs.hideNavBar, function(val) {
+        navViewCtrl.showBar(!val);
+      }));
+    }
+  }
+
+
+  function deregisterFns() {
+    // remove all existing $attrs.$observe's
+    for (var x = 0; x < deregisters.length; x++) {
+      deregisters[x]();
+    }
+    deregisters = [];
+  }
 
 
   function generateButton(html) {
@@ -85,9 +109,9 @@ function($scope, $element, $attrs, $compile, $ionicHistory, $ionicViewSwitcher) 
   }
 
 
-  self.afterEnter = function(ev, transitionData) {
-    $ionicViewSwitcher.setActiveView($element.parent());
-  };
+  function attrTrue(key) {
+    return !!$scope.$eval($attrs[key]);
+  }
 
 
   self.navElement = function(type, html) {

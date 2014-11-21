@@ -971,11 +971,117 @@ describe('Ionic History', function() {
     expect(homeReg.direction).toEqual('exit');
   }));
 
-  it('should be an abstract view', inject(function($document) {
-    var reg = ionicHistory.register({}, false);
-    expect(reg.action).not.toEqual('abstractView');
+  it('should goToHistoryRoot', inject(function($state) {
+    var tab1Container = {};
+    ionicHistory.registerHistory(tab1Container);
 
-    reg = ionicHistory.register({}, true);
+    $state.go('tabs.tab1view1');
+    var tab1view1 = ionicHistory.register(tab1Container, false);
+    rootScope.$apply();
+
+    $state.go('tabs.tab1view2');
+    var tab1view2 = ionicHistory.register(tab1Container, false);
+    rootScope.$apply();
+
+    ionicHistory.goToHistoryRoot(tab1Container.$historyId);
+    var tab1view1Tap = ionicHistory.register(tab1Container, false);
+    rootScope.$apply();
+
+    expect(ionicHistory.viewHistory().currentView.viewId).toBe(tab1view1.viewId);
+    expect(tab1view1Tap.viewId).toBe(tab1view1.viewId);
+    expect(tab1view1Tap.action).toBe('moveBack');
+    expect(tab1view1Tap.direction).toBe('back');
+  }));
+
+  it('should set nextViewOptions disableAnimate', inject(function($state) {
+    $state.go('home');
+    rootScope.$apply();
+    var homeReg = ionicHistory.register({}, false);
+    expect(homeReg.direction).toEqual('none');
+
+    ionicHistory.nextViewOptions({ disableAnimate: true });
+
+    $state.go('info');
+    rootScope.$apply();
+    var infoReg = ionicHistory.register({}, false);
+    expect(infoReg.direction).toEqual('none');
+    expect(infoReg.enableBack).toEqual(true);
+    expect(ionicHistory.viewHistory().histories[infoReg.historyId].stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().backView.viewId).toBe(homeReg.viewId);
+  }));
+
+  it('should set nextViewOptions disableBack', inject(function($state) {
+    $state.go('home');
+    rootScope.$apply();
+    var homeReg = ionicHistory.register({}, false);
+    expect(homeReg.direction).toEqual('none');
+
+    ionicHistory.nextViewOptions({ disableBack: true });
+
+    $state.go('info');
+    rootScope.$apply();
+    var infoReg = ionicHistory.register({}, false);
+    expect(infoReg.enableBack).toEqual(false);
+    expect(infoReg.direction).toEqual('forward');
+    expect(ionicHistory.viewHistory().histories[infoReg.historyId].stack.length).toEqual(2);
+    expect(ionicHistory.viewHistory().backView).toBe(null);
+  }));
+
+  it('should set nextViewOptions historyRoot', inject(function($state) {
+    $state.go('home');
+    rootScope.$apply();
+    var homeReg = ionicHistory.register({}, false);
+    expect(homeReg.direction).toEqual('none');
+
+    ionicHistory.nextViewOptions({ historyRoot: true });
+
+    $state.go('info');
+    rootScope.$apply();
+    var infoReg = ionicHistory.register({}, false);
+    expect(infoReg.enableBack).toEqual(false);
+    expect(infoReg.direction).toEqual('forward');
+    expect(ionicHistory.viewHistory().histories[infoReg.historyId].stack.length).toEqual(1);
+    expect(ionicHistory.viewHistory().backView).toBe(null);
+  }));
+
+  it('should set and overwrite nextViewOptions', inject(function($state) {
+    expect( ionicHistory.nextViewOptions() ).toBeUndefined();
+    expect( ionicHistory.nextViewOptions({}) ).toEqual({});
+    ionicHistory.nextViewOptions(null);
+    expect( ionicHistory.nextViewOptions({ historyRoot: true }) ).toEqual({ historyRoot: true });
+    expect( ionicHistory.nextViewOptions({ disableBack: true }) ).toEqual({ historyRoot: true, disableBack: true });
+    expect( ionicHistory.nextViewOptions({ historyRoot: false }) ).toEqual({ historyRoot: false, disableBack: true });
+    ionicHistory.nextViewOptions(null);
+    expect( ionicHistory.nextViewOptions({}) ).toEqual({});
+  }));
+
+  it('should should find ion-tabs as an abstract element', inject(function($ionicHistory, $document) {
+    var ele = angular.element('<ion-tabs>');
+    expect($ionicHistory.isAbstractEle(ele)).toBe(true);
+
+    ele = angular.element('<ion-tab>');
+    expect($ionicHistory.isAbstractEle(ele)).toBe(false);
+  }));
+
+  it('should should find ion-side-menus as an abstract element', inject(function($ionicHistory, $document) {
+    var ele = angular.element('<ion-side-menus>');
+    expect($ionicHistory.isAbstractEle(ele)).toBe(true);
+
+    ele = angular.element('<ion-side-menu>');
+    expect($ionicHistory.isAbstractEle(ele)).toBe(false);
+  }));
+
+  it('should should find first child thats an ion-tabs as an abstract element', inject(function($ionicHistory, $document) {
+    var div = angular.element('<div>');
+    var ionTabs = angular.element('<ion-tabs>');
+    div.append(ionTabs);
+    expect($ionicHistory.isAbstractEle(div)).toBe(true);
+  }));
+
+  it('should be an abstract view', inject(function($document) {
+    var reg = ionicHistory.register({}, {
+      $template: '<ion-tabs></ion-tabs>'
+    });
     expect(reg.action).toEqual('abstractView');
   }));
 
@@ -1058,13 +1164,13 @@ describe('Ionic History', function() {
   it('should update document title', inject(function($document) {
     $document[0].title = 'Original Title';
 
-    rootScope.$broadcast("viewState.viewEnter");
+    rootScope.$broadcast("$ionicView.afterEnter");
     expect($document[0].title).toEqual('Original Title');
 
-    rootScope.$broadcast("viewState.viewEnter", {});
+    rootScope.$broadcast("$ionicView.afterEnter", {});
     expect($document[0].title).toEqual('Original Title');
 
-    rootScope.$broadcast("viewState.viewEnter", { title: 'New Title' });
+    rootScope.$broadcast("$ionicView.afterEnter", { title: 'New Title' });
     expect($document[0].title).toEqual('New Title');
   }));
 

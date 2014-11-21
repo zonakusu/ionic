@@ -70,8 +70,56 @@
  * This is good to do because the template will be cached for very fast loading, instead of
  * having to fetch them from the network.
  *
+ * ## Caching
+ *
+ * By default views are cached to improve performance. When a view is navigated away from,
+ * its element is left in the DOM, and its scope is disconnected from the cycle. When navigating
+ * to a view which is already cached, its scope is then reconnected, and the existing element which
+ * was left in the DOM becomes the active view. This also allows for scroll position of previous
+ * views to be maintained.
+ *
+ * Caching can be disabled and enabled in multiple ways. By default, Ionic will cache a maximum
+ * of 10 views, and not only can this be configured, but apps can also explicitly state
+ * which views should and should not be cached.
+ *
+ * Note that because we are caching these views, we aren’t destroying scopes. Instead, scopes are
+ * being disconnected from the watch cycle. Because scopes are not being destroyed and recreated,
+ * then controllers are not loading again on a subsequent viewing. If the app/controller needs to
+ * know when a view has entered or has left, then view events emitted from the
+ * {@link ionic.directive:ionView} scope, such as `$ionicView.enter`, may be useful.
+ *
+ * #### Disable cache globally
+ *
+ * The {@link ionic.provider:$ionicConfigProvider} can be used to set the maximum allowable views
+ * which can be cached, but this can also be use to disable all caching by setting it to 0.
+ *
+ * ```js
+ * $ionicConfigProvider.views.maxCache(0);
+ * ```
+ *
+ * #### Disable cache within state provider
+ *
+ * ```js
+ * $stateProvider.state('myState', {
+ *    cache: false,
+ *    url : '/myUrl',
+ *    templateUrl : 'my-template.html'
+ * })
+ * ```
+ *
+ * #### Disable cache with an attribute
+ *
+ * ```html
+ * <ion-view cache-view="false" view-title="My Title!">
+ *   ...
+ * </ion-view>
+ * ```
+ *
+ *
+ * ## AngularUI Router
+ *
  * Please visit [AngularUI Router's docs](https://github.com/angular-ui/ui-router/wiki) for
- * more info. Below is a great video by the AngularUI Router guys that may help to explain
+ * more info. Below is a great video by the AngularUI Router team that may help to explain
  * how it all works:
  *
  * <iframe width="560" height="315" src="//www.youtube.com/embed/dqJRoh8MnBo"
@@ -79,7 +127,8 @@
  *
  * @param {string=} name A view name. The name should be unique amongst the other views in the
  * same state. You can have views of the same name that live in different states. For more
- * information, see ui-router's [ui-view documentation](http://angular-ui.github.io/ui-router/site/#/api/ui.router.state.directive:ui-view).
+ * information, see ui-router's
+ * [ui-view documentation](http://angular-ui.github.io/ui-router/site/#/api/ui.router.state.directive:ui-view).
  */
 IonicModule
 .directive('ionNavView', [

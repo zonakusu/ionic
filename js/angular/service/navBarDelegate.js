@@ -20,7 +20,7 @@
  * ```js
  * function MyCtrl($scope, $ionicNavBarDelegate) {
  *   $scope.setNavTitle = function(title) {
- *     $ionicNavBarDelegate.setTitle(title);
+ *     $ionicNavBarDelegate.title(title);
  *   }
  * }
  * ```
@@ -40,7 +40,7 @@ IonicModule
    * @name $ionicNavBarDelegate#showBackButton
    * @description
    * Set/get whether the {@link ionic.directive:ionNavBackButton} is shown
-   * (if it exists).
+   * (if it exists and there is a previous view that can be navigated to).
    * @param {boolean=} show Whether to show the back button.
    * @returns {boolean} Whether the back button is shown.
    */
@@ -62,13 +62,12 @@ IonicModule
    * @param {string} title The new title to show.
    */
   'title',
-  /**
-   * @ngdoc method
-   * @name $ionicNavBarDelegate#update
-   * @description
-   * Updates the {@link ionic.directive:ionNavBar} with a transition using the
-   * supplied view data.
-   * @param {object} viewData An object containing `title`, `showBar` properties.
-   */
-  'update'
+
+  // DEPRECATED, as of v1.0.0-beta14 -------
+  'changeTitle',
+  'setTitle',
+  'getTitle',
+  'back',
+  'getPreviousTitle'
+  // END DEPRECATED -------
 ]));

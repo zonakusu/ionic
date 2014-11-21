@@ -57,6 +57,33 @@ describe('ionNavBar', function() {
       expect(ctrl.title()).toBe('foo');
     });
 
+    it('should showBar=true with update data showNavBar=true', function() {
+      setup();
+      ctrl.update({
+        showNavBar: true,
+        hasHeaderBar: false
+      });
+      expect(ctrl.showBar()).toBe(true);
+    });
+
+    it('should showBar=false with update data showNavBar=false', function() {
+      setup();
+      ctrl.update({
+        showNavBar: false,
+        hasHeaderBar: false
+      });
+      expect(ctrl.showBar()).toBe(false);
+    });
+
+    it('should showBar=false with update data showNavBar=true and hasHeaderBar=true', function() {
+      setup();
+      ctrl.update({
+        showNavBar: false,
+        hasHeaderBar: true
+      });
+      expect(ctrl.showBar()).toBe(false);
+    });
+
   });
 
   describe('directive', function() {
@@ -83,6 +110,29 @@ describe('ionNavBar', function() {
       expect(parentScope.$hasHeader).toBe(false);
     });
 
+    it('should set header align-title attr from ion-nav-bar', inject(function($ionicConfig) {
+      $ionicConfig.navBar.alignTitle('left');
+
+      var el = setup();
+      expect(el[0].querySelector('ion-header-bar').getAttribute('align-title')).toEqual('left');
+      expect(el[0].querySelector('ion-header-bar .title').classList.contains('title-left')).toEqual(true);
+
+      el = setup('align-title="right"');
+      expect(el[0].querySelector('ion-header-bar').getAttribute('align-title')).toEqual('right');
+      expect(el[0].querySelector('ion-header-bar .title').classList.contains('title-right')).toEqual(true);
+    }));
+
+    it('should set header no-tap-scroll attr from ion-nav-bar', function() {
+      var el = setup();
+      expect(el[0].querySelector('ion-header-bar').getAttribute('no-tap-scroll')).toEqual(null);
+
+      el = setup('no-tap-scroll="true"');
+      expect(el[0].querySelector('ion-header-bar').getAttribute('no-tap-scroll')).toEqual('true');
+
+      el = setup('no-tap-scroll="false"');
+      expect(el[0].querySelector('ion-header-bar').getAttribute('no-tap-scroll')).toEqual('false');
+    });
+
     it('should register with $ionicNavBarDelegate', inject(function($ionicNavBarDelegate) {
       var deregisterSpy = jasmine.createSpy('deregister');
       spyOn($ionicNavBarDelegate, '_registerInstance').andCallFake(function() {
@@ -96,6 +146,37 @@ describe('ionNavBar', function() {
       expect(deregisterSpy).not.toHaveBeenCalled();
       el.scope().$destroy();
       expect(deregisterSpy).toHaveBeenCalled();
+    }));
+
+    it('should align title w/ $ionicNavBarDelegate', inject(function($ionicNavBarDelegate) {
+      var el = setup('delegate-handle="theBestHandle"');
+      var instance = $ionicNavBarDelegate.$getByHandle('theBestHandle');
+      instance.align('right');
+      expect(el[0].querySelector('[nav-bar="active"] .title').classList.contains('title-right')).toEqual(true);
+    }));
+
+    it('should showBackButton w/ $ionicNavBarDelegate', inject(function($ionicNavBarDelegate) {
+      var el = setup('delegate-handle="theBestHandle"');
+      var instance = $ionicNavBarDelegate.$getByHandle('theBestHandle');
+      instance.showBackButton(true);
+      instance.showBackButton(false);
+    }));
+
+    it('should showBar w/ $ionicNavBarDelegate', inject(function($ionicNavBarDelegate) {
+      var el = setup('delegate-handle="theBestHandle"');
+      var instance = $ionicNavBarDelegate.$getByHandle('theBestHandle');
+      instance.showBar(true);
+      expect(el.hasClass('hide')).toBe(false);
+      instance.showBar(false);
+      expect(el.hasClass('hide')).toBe(true);
+    }));
+
+    it('should set title w/ $ionicNavBarDelegate', inject(function($ionicNavBarDelegate) {
+      var el = setup('delegate-handle="theBestHandle"');
+      var instance = $ionicNavBarDelegate.$getByHandle('theBestHandle');
+      expect(el[0].querySelector('[nav-bar="active"] .title').innerText).toEqual('');
+      instance.title('Night Ranger')
+      expect(el[0].querySelector('[nav-bar="active"] .title').innerText).toEqual('Night Ranger');
     }));
 
   });
