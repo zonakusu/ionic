@@ -32,16 +32,7 @@ function($scope, scrollViewOptions, $timeout, $window, $location, $document, $io
 
   var deregisterInstance = $ionicScrollDelegate._registerInstance(
     self, scrollViewOptions.delegateHandle, function() {
-      if ($scope.$$disconnected) {
-        return false;
-      }
-
-      var currentHistoryId = $ionicHistory.currentHistoryId();
-      if (currentHistoryId) {
-        return currentHistoryId == (isDefined($scope.$historyId) ? $scope.$historyId : 'root');
-      }
-
-      return true;
+      return $ionicHistory.isActiveScope($scope);
     }
   );
 
@@ -185,8 +176,9 @@ function($scope, scrollViewOptions, $timeout, $window, $location, $document, $io
       refresher.classList.add('active');
       refresherScope.$onPulling();
     }, function() {
-      // deactivateCallback
-        refresher.classList.remove('active', 'refreshing', 'refreshing-tail');
+        refresher.classList.remove('active');
+        refresher.classList.remove('refreshing');
+        refresher.classList.remove('refreshing-tail');
     }, function() {
       // startCallback
       refresher.classList.add('refreshing');

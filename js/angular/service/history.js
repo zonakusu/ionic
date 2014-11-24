@@ -22,7 +22,8 @@ IonicModule
   '$location',
   '$window',
   '$ionicViewSwitcher',
-function($rootScope, $state, $location, $window, $ionicViewSwitcher) {
+  '$ionicNavViewDelegate',
+function($rootScope, $state, $location, $window, $ionicViewSwitcher, $ionicNavViewDelegate) {
 
   // history actions while navigating views
   var ACTION_INITIAL_VIEW = 'initialView';
@@ -440,7 +441,10 @@ function($rootScope, $state, $location, $window, $ionicViewSwitcher) {
      * @description The app's current view.
      * @returns {object} Returns the current view.
      */
-    currentView: function() {
+    currentView: function(view) {
+      if (arguments.length) {
+        viewHistory.currentView = view;
+      }
       return viewHistory.currentView;
     },
 
@@ -588,6 +592,18 @@ function($rootScope, $state, $location, $window, $ionicViewSwitcher) {
 
     /**
      * @ngdoc method
+     * @name $ionicHistory#clearCache
+     * @description Removes all cached views within every {@link ionic.directive:ionNavView}.
+     * This both removes the view element from the DOM, and destroy it's scope.
+     */
+    clearCache: function() {
+      $ionicNavViewDelegate._instances.forEach(function(instance) {
+        instance.clearCache();
+      });
+    },
+
+    /**
+     * @ngdoc method
      * @name $ionicHistory#nextViewOptions
      * @description Sets options for the next view. This method can be useful to override
      * certain view/transition defaults right before a view transition happens. For example,
@@ -623,6 +639,17 @@ function($rootScope, $state, $location, $window, $ionicViewSwitcher) {
 
     isAbstractEle: function(ele) {
       return !!(ele && (isAbstractTag(ele) || isAbstractTag(ele.children())));
+    },
+
+    isActiveScope: function(scope) {
+      if (!scope || scope.$$disconnected) return false;
+
+      var currentHistoryId = this.currentHistoryId();
+      if (currentHistoryId) {
+        return currentHistoryId == (isDefined(scope.$historyId) ? scope.$historyId : 'root');
+      }
+
+      return true;
     }
 
   };
