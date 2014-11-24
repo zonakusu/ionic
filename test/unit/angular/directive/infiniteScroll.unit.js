@@ -248,6 +248,22 @@ describe('ionicInfiniteScroll directive', function() {
 
   });
 
+  it('should checkbounds on launch', inject(function($timeout) {
+    var el = setupJS();
+    spyOn(el.controller('ionInfiniteScroll'),'checkBounds');
+    expect(el.controller('ionInfiniteScroll').checkBounds).not.toHaveBeenCalled();
+    $timeout.flush();
+    expect(el.controller('ionInfiniteScroll').checkBounds).toHaveBeenCalled();
+  }));
+
+  it('should not checkbounds on launch if immediate-check=false', inject(function($timeout) {
+    var el = setupJS('immediate-check="false"');
+    spyOn(el.controller('ionInfiniteScroll'),'checkBounds');
+    expect(el.controller('ionInfiniteScroll').checkBounds).not.toHaveBeenCalled();
+    $timeout.flush();
+    expect(el.controller('ionInfiniteScroll').checkBounds).not.toHaveBeenCalled();
+  }));
+
   it('scroll.infiniteScrollComplete should work', inject(function($timeout) {
     var el = setupJS();
     ctrl.isLoading = true;
@@ -259,5 +275,4 @@ describe('ionicInfiniteScroll directive', function() {
     $timeout.flush();
     expect(el.controller('$ionicScroll').scrollView.resize).toHaveBeenCalled();
   }));
-
 });

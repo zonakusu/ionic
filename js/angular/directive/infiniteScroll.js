@@ -19,6 +19,7 @@
  * @param {string=} distance The distance from the bottom that the scroll must
  * reach to trigger the on-infinite expression. Default: 1%.
  * @param {string=} icon The icon to show while loading. Default: 'ion-loading-d'.
+ * @param {boolean=} immediate-check Whether to check the infinite scroll bounds immediately on load.
  *
  * @usage
  * ```html
@@ -92,8 +93,11 @@ IonicModule
       } else {
         infiniteScrollCtrl.scrollEl.addEventListener('scroll', infiniteScrollCtrl.checkBounds);
       }
-      //Check bounds on start, after scrollView is fully rendered
-      setTimeout(infiniteScrollCtrl.checkBounds);
+      // Optionally check bounds on start after scrollView is fully rendered
+      var doImmediateCheck = angular.isDefined($attrs.immediateCheck) ? $scope.$eval($attrs.immediateCheck) : true;
+      if (doImmediateCheck) {
+        $timeout(function() { infiniteScrollCtrl.checkBounds(); });
+      }
     }
   };
 }]);
