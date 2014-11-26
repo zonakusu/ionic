@@ -87,7 +87,8 @@ function($scope, $attrs, $ionicListDelegate, $ionicHistory) {
 
   var deregisterInstance = $ionicListDelegate._registerInstance(
     self, $attrs.delegateHandle, function() {
-      return $ionicHistory.isActiveScope($scope);
+    return true;
+      // return $ionicHistory.isActiveScope($scope);
     }
   );
   $scope.$on('$destroy', deregisterInstance);
