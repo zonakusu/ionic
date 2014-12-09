@@ -5,24 +5,40 @@
  */
 
 .slider {
-  position: relative;
-  visibility: hidden;
-  // Make sure items don't scroll over ever
   overflow: hidden;
 }
 
 .slider-slides {
-  position: relative;
-  height: 100%;
+  width: 100%;
+  @include translate3d(0,0,0);
+  -webkit-transition: linear -webkit-transform;
+  transition: linear transform;
 }
 
-.slider-slide {
-  position: relative;
+ion-slide {
   display: block;
-  float: left;
+}
+.slider-slide {
   width: 100%;
-  height: 100%;
-  vertical-align: top;
+  @include translate3d(0,0,0);
+
+  &:not([slide-display]) {
+    // This !important flag is here because it lets the end-developer specify display styles
+    // for slides as specifically as he wants, but still not show the slides that should be hidden.
+    display: none !important;
+  }
+  &[slide-display="previous"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    @include translate3d(-100%,0,0);
+  }
+  &[slide-display="next"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    @include translate3d(100%,0,0);
+  }
 }
 
 .slider-slide-image {
@@ -38,13 +54,20 @@
   width: 100%;
   height: 15px;
   text-align: center;
+  z-index: 2;
+
+  @include display-flex();
+  @include align-items(center);
+  @include justify-content(center);
 
   .slider-pager-page {
-    display: inline-block;
     margin: 0px 3px;
     width: 15px;
-    color: #000;
+    height: 15px;
+    border-radius: 15px;
+    background-color: black;
     text-decoration: none;
+    cursor: pointer;
 
     opacity: 0.3;
 
@@ -52,5 +75,17 @@
       @include transition(opacity 0.4s ease-in);
       opacity: 1;
     }
+  }
+}
+
+.modal {
+  .slider {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .slider-slides, .slider-slide {
+    height: 100%;
   }
 }
