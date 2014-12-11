@@ -643,7 +643,8 @@ button.item.item-button-right {
   &.ng-leave {
     @include transition-duration( $item-remove-transition-duration );
   }
-  &.ng-leave .item-content {
+  &.ng-leave .item-content,
+  &.ng-leave:last-of-type {
     @include transition-duration( $item-remove-transition-duration );
     @include transition-timing-function( $item-remove-transition-function );
     @include transition-property( all );
@@ -654,6 +655,9 @@ button.item.item-button-right {
     -webkit-transform: translate3d(-100%, 0, 0) !important;
     transform: translate3d(-100%, 0, 0) !important;
   }
+  &.ng-leave.ng-leave-active:last-of-type {
+    opacity: 0;
+  }
 
   &.ng-leave.ng-leave-active ~ ion-item:not(.ng-leave) {
     -webkit-transform: translate3d(0, unquote('-webkit-calc(-100% + 1px)'), 0);
@@ -661,10 +665,6 @@ button.item.item-button-right {
     @include transition-duration( $item-remove-transition-duration );
     @include transition-timing-function( $item-remove-descendents-transition-function );
     @include transition-property( all );
-  }
-
-  &.ng-leave {
-    opacity:1;
   }
 }
 
