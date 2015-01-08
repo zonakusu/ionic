@@ -1078,6 +1078,25 @@ describe('Ionic History', function() {
     expect($ionicHistory.isAbstractEle(div)).toBe(true);
   }));
 
+  it('should should be an abstract element from the viewLocals', inject(function($ionicHistory, $document) {
+    var div = angular.element('<div>');
+    var viewLocals = {
+      $$state: {
+        self: {
+          abstract: true
+        }
+      }
+    };
+    expect($ionicHistory.isAbstractEle(div, viewLocals)).toBe(true);
+
+    var viewLocals = {
+      $$state: {
+        self: {}
+      }
+    };
+    expect($ionicHistory.isAbstractEle(div, viewLocals)).toBe(false);
+  }));
+
   it('should be an abstract view', inject(function($document) {
     var reg = ionicHistory.register({}, {
       $template: '<ion-tabs></ion-tabs>'
@@ -1121,6 +1140,17 @@ describe('Ionic History', function() {
     expect(ionicHistory.isActiveScope(scope)).toEqual(false);
   });
 
+  it('should not be active when parent scope is disconnected', function() {
+    var scope = {
+      $parent: {
+        $parent: {
+          $$disconnected: true
+        }
+      }
+    };
+    expect(ionicHistory.isActiveScope(scope)).toEqual(false);
+  });
+
   it('should be active w/ scope but no current history id', function() {
     ionicHistory.registerHistory('1234');
     expect(ionicHistory.isActiveScope(scope)).toEqual(true);
@@ -1134,6 +1164,74 @@ describe('Ionic History', function() {
     var scope = {
       $historyId: '123'
     }
+    expect(ionicHistory.isActiveScope(scope)).toEqual(true);
+  });
+
+  it('should be active w/ scopes parent the same history id as current view', function() {
+    ionicHistory.currentView({
+      historyId: '123'
+    });
+
+    var scope = {
+      $parent: {
+        $historyId: '123'
+      }
+    }
+    expect(ionicHistory.isActiveScope(scope)).toEqual(true);
+  });
+
+  it('should be active when one of the parent scopes is the same history id as current view', function() {
+    ionicHistory.currentView({
+      historyId: '123'
+    });
+
+    var scope = {
+      $parent: {
+        $historyId: 'abc',
+        $parent: {
+          $historyId: 'xyz',
+          $parent: {
+            $historyId: '123'
+          }
+        }
+      }
+    };
+    expect(ionicHistory.isActiveScope(scope)).toEqual(true);
+  });
+
+  it('should be active when activeHistoryId found before historyId, for tabs controller', function() {
+    ionicHistory.currentView({
+      historyId: '123'
+    });
+
+    var scope = {
+      $parent: {
+        $parent: {
+          $activeHistoryId: '123',
+          $parent: {
+            $historyId: 'xyz'
+          }
+        }
+      }
+    };
+    expect(ionicHistory.isActiveScope(scope)).toEqual(true);
+  });
+
+  it('should be active when historyId found before activeHistoryId', function() {
+    ionicHistory.currentView({
+      historyId: '123'
+    });
+
+    var scope = {
+      $parent: {
+        $parent: {
+          $activeHistoryId: 'xyz',
+          $parent: {
+            $historyId: '123'
+          }
+        }
+      }
+    };
     expect(ionicHistory.isActiveScope(scope)).toEqual(true);
   });
 

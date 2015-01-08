@@ -19,10 +19,9 @@ function($timeout, $document, $q, $ionicClickBlock, $ionicConfig, $ionicNavBarDe
   var DATA_ELE_IDENTIFIER = '$eleId';
   var DATA_VIEW_ACCESSED = '$accessed';
   var DATA_FALLBACK_TIMER = '$fallbackTimer';
+  var DATA_VIEW = '$viewData';
   var NAV_VIEW_ATTR = 'nav-view';
   var HISTORY_CURSOR_ATTR = 'history-cursor';
-  var HISTORY_ROOT = 'root';
-  var HISTORY_AFTER_ROOT = 'after-root';
   var VIEW_STATUS_ACTIVE = 'active';
   var VIEW_STATUS_CACHED = 'cached';
   var VIEW_STATUS_STAGED = 'stage';
@@ -34,69 +33,6 @@ function($timeout, $document, $q, $ionicClickBlock, $ionicConfig, $ionicNavBarDe
   var isActiveTimer;
   var cachedAttr = ionic.DomUtil.cachedAttr;
   var transitionPromises = [];
-
-  function getViewElementIdentifier(locals, view) {
-    if (viewState(locals).abstract) return viewState(locals).name;
-    if (view) return view.stateId || view.viewId;
-    return ionic.Utils.nextUid();
-  }
-
-  function viewState(locals) {
-    return locals && locals.$$state && locals.$$state.self || {};
-  }
-
-  function getTransitionData(viewLocals, enteringEle, direction, view) {
-    // Priority
-    // 1) attribute directive on the button/link to this view
-    // 2) entering element's attribute
-    // 3) entering view's $state config property
-    // 4) view registration data
-    // 5) global config
-    // 6) fallback value
-
-    var state = viewState(viewLocals);
-    var transition = nextTransition || cachedAttr(enteringEle, 'view-transition') || state.viewTransition || $ionicConfig.views.transition() || 'ios';
-    direction = nextDirection || cachedAttr(enteringEle, 'view-direction') || state.viewDirection || direction || 'none';
-
-    return extend(getViewData(view), {
-      transition: transition,
-      direction: direction,
-      shouldAnimate: (transition !== 'none' && direction !== 'none')
-    });
-  }
-
-  function getViewData(view) {
-    view = view || {};
-    return {
-      viewId: view.viewId,
-      stateId: view.stateId,
-      stateName: view.stateName,
-      stateParams: view.stateParams
-    };
-  }
-
-  function navViewAttr(ele, value) {
-    if (arguments.length > 1) {
-      cachedAttr(ele, NAV_VIEW_ATTR, value);
-    } else {
-      return cachedAttr(ele, NAV_VIEW_ATTR);
-    }
-  }
-
-  function historyCursorAttr(ele, value) {
-    cachedAttr(ele, HISTORY_CURSOR_ATTR, value);
-  }
-
-  function destroyViewEle(ele) {
-    // we found an element that should be removed
-    // destroy its scope, then remove the element
-    if (ele && ele.length) {
-      var viewScope = ele.scope();
-      viewScope && viewScope.$destroy();
-      ele.remove();
-    }
-  }
-
 
   var ionicViewSwitcher = {
 
@@ -112,7 +48,6 @@ function($timeout, $document, $q, $ionicClickBlock, $ionicConfig, $ionicNavBarDe
         init: function(registerData, callback) {
           ionicViewSwitcher.isTransitioning(true);
 
-          $ionicClickBlock.show();
           switcher.loadViewElements(registerData);
 
           switcher.render(registerData, function() {
@@ -163,29 +98,34 @@ function($timeout, $document, $q, $ionicClickBlock, $ionicConfig, $ionicNavBarDe
         },
 
         render: function(registerData, callback) {
-          var enteringData = getTransitionData(viewLocals, enteringEle, registerData.direction, enteringView);
-          var transitionFn = $ionicConfig.transitions.views[enteringData.transition];
+          // disconnect the leaving scope before reconnecting or creating a scope for the entering view
+          leavingEle && ionic.Utils.disconnectScope(leavingEle.scope());
 
           if (alreadyInDom) {
             // it was already found in the DOM, just reconnect the scope
             ionic.Utils.reconnectScope(enteringEle.scope());
-
-            // set the styles of where this element will end up going so
-            // the DOM has some time to render its correct starting point
-            transitionFn(enteringEle, null, enteringData.direction, false).run(0);
 
           } else {
             // the entering element is not already in the DOM
             // set that the entering element should be "staged" and its
             // styles of where this element will go before it hits the DOM
             navViewAttr(enteringEle, VIEW_STATUS_STAGED);
+
+            var enteringData = getTransitionData(viewLocals, enteringEle, registerData.direction, enteringView);
+            var transitionFn = $ionicConfig.transitions.views[enteringData.transition] || $ionicConfig.transitions.views.none;
             transitionFn(enteringEle, null, enteringData.direction, true).run(0);
 
-            historyCursorAttr(enteringEle, registerData.isHistoryRoot ? HISTORY_ROOT : HISTORY_AFTER_ROOT);
+            enteringEle.data(DATA_VIEW, {
+              viewId: enteringData.viewId,
+              historyId: enteringData.historyId,
+              stateName: enteringData.stateName,
+              stateParams: enteringData.stateParams
+            });
 
             // if the current state has cache:false
             // or the element has cache-view="false" attribute
-            if (viewState(viewLocals).cache === false || enteringEle.attr('cache-view') == 'false') {
+            if (viewState(viewLocals).cache === false || viewState(viewLocals).cache === 'false' ||
+                enteringEle.attr('cache-view') == 'false' || $ionicConfig.views.maxCache() === 0) {
               enteringEle.data(DATA_NO_CACHE, true);
             }
 
@@ -200,7 +140,7 @@ function($timeout, $document, $q, $ionicClickBlock, $ionicConfig, $ionicNavBarDe
           // update that this view was just accessed
           enteringEle.data(DATA_VIEW_ACCESSED, Date.now());
 
-          $timeout(callback, 16);
+          callback && callback();
         },
 
         transition: function(direction, enableBack) {
@@ -222,22 +162,18 @@ function($timeout, $document, $q, $ionicClickBlock, $ionicConfig, $ionicNavBarDe
           switcher.emit('before', enteringData, leavingData);
 
           // 1) get the transition ready and see if it'll animate
-          var transitionFn = $ionicConfig.transitions.views[enteringData.transition];
+          var transitionFn = $ionicConfig.transitions.views[enteringData.transition] || $ionicConfig.transitions.views.none;
           var viewTransition = transitionFn(enteringEle, leavingEle, enteringData.direction, enteringData.shouldAnimate);
 
           if (viewTransition.shouldAnimate) {
             // 2) attach transitionend events (and fallback timer)
             enteringEle.on(TRANSITIONEND_EVENT, transitionComplete);
-            leavingEle && leavingEle.on(TRANSITIONEND_EVENT, transitionComplete);
-            enteringEle.data(DATA_FALLBACK_TIMER, $timeout(transitionComplete, 750));
+            enteringEle.data(DATA_FALLBACK_TIMER, $timeout(transitionComplete, 1000));
+            $ionicClickBlock.show();
           }
 
           // 3) stage entering element, opacity 0, no transition duration
           navViewAttr(enteringEle, VIEW_STATUS_STAGED);
-
-          if (enteringData.direction == 'swap') {
-            historyCursorAttr(enteringEle, HISTORY_ROOT);
-          }
 
           // 4) place the elements in the correct step to begin
           viewTransition.run(0);
@@ -268,8 +204,8 @@ function($timeout, $document, $q, $ionicClickBlock, $ionicConfig, $ionicNavBarDe
             transitionComplete.x = true;
 
             enteringEle.off(TRANSITIONEND_EVENT, transitionComplete);
-            leavingEle && leavingEle.off(TRANSITIONEND_EVENT, transitionComplete);
             $timeout.cancel(enteringEle.data(DATA_FALLBACK_TIMER));
+            leavingEle && $timeout.cancel(leavingEle.data(DATA_FALLBACK_TIMER));
 
             // 8) emit that the views have finished transitioning
             // each parent nav-view will update which views are active and cached
@@ -345,8 +281,6 @@ function($timeout, $document, $q, $ionicClickBlock, $ionicConfig, $ionicNavBarDe
 
           destroyViewEle(removableEle);
 
-          ionic.Utils.disconnectScope(leavingEle && leavingEle.scope());
-
           if (enteringEle.data(DATA_NO_CACHE)) {
             enteringEle.data(DATA_DESTROY_ELE, true);
           }
@@ -408,17 +342,77 @@ function($timeout, $document, $q, $ionicClickBlock, $ionicConfig, $ionicNavBarDe
       navViewAttr(viewEle, isActiveAttr ? VIEW_STATUS_ACTIVE : VIEW_STATUS_CACHED);
     },
 
-    isHistoryRoot: function(viewElement) {
-      return cachedAttr(viewElement, HISTORY_CURSOR_ATTR) === HISTORY_ROOT;
-    },
-
     getTransitionData: getTransitionData,
-    historyCursorAttr: historyCursorAttr,
     navViewAttr: navViewAttr,
     destroyViewEle: destroyViewEle
 
   };
 
   return ionicViewSwitcher;
+
+
+  function getViewElementIdentifier(locals, view) {
+    if (viewState(locals).abstract) return viewState(locals).name;
+    if (view) return view.stateId || view.viewId;
+    return ionic.Utils.nextUid();
+  }
+
+  function viewState(locals) {
+    return locals && locals.$$state && locals.$$state.self || {};
+  }
+
+  function getTransitionData(viewLocals, enteringEle, direction, view) {
+    // Priority
+    // 1) attribute directive on the button/link to this view
+    // 2) entering element's attribute
+    // 3) entering view's $state config property
+    // 4) view registration data
+    // 5) global config
+    // 6) fallback value
+
+    var state = viewState(viewLocals);
+    var viewTransition = nextTransition || cachedAttr(enteringEle, 'view-transition') || state.viewTransition || $ionicConfig.views.transition() || 'ios';
+    var navBarTransition = $ionicConfig.navBar.transition();
+    direction = nextDirection || cachedAttr(enteringEle, 'view-direction') || state.viewDirection || direction || 'none';
+
+    return extend(getViewData(view), {
+      transition: viewTransition,
+      navBarTransition: navBarTransition === 'view' ? viewTransition : navBarTransition,
+      direction: direction,
+      shouldAnimate: (viewTransition !== 'none' && direction !== 'none')
+    });
+  }
+
+  function getViewData(view) {
+    view = view || {};
+    return {
+      viewId: view.viewId,
+      historyId: view.historyId,
+      stateId: view.stateId,
+      stateName: view.stateName,
+      stateParams: view.stateParams
+    };
+  }
+
+  function navViewAttr(ele, value) {
+    if (arguments.length > 1) {
+      cachedAttr(ele, NAV_VIEW_ATTR, value);
+    } else {
+      return cachedAttr(ele, NAV_VIEW_ATTR);
+    }
+  }
+
+  function destroyViewEle(ele) {
+    // we found an element that should be removed
+    // destroy its scope, then remove the element
+    if (ele && ele.length) {
+      var viewScope = ele.scope();
+      if (viewScope) {
+        viewScope.$emit('$ionicView.unloaded', ele.data(DATA_VIEW));
+        viewScope.$destroy();
+      }
+      ele.remove();
+    }
+  }
 
 }]);

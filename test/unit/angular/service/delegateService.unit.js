@@ -2,7 +2,7 @@ describe('DelegateFactory', function() {
   function setup(methods) {
     var delegate;
     inject(function($log, $injector) {
-      delegate = $injector.instantiate(delegateService(methods || []));
+      delegate = $injector.instantiate(ionic.DelegateService(methods || []));
     });
     return delegate;
   }
@@ -123,11 +123,6 @@ describe('DelegateFactory', function() {
 
     expect(instance2.fn).not.toHaveBeenCalled();
     expect(delegate.fn()).toBe('ret1');
-  });
-
-  it('$getByHandle should return this for blank handle', function() {
-    var delegate = setup();
-    expect(delegate.$getByHandle()).toBe(delegate);
   });
 
   describe('$getByHandle', function() {

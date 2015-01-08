@@ -1,11 +1,11 @@
-[![Build Status](https://circleci.com/gh/driftyco/ionic.png?circle-token=7388822b8691078560c4f057d8eb0df0e8d7f1b5)](https://circleci.com/gh/driftyco/ionic)
+[![Circle CI](https://circleci.com/gh/driftyco/ionic.svg?style=svg)](https://circleci.com/gh/driftyco/ionic)
 
 
 [![Issues Ready](https://badge.waffle.io/driftyco/ionic.png?label=ready&title=Ready)](https://waffle.io/driftyco/ionic)
 
 The best place to start with Ionic is our [documentation page](http://ionicframework.com/docs/).
 
-Ionic currently best supports iOS 6+ and Android 4.1+, with scaled-down support for Android 2.3.
+Ionic currently best supports iOS 7+ and Android 4.1+.
 
 # What is Ionic?
 
@@ -38,12 +38,12 @@ $ ionic start myproject
 ### Manual Start
 
 - Download the latest **stable** release from:
-  * The release folder of this repository
-  * The Ionic CDN: [Latest Release](http://code.ionicframework.com/)
-  * `bower install ionic`
+  * The `release` folder of this repository
+  * Ionic CDN: [Latest Release](http://code.ionicframework.com/)
+  * Using bower: `bower install ionic`
 - Download the **bleeding edge just-from-master release** from:
-  * The Ionic CDN: [Nightly Build](http://code.ionicframework.com/#nightly)
-  * Look in the [ionic-bower Repository](https://github.com/driftyco/ionic-bower) for the latest version, and do for example `bower install driftyco/ionic-bower#0.9.23-alpha-652` (`bower install ionic` will have the latest available soon)
+  * Ionic CDN: [Nightly Build](http://code.ionicframework.com/#nightly)
+  * Using bower: `bower install driftyco/ionic-bower#master`
 
 Once you have a release, use `js/ionic.js`, `js/ionic-angular.js`, and `css/ionic.css`.
 

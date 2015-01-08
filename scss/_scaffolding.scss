@@ -323,20 +323,20 @@ body:not(.platform-ios) ion-infinite-scroll:not(.active) .icon{
 }
 
 .has-subheader {
-  top: $bar-height * 2;
+  top: $bar-height + $bar-subheader-height;
 }
 .has-tabs-top {
   top: $bar-height + $tabs-height;
 }
 .has-header.has-subheader.has-tabs-top {
-  top: 2 * $bar-height + $tabs-height;
+  top: $bar-height + $bar-subheader-height + $tabs-height;
 }
 
 .has-footer {
-  bottom: $bar-height;
+  bottom: $bar-footer-height;
 }
 .has-subfooter {
-  bottom: $bar-height * 2;
+  bottom: $bar-footer-height + $bar-subfooter-height;
 }
 
 .has-tabs,
@@ -345,7 +345,7 @@ body:not(.platform-ios) ion-infinite-scroll:not(.active) .icon{
 }
 
 .has-footer.has-tabs {
-  bottom: $tabs-height + $bar-height;
+  bottom: $tabs-height + $bar-footer-height;
 }
 
 // A full screen section with a solid background
